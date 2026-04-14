@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Dashboard from "@/pages/Dashboard";
 import CountyDetail from "@/pages/CountyDetail";
 import InterventionDetail from "@/pages/InterventionDetail";
+import Methods from "@/pages/Methods";
 import NotFound from "@/pages/not-found";
 
 function AppContent() {
@@ -15,6 +16,7 @@ function AppContent() {
         <Route path="/" component={Dashboard} />
         <Route path="/county/:fips" component={CountyDetail} />
         <Route path="/intervention/:slug" component={InterventionDetail} />
+        <Route path="/methods" component={Methods} />
         <Route component={NotFound} />
       </Switch>
     </Router>

@@ -106,6 +106,11 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Link href="/methods">
+              <Button variant="ghost" size="sm" className="gap-1 text-xs hidden md:inline-flex">
+                <Info className="w-3.5 h-3.5" /> Methods
+              </Button>
+            </Link>
             <div className="relative hidden md:block">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input
