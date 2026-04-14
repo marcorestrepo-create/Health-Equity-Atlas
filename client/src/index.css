@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Health Equity Atlas — deep navy/teal + warm amber accent
+   Palette inspired by CDC/WHO health equity visual language:
+   authoritative blues, compassionate warmth, high-contrast data readability */
+
+@layer base {
+  :root {
+    /* Surfaces — warm gray with subtle blue undertone */
+    --background: 220 20% 97%;
+    --foreground: 215 28% 12%;
+    --card: 220 18% 98%;
+    --card-foreground: 215 28% 12%;
+    --popover: 220 18% 98%;
+    --popover-foreground: 215 28% 12%;
+
+    /* Primary — deep teal-navy (authoritative, health-focused) */
+    --primary: 195 85% 24%;
+    --primary-foreground: 0 0% 98%;
+
+    /* Secondary — muted blue-gray */
+    --secondary: 210 12% 92%;
+    --secondary-foreground: 215 20% 25%;
+
+    /* Muted */
+    --muted: 210 10% 94%;
+    --muted-foreground: 215 10% 45%;
+
+    /* Accent — warm amber for action/highlight */
+    --accent: 32 90% 52%;
+    --accent-foreground: 32 95% 15%;
+
+    /* Destructive — for critical alerts */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 12% 87%;
+    --input: 210 12% 87%;
+    --ring: 195 85% 24%;
+    --radius: 0.5rem;
+
+    /* Chart colors for data visualization — accessible sequence */
+    --chart-1: 195 85% 24%; /* deep teal */
+    --chart-2: 15 65% 42%;  /* terra/rust */
+    --chart-3: 195 60% 18%; /* dark teal */
+    --chart-4: 188 55% 82%; /* light cyan */
+    --chart-5: 345 35% 45%; /* mauve */
+
+    /* Sidebar */
+    --sidebar-background: 215 28% 12%;
+    --sidebar-foreground: 210 15% 85%;
+    --sidebar-primary: 188 55% 55%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 215 20% 18%;
+    --sidebar-accent-foreground: 210 15% 85%;
+    --sidebar-border: 215 20% 20%;
+    --sidebar-ring: 195 85% 24%;
+  }
+
+  .dark {
+    --background: 215 28% 8%;
+    --foreground: 210 15% 88%;
+    --card: 215 25% 10%;
+    --card-foreground: 210 15% 88%;
+    --popover: 215 25% 10%;
+    --popover-foreground: 210 15% 88%;
+    --primary: 188 45% 48%;
+    --primary-foreground: 215 28% 8%;
+    --secondary: 215 18% 16%;
+    --secondary-foreground: 210 12% 80%;
+    --muted: 215 15% 14%;
+    --muted-foreground: 210 8% 55%;
+    --accent: 32 75% 55%;
+    --accent-foreground: 32 95% 95%;
+    --destructive: 0 62% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 215 15% 18%;
+    --input: 215 15% 18%;
+    --ring: 188 45% 48%;
+    --chart-1: 188 55% 48%;
+    --chart-2: 15 55% 50%;
+    --chart-3: 188 40% 35%;
+    --chart-4: 188 45% 70%;
+    --chart-5: 345 30% 55%;
+
+    --sidebar-background: 215 30% 6%;
+    --sidebar-foreground: 210 12% 80%;
+    --sidebar-primary: 188 50% 50%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 215 25% 12%;
+    --sidebar-accent-foreground: 210 12% 80%;
+    --sidebar-border: 215 20% 14%;
+    --sidebar-ring: 188 45% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+}
+
+/* Equity gap color scale — 5 quintile classes */
+.gap-q1 { --gap-color: #1a6b4a; } /* lowest gap — green */
+.gap-q2 { --gap-color: #6ba84a; }
+.gap-q3 { --gap-color: #e8b84a; }
+.gap-q4 { --gap-color: #d4723c; }
+.gap-q5 { --gap-color: #b5282e; } /* highest gap — red */
+
+/* Scrollbar styling for data panels */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
