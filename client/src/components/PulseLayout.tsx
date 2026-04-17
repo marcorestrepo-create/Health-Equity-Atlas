@@ -70,7 +70,7 @@ export function PulseNav() {
         </Link>
 
         {/* Nav links */}
-        <div className="flex gap-6 ml-10 flex-1">
+        <div className="flex gap-4 sm:gap-6 ml-4 sm:ml-10 flex-1">
           {navLinks.map((link) => {
             const isActive =
               link.href === "/" ? location === "/" : location.startsWith(link.href);
@@ -93,10 +93,10 @@ export function PulseNav() {
         {/* Search trigger */}
         <button
           onClick={() => setSearchOpen(true)}
-          className="flex items-center gap-2 h-7 px-3 text-[11px] font-data bg-white/8 border border-white/12 text-white/60 hover:text-white/90 hover:border-white/25 transition-colors"
+          className="flex items-center justify-center gap-2 h-8 sm:h-7 px-2.5 sm:px-3 text-[11px] font-data bg-white/10 sm:bg-white/8 border border-white/20 sm:border-white/12 text-white/80 sm:text-white/60 hover:text-white/90 hover:border-white/25 transition-colors shrink-0"
           data-testid="btn-search"
         >
-          <Search className="w-3.5 h-3.5" />
+          <Search className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
           <span className="hidden sm:inline">Search counties</span>
           <kbd className="hidden md:inline font-data text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-white/40 ml-2">
             ⌘K

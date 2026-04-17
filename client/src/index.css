@@ -218,3 +218,14 @@
 .rounded-lg { border-radius: 2px !important; }
 .rounded-md { border-radius: 1px !important; }
 .rounded-sm { border-radius: 0px !important; }
+
+/* ================================================================
+   Hide scrollbar utility (for horizontal tab scroll on mobile)
+   ================================================================ */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

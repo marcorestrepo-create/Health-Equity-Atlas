@@ -190,15 +190,16 @@ export default function Dashboard() {
 
         {/* Tab navigation */}
         <section className="max-w-[1100px] mx-auto px-6">
-          <div className="flex items-end justify-between gap-8 mb-8">
-            <div className="flex gap-6">
+          {/* Tabs — horizontally scrollable on mobile */}
+          <div className="flex flex-col gap-4 mb-8">
+            <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-1 -mx-6 px-6 scrollbar-hide">
               {(["overview", "map", "interventions", "states"] as const).map((tab) => {
-                const labels = { overview: "Overview", map: "Bubble Map", interventions: "Interventions", states: "State Rankings" };
+                const labels = { overview: "Overview", map: "Map", interventions: "Interventions", states: "States" };
                 return (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`font-data text-[11px] uppercase tracking-[0.14em] pb-1 transition-colors ${
+                    className={`font-data text-[11px] uppercase tracking-[0.14em] pb-1 transition-colors whitespace-nowrap shrink-0 ${
                       activeTab === tab
                         ? "text-[var(--pulse-navy)] border-b-2 border-[var(--pulse-navy)]"
                         : "text-[var(--pulse-text-muted)] hover:text-[var(--pulse-navy)]"
@@ -211,13 +212,12 @@ export default function Dashboard() {
               })}
             </div>
             
-            {/* Filters */}
-            <div className="hidden md:flex items-center gap-2">
-              <span className="label-mono text-[10px]">Layer:</span>
+            {/* Filters — visible on all sizes */}
+            <div className="flex flex-wrap items-center gap-2">
               <select
                 value={activeLayer}
                 onChange={(e) => setActiveLayer(e.target.value as DataLayerKey)}
-                className="font-data text-[11px] h-7 px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
+                className="font-data text-[11px] h-7 px-1.5 sm:px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)] max-w-[140px] sm:max-w-none"
                 style={{ borderColor: "var(--pulse-border)" }}
                 data-testid="select-layer"
               >
@@ -228,7 +228,7 @@ export default function Dashboard() {
               <select
                 value={stateFilter}
                 onChange={(e) => setStateFilter(e.target.value)}
-                className="font-data text-[11px] h-7 px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
+                className="font-data text-[11px] h-7 px-1.5 sm:px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
                 style={{ borderColor: "var(--pulse-border)" }}
                 data-testid="select-state"
               >
@@ -240,7 +240,7 @@ export default function Dashboard() {
               <select
                 value={ruralFilter}
                 onChange={(e) => setRuralFilter(e.target.value)}
-                className="font-data text-[11px] h-7 px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
+                className="font-data text-[11px] h-7 px-1.5 sm:px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
                 style={{ borderColor: "var(--pulse-border)" }}
                 data-testid="select-rural"
               >
