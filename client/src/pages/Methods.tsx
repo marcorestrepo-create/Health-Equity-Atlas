@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   ArrowLeft,
   Database,
@@ -774,6 +775,11 @@ function SourcesTab() {
 /* ─── main page ─── */
 
 export default function Methods() {
+  usePageTitle(
+    "About & Methods — Pulse: U.S. Health Equity Atlas",
+    "Learn about the data sources, methodology, and scoring behind Pulse: U.S. Health Equity Atlas—covering 3,144 counties and a composite Health Equity Gap Score."
+  );
+
   const [activeTab, setActiveTab] = useState<TabId>("metrics");
 
   return (

@@ -10,6 +10,7 @@ import {
 import { PulseDivider, PulseLineSmall } from "@/components/PulseLayout";
 import { INTERVENTION_COLORS } from "@/lib/constants";
 import { useState } from "react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const iconMap: Record<string, any> = {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
@@ -37,6 +38,16 @@ export default function CountyDetail() {
     queryKey: [`/api/counties/${fips}`],
     enabled: !!fips,
   });
+
+  const countyName = data?.county?.name;
+  const stateAbbr = data?.county?.stateAbbr;
+  const pageTitle = countyName && stateAbbr
+    ? `${countyName}, ${stateAbbr} — Health Equity Gap Score | Pulse Atlas`
+    : "County Detail — Pulse Atlas";
+  const pageDescription = countyName && stateAbbr
+    ? `Health equity data for ${countyName}, ${stateAbbr}: uninsured rates, maternal mortality, chronic disease, provider shortages, and evidence-based interventions.`
+    : undefined;
+  usePageTitle(pageTitle, pageDescription);
 
   if (isLoading || !data) {
     return (

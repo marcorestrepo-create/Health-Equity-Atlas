@@ -7,6 +7,50 @@ export async function registerRoutes(server: Server, app: Express) {
   // Seed database on startup
   await seedDatabase();
 
+  // GET /robots.txt
+  app.get("/robots.txt", (_req, res) => {
+    res.setHeader("Content-Type", "text/plain");
+    res.send(
+      "User-agent: *\nAllow: /\nSitemap: https://thepulseatlas.com/sitemap.xml\n"
+    );
+  });
+
+  // GET /sitemap.xml
+  app.get("/sitemap.xml", (_req, res) => {
+    const today = new Date().toISOString().split("T")[0];
+    const baseUrl = "https://thepulseatlas.com";
+
+    const counties = storage.getFilteredCounties({});
+    const interventions = storage.getAllInterventions();
+
+    const staticUrls = [
+      `  <url>\n    <loc>${baseUrl}/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>`,
+      `  <url>\n    <loc>${baseUrl}/#/methods</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
+    ];
+
+    const countyUrls = counties.map(
+      (c) =>
+        `  <url>\n    <loc>${baseUrl}/#/county/${c.fips}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>`
+    );
+
+    const interventionUrls = interventions.map(
+      (i) =>
+        `  <url>\n    <loc>${baseUrl}/#/intervention/${i.slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`
+    );
+
+    const xml = [
+      `<?xml version="1.0" encoding="UTF-8"?>`,
+      `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+      ...staticUrls,
+      ...interventionUrls,
+      ...countyUrls,
+      `</urlset>`,
+    ].join("\n");
+
+    res.setHeader("Content-Type", "application/xml");
+    res.send(xml);
+  });
+
   // GET /api/counties - all counties (lightweight)
   app.get("/api/counties", (req, res) => {
     const { state, ruralUrban, minGap, maxGap, maternityCareDesert, hospitalClosure, intervention } = req.query;

@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { apiRequest } from "@/lib/queryClient";
 import {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users,
@@ -17,6 +18,11 @@ const iconMap: Record<string, any> = {
 };
 
 export default function Dashboard() {
+  usePageTitle(
+    "Pulse — U.S. Health Equity Atlas | 3,144 Counties Mapped",
+    "Interactive county-by-county atlas mapping health equity gaps across 3,144 U.S. counties. Insurance, maternal mortality, chronic disease, provider shortages, and more."
+  );
+
   const [, navigate] = useLocation();
   const [activeLayer, setActiveLayer] = useState<DataLayerKey>("healthEquityGapScore");
   const [stateFilter, setStateFilter] = useState<string>("all");

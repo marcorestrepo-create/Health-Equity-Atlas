@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { PulseDivider } from "@/components/PulseLayout";
 import { INTERVENTION_COLORS } from "@/lib/constants";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const iconMap: Record<string, any> = {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
@@ -20,6 +21,15 @@ export default function InterventionDetail() {
     queryKey: [`/api/interventions/${slug}`],
     enabled: !!slug,
   });
+
+  const interventionName = data?.intervention?.name;
+  const pageTitle = interventionName
+    ? `${interventionName} — Pulse: U.S. Health Equity Atlas`
+    : "Intervention — Pulse: U.S. Health Equity Atlas";
+  const pageDescription = interventionName
+    ? `Learn about ${interventionName} as an evidence-based intervention for improving health equity across U.S. counties.`
+    : undefined;
+  usePageTitle(pageTitle, pageDescription);
 
   if (isLoading || !data) {
     return (

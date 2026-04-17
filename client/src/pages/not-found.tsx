@@ -1,8 +1,11 @@
 import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { PulseLineSmall } from "@/components/PulseLayout";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function NotFound() {
+  usePageTitle("Page Not Found — Pulse Atlas");
+
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center px-6">
       <PulseLineSmall width={120} />
