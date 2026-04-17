@@ -83,6 +83,21 @@ export default function CountyDetail() {
       const contentWidth = pageWidth - margin * 2;
 
       // ── Shared helpers ──
+      // Sanitize Unicode characters that Helvetica can't render
+      const sanitize = (s: string) => s
+        .replace(/\u2212/g, "-")   // Unicode minus → ASCII hyphen
+        .replace(/\u2013/g, "-")   // en-dash
+        .replace(/\u2014/g, " - ") // em-dash
+        .replace(/\u2018/g, "'")   // left single quote
+        .replace(/\u2019/g, "'")   // right single quote
+        .replace(/\u201C/g, '"')   // left double quote
+        .replace(/\u201D/g, '"')   // right double quote
+        .replace(/\u2026/g, "...") // ellipsis
+        .replace(/[^\x00-\x7F]/g, (ch) => {
+          // Keep basic Latin-1 supplement (accented chars), replace other non-ASCII
+          const code = ch.charCodeAt(0);
+          return (code >= 0x00A0 && code <= 0x00FF) ? ch : "";
+        });
       const checkPage = (needed: number) => { if (y + needed > pageHeight - 20) { doc.addPage(); y = margin; } };
       const sectionTitle = (title: string) => {
         checkPage(14);
@@ -101,7 +116,7 @@ export default function CountyDetail() {
         doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(50, 50, 50);
-        const lines = doc.splitTextToSize(text, contentWidth - indent);
+        const lines = doc.splitTextToSize(sanitize(text), contentWidth - indent);
         for (const line of lines) {
           checkPage(5);
           doc.text(line, margin + indent, y);
@@ -112,10 +127,10 @@ export default function CountyDetail() {
         doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(50, 50, 50);
-        const lines = doc.splitTextToSize(text, contentWidth - indent - 4);
+        const lines = doc.splitTextToSize(sanitize(text), contentWidth - indent - 4);
         for (let i = 0; i < lines.length; i++) {
           checkPage(5);
-          doc.text(i === 0 ? `\u2022  ${lines[i]}` : `    ${lines[i]}`, margin + indent, y);
+          doc.text(i === 0 ? `*  ${lines[i]}` : `    ${lines[i]}`, margin + indent, y);
           y += 4.2;
         }
       };
@@ -128,7 +143,7 @@ export default function CountyDetail() {
         const labelWidth = doc.getTextWidth(`${label}: `);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(50, 50, 50);
-        const valLines = doc.splitTextToSize(value, contentWidth - indent - labelWidth - 2);
+        const valLines = doc.splitTextToSize(sanitize(value), contentWidth - indent - labelWidth - 2);
         for (let i = 0; i < valLines.length; i++) {
           if (i === 0) {
             doc.text(valLines[i], margin + indent + labelWidth, y);
@@ -253,11 +268,11 @@ export default function CountyDetail() {
           doc.text(row.natl, cols[3], y);
           if (row.flag) {
             doc.setTextColor(192, 57, 43);
-            doc.text("\u25B2 Worse", cols[4], y);
+            doc.text("^ Worse", cols[4], y);
             doc.setTextColor(50, 50, 50);
           } else {
             doc.setTextColor(45, 125, 107);
-            doc.text("\u25BC Better", cols[4], y);
+            doc.text("v Better", cols[4], y);
             doc.setTextColor(50, 50, 50);
           }
           y += 4.5;
@@ -296,10 +311,10 @@ export default function CountyDetail() {
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
           doc.setTextColor(26, 39, 68);
-          doc.text(`#${ri.rank}  ${ri.intervention.name}`, margin, y);
+          doc.text(sanitize(`#${ri.rank}  ${ri.intervention.name}`), margin, y);
           y += 5;
           labelValue("Gap addressed", ri.intervention.gapAddressed);
-          labelValue("Evidence", `${ri.intervention.evidenceStrength} \u2014 ${ri.intervention.keyMetric}`);
+          labelValue("Evidence", `${ri.intervention.evidenceStrength} -- ${ri.intervention.keyMetric}`);
           if (ri.intervention.costEffectiveness) labelValue("Cost-effectiveness", ri.intervention.costEffectiveness);
           labelValue("Rationale for this county", ri.rationale);
           if (ri.intervention.priorityPopulations) labelValue("Priority populations", ri.intervention.priorityPopulations);
@@ -407,12 +422,12 @@ export default function CountyDetail() {
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
           doc.setTextColor(26, 39, 68);
-          doc.text(`#${ri.rank}  ${ri.intervention.name}`, margin, y);
+          doc.text(sanitize(`#${ri.rank}  ${ri.intervention.name}`), margin, y);
           y += 1;
           doc.setFontSize(8);
           doc.setFont("helvetica", "normal");
           doc.setTextColor(45, 125, 107);
-          doc.text(`Evidence: ${ri.intervention.evidenceStrength}  |  Gap Score: ${ri.gapScore?.toFixed(1)}/100`, margin + 3, y + 3);
+          doc.text(sanitize(`Evidence: ${ri.intervention.evidenceStrength}  |  Gap Score: ${ri.gapScore?.toFixed(1)}/100`), margin + 3, y + 3);
           y += 7;
           doc.setTextColor(50, 50, 50);
           if (ri.intervention.costEffectiveness) labelValue("Cost-effectiveness", ri.intervention.costEffectiveness);
@@ -487,7 +502,7 @@ export default function CountyDetail() {
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
           doc.setTextColor(26, 39, 68);
-          doc.text(`#${ri.rank}  ${ri.intervention.name}`, margin, y);
+          doc.text(sanitize(`#${ri.rank}  ${ri.intervention.name}`), margin, y);
           y += 5;
           labelValue("Evidence strength", ri.intervention.evidenceStrength);
           labelValue("Gap addressed", ri.intervention.gapAddressed);
