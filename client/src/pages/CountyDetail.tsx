@@ -74,132 +74,467 @@ export default function CountyDetail() {
       const { jsPDF } = await import("jspdf");
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
       const c = briefingData.county;
+      const sc = briefingData.stateContext;
+      const nb = briefingData.nationalBenchmarks;
       const margin = 18;
       let y = margin;
       const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
       const contentWidth = pageWidth - margin * 2;
 
-      // Header
-      doc.setFillColor(15, 27, 45); // pulse-nav-bg
-      doc.rect(0, 0, pageWidth, 38, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-      doc.text("Pulse: Health Equity Briefing", margin, 14);
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "normal");
-      doc.text(`${c.name}, ${c.state}`, margin, 22);
-      doc.setFontSize(9);
-      const audienceLabel = audience === "policymaker" ? "Policymaker Briefing" : audience === "health-system" ? "Health System Briefing" : "Nonprofit Briefing";
-      doc.text(`${audienceLabel} · National Minority Health Month 2026 · FIPS: ${c.fips}`, margin, 30);
-      doc.text(`Generated: ${new Date().toLocaleDateString()} · thepulseatlas.com`, margin, 35);
-
-      y = 46;
-      doc.setTextColor(26, 39, 68); // pulse-navy
-
-      // County profile
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text("County Profile", margin, y);
-      y += 6;
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
-      const profileItems = [
-        `Population: ${c.population?.toLocaleString() || "N/A"}`,
-        `Classification: ${c.ruralUrban === "rural" ? "Rural" : c.ruralUrban === "micro" ? "Micropolitan" : "Metropolitan"}`,
-        `Health Equity Gap Score: ${gapScore.toFixed(1)} / 100`,
-        `Life Expectancy: ${c.lifeExpectancy?.toFixed(1) || "N/A"} years (national: 78.4)`,
-        `Maternity Care Desert: ${c.maternityCareDesert ? "YES" : "No"}`,
-        `Hospital Closure Since 2010: ${c.hospitalClosureSince2010 ? "YES" : "No"}`,
-      ];
-      for (const item of profileItems) {
-        doc.text(`• ${item}`, margin + 2, y);
-        y += 5;
-      }
-
-      // Key health metrics
-      y += 4;
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text("Key Health Metrics", margin, y);
-      y += 6;
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
-      const metrics = [
-        { label: "Uninsured Rate", value: c.uninsuredRate, natl: 9.2, unit: "%" },
-        { label: "Maternal Mortality", value: c.maternalMortalityRate, natl: 22.3, unit: "/100k births" },
-        { label: "Diabetes Prevalence", value: c.diabetesRate, natl: 10.9, unit: "%" },
-        { label: "Hypertension Prevalence", value: c.hypertensionRate, natl: 32.5, unit: "%" },
-        { label: "Obesity Rate", value: c.obesityRate, natl: 31.9, unit: "%" },
-        { label: "Primary Care Physicians", value: c.pcpPer100k, natl: 76.4, unit: "/100k" },
-        { label: "No Broadband Access", value: c.noBroadbandRate, natl: 15, unit: "%" },
-        { label: "HPSA Score", value: c.hpsaScore, natl: 10, unit: "/26" },
-        { label: "Social Vulnerability Index", value: c.sviOverall, natl: 0.5, unit: "" },
-        { label: "EJ Screen Index", value: c.ejScreenIndex, natl: 50, unit: "" },
-      ];
-      for (const m of metrics) {
-        const valStr = m.value != null ? m.value.toFixed(1) : "N/A";
-        doc.text(`• ${m.label}: ${valStr}${m.unit} (national: ${m.natl}${m.unit})`, margin + 2, y);
-        y += 4.5;
-      }
-
-      // Interventions
-      y += 6;
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text("Recommended Interventions (Ranked by Potential Impact)", margin, y);
-      y += 7;
-      for (const ri of briefingData.interventions) {
-        if (!ri.intervention) continue;
-        if (y > 240) { doc.addPage(); y = margin; }
-        doc.setFontSize(10);
+      // ── Shared helpers ──
+      const checkPage = (needed: number) => { if (y + needed > pageHeight - 20) { doc.addPage(); y = margin; } };
+      const sectionTitle = (title: string) => {
+        checkPage(14);
+        y += 2;
+        doc.setDrawColor(26, 39, 68);
+        doc.setLineWidth(0.3);
+        doc.line(margin, y, margin + contentWidth, y);
+        y += 6;
+        doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
-        doc.text(`#${ri.rank} — ${ri.intervention.name}`, margin, y);
-        y += 5;
-        doc.setFontSize(8);
+        doc.setTextColor(26, 39, 68);
+        doc.text(title, margin, y);
+        y += 6;
+      };
+      const bodyText = (text: string, indent = 0) => {
+        doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
-        doc.setTextColor(80, 80, 80);
-        doc.text(`Evidence Strength: ${ri.intervention.evidenceStrength}`, margin + 3, y);
-        y += 4;
-        doc.text(`Gap Score: ${ri.gapScore?.toFixed(1)} / 100`, margin + 3, y);
-        y += 4;
-        const rationaleLines = doc.splitTextToSize(`Rationale: ${ri.rationale}`, contentWidth - 6);
-        for (const line of rationaleLines) {
-          if (y > 255) { doc.addPage(); y = margin; }
-          doc.text(line, margin + 3, y);
-          y += 3.8;
+        doc.setTextColor(50, 50, 50);
+        const lines = doc.splitTextToSize(text, contentWidth - indent);
+        for (const line of lines) {
+          checkPage(5);
+          doc.text(line, margin + indent, y);
+          y += 4;
         }
-        const metricLines = doc.splitTextToSize(`Key Evidence: ${ri.intervention.keyMetric}`, contentWidth - 6);
-        for (const line of metricLines) {
-          if (y > 255) { doc.addPage(); y = margin; }
-          doc.text(line, margin + 3, y);
-          y += 3.8;
+      };
+      const bulletItem = (text: string, indent = 2) => {
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(50, 50, 50);
+        const lines = doc.splitTextToSize(text, contentWidth - indent - 4);
+        for (let i = 0; i < lines.length; i++) {
+          checkPage(5);
+          doc.text(i === 0 ? `\u2022  ${lines[i]}` : `    ${lines[i]}`, margin + indent, y);
+          y += 4.2;
         }
-        if (audience === "health-system" && ri.intervention.costEffectiveness) {
-          const costLines = doc.splitTextToSize(`Cost-Effectiveness: ${ri.intervention.costEffectiveness}`, contentWidth - 6);
-          for (const line of costLines) {
-            if (y > 255) { doc.addPage(); y = margin; }
-            doc.text(line, margin + 3, y);
-            y += 3.8;
+      };
+      const labelValue = (label: string, value: string, indent = 3) => {
+        checkPage(5);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(26, 39, 68);
+        doc.text(`${label}: `, margin + indent, y);
+        const labelWidth = doc.getTextWidth(`${label}: `);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(50, 50, 50);
+        const valLines = doc.splitTextToSize(value, contentWidth - indent - labelWidth - 2);
+        for (let i = 0; i < valLines.length; i++) {
+          if (i === 0) {
+            doc.text(valLines[i], margin + indent + labelWidth, y);
+          } else {
+            y += 4;
+            checkPage(5);
+            doc.text(valLines[i], margin + indent + labelWidth, y);
           }
         }
+        y += 4.5;
+      };
+      const fmt = (v: number | null | undefined, decimals = 1) => v != null ? v.toFixed(decimals) : "N/A";
+      const classify = (r: string) => r === "rural" ? "Rural" : r === "micro" ? "Micropolitan" : "Metropolitan";
+
+      // ── Audience-specific titles and subtitles ──
+      const audienceConfig: Record<string, { title: string; subtitle: string; accent: [number,number,number] }> = {
+        "policymaker": {
+          title: "Legislative Health Equity Briefing",
+          subtitle: "Data-driven talking points for policy action",
+          accent: [26, 39, 68], // navy
+        },
+        "health-system": {
+          title: "Health System Strategic Briefing",
+          subtitle: "CHNA-aligned data for clinical and operational planning",
+          accent: [45, 125, 107], // teal
+        },
+        "nonprofit": {
+          title: "Community Health Needs Assessment",
+          subtitle: "Grant-ready data and partnership opportunities",
+          accent: [192, 57, 43], // terracotta
+        },
+      };
+      const config = audienceConfig[audience] || audienceConfig["policymaker"];
+
+      // ══════════════════════════════════════════════════════════════
+      // HEADER (shared structure, audience-specific color + title)
+      // ══════════════════════════════════════════════════════════════
+      doc.setFillColor(15, 27, 45);
+      doc.rect(0, 0, pageWidth, 42, "F");
+      // Accent stripe
+      doc.setFillColor(...config.accent);
+      doc.rect(0, 42, pageWidth, 2, "F");
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.text("PULSE: U.S. HEALTH EQUITY ATLAS", margin, 10);
+
+      doc.setFontSize(17);
+      doc.text(`${c.name}, ${c.state}`, margin, 20);
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(config.title, margin, 28);
+
+      doc.setFontSize(8);
+      doc.setTextColor(180, 190, 210);
+      doc.text(config.subtitle, margin, 34);
+      doc.text(`Generated ${new Date().toLocaleDateString()} \u00B7 FIPS ${c.fips} \u00B7 thepulseatlas.com`, margin, 39);
+
+      y = 52;
+      doc.setTextColor(26, 39, 68);
+
+      // ══════════════════════════════════════════════════════════════
+      // POLICYMAKER BRIEFING
+      // ══════════════════════════════════════════════════════════════
+      if (audience === "policymaker") {
+
+        // ── Executive Summary ──
+        sectionTitle("Executive Summary");
+        const severityWord = gapScore > 60 ? "critical" : gapScore > 45 ? "significant" : gapScore > 30 ? "moderate" : "below-average";
+        bodyText(`${c.name} (population ${c.population?.toLocaleString()}) faces ${severityWord} health equity challenges with a composite Gap Score of ${gapScore.toFixed(1)}/100. The county ranks #${sc.countyRankInState} out of ${sc.totalCountiesInState} counties in ${sc.stateName} for health equity need.${briefingData.affectedPop ? ` An estimated ${briefingData.affectedPop.toLocaleString()} residents lack health insurance coverage.` : ""}`);
+        y += 2;
+
+        // ── Constituent Impact ──
+        sectionTitle("Constituent Impact at a Glance");
+        const impactItems = [
+          `Population affected: ${c.population?.toLocaleString()} residents`,
+          `Life expectancy: ${fmt(c.lifeExpectancy)} years (national avg: ${nb.lifeExpectancy}, state avg: ${sc.stateAvgLifeExp})`,
+          `Uninsured: ${fmt(c.uninsuredRate)}% of residents (national: ${nb.uninsuredRate}%, state avg: ${sc.stateAvgUninsured}%)`,
+          `Primary care shortage: ${fmt(c.pcpPer100k)} PCPs per 100k (national: ${nb.pcpPer100k}, state avg: ${sc.stateAvgPcp})`,
+        ];
+        if (c.maternityCareDesert === 1) impactItems.push(`Designated Maternity Care Desert \u2014 1 of ${sc.stateMaternityCareDeserts} in ${sc.stateAbbr}`);
+        if (c.hospitalClosureSince2010 === 1) impactItems.push(`Hospital closed since 2010 \u2014 1 of ${sc.stateHospitalClosures} closures statewide`);
+        for (const item of impactItems) bulletItem(item);
+        y += 2;
+
+        // ── Peer County Comparison ──
+        sectionTitle("Peer County Comparison");
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(50, 50, 50);
+        // Table header
+        checkPage(20);
+        doc.setFillColor(240, 238, 232);
+        doc.rect(margin, y - 3, contentWidth, 6, "F");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
         doc.setTextColor(26, 39, 68);
-        y += 3;
+        const cols = [margin, margin + 45, margin + 80, margin + 115, margin + 145];
+        doc.text("Metric", cols[0] + 2, y);
+        doc.text(c.name.length > 16 ? c.name.substring(0, 16) + "..." : c.name, cols[1], y);
+        doc.text(`${sc.stateAbbr} Avg`, cols[2], y);
+        doc.text("National", cols[3], y);
+        doc.text("Disparity", cols[4], y);
+        y += 5;
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(50, 50, 50);
+        doc.setFontSize(8);
+        const compRows = [
+          { label: "Gap Score", local: fmt(gapScore), state: `${sc.stateAvgGapScore}`, natl: "—", flag: gapScore > sc.stateAvgGapScore },
+          { label: "Uninsured %", local: `${fmt(c.uninsuredRate)}%`, state: `${sc.stateAvgUninsured}%`, natl: `${nb.uninsuredRate}%`, flag: (c.uninsuredRate || 0) > nb.uninsuredRate },
+          { label: "Life Expectancy", local: `${fmt(c.lifeExpectancy)} yr`, state: `${sc.stateAvgLifeExp} yr`, natl: `${nb.lifeExpectancy} yr`, flag: (c.lifeExpectancy || 99) < nb.lifeExpectancy },
+          { label: "PCP per 100k", local: fmt(c.pcpPer100k), state: `${sc.stateAvgPcp}`, natl: `${nb.pcpPer100k}`, flag: (c.pcpPer100k || 999) < nb.pcpPer100k },
+          { label: "Maternal Mortality", local: `${fmt(c.maternalMortalityRate)}`, state: "—", natl: `${nb.maternalMortalityRate}`, flag: (c.maternalMortalityRate || 0) > nb.maternalMortalityRate },
+        ];
+        for (const row of compRows) {
+          checkPage(5);
+          doc.text(row.label, cols[0] + 2, y);
+          doc.text(row.local, cols[1], y);
+          doc.text(row.state, cols[2], y);
+          doc.text(row.natl, cols[3], y);
+          if (row.flag) {
+            doc.setTextColor(192, 57, 43);
+            doc.text("\u25B2 Worse", cols[4], y);
+            doc.setTextColor(50, 50, 50);
+          } else {
+            doc.setTextColor(45, 125, 107);
+            doc.text("\u25BC Better", cols[4], y);
+            doc.setTextColor(50, 50, 50);
+          }
+          y += 4.5;
+        }
+        y += 2;
+
+        // ── Legislative Talking Points ──
+        sectionTitle("Legislative Talking Points");
+        const talkingPoints = [];
+        if ((c.uninsuredRate || 0) > nb.uninsuredRate) {
+          talkingPoints.push(`${fmt(c.uninsuredRate)}% of constituents in ${c.name} lack health insurance \u2014 ${((c.uninsuredRate || 0) - nb.uninsuredRate).toFixed(1)} percentage points above the national rate. Medicaid expansion and marketplace enrollment support could directly reduce this gap.`);
+        }
+        if (c.maternityCareDesert === 1) {
+          talkingPoints.push(`${c.name} is a federally designated Maternity Care Desert. Mothers must travel ${fmt(c.distanceToHospital)} miles to reach hospital care. Federal OB access grants and telehealth parity legislation could save lives.`);
+        }
+        if ((c.pcpPer100k || 999) < nb.pcpPer100k) {
+          talkingPoints.push(`With only ${fmt(c.pcpPer100k)} primary care physicians per 100,000 residents (vs. national ${nb.pcpPer100k}), provider shortage is acute. Loan repayment programs and NHSC site designations are evidence-based solutions.`);
+        }
+        if ((c.noBroadbandRate || 0) > 15) {
+          talkingPoints.push(`${fmt(c.noBroadbandRate)}% of households lack broadband \u2014 a barrier to telehealth adoption. Broadband infrastructure investment is a health equity issue.`);
+        }
+        if ((c.lifeExpectancy || 99) < nb.lifeExpectancy) {
+          talkingPoints.push(`Life expectancy is ${fmt(c.lifeExpectancy)} years, ${(nb.lifeExpectancy - (c.lifeExpectancy || 0)).toFixed(1)} years below the national average. This gap represents preventable years of life lost.`);
+        }
+        if (talkingPoints.length === 0) {
+          talkingPoints.push(`While ${c.name} performs near national benchmarks on several metrics, targeted investment in the interventions below could further close remaining disparities.`);
+        }
+        for (const tp of talkingPoints) bulletItem(tp);
+        y += 2;
+
+        // ── Budget Impact Estimates ──
+        sectionTitle("Recommended Interventions & Budget Context");
+        for (const ri of briefingData.interventions) {
+          if (!ri.intervention) continue;
+          checkPage(28);
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(26, 39, 68);
+          doc.text(`#${ri.rank}  ${ri.intervention.name}`, margin, y);
+          y += 5;
+          labelValue("Gap addressed", ri.intervention.gapAddressed);
+          labelValue("Evidence", `${ri.intervention.evidenceStrength} \u2014 ${ri.intervention.keyMetric}`);
+          if (ri.intervention.costEffectiveness) labelValue("Cost-effectiveness", ri.intervention.costEffectiveness);
+          labelValue("Rationale for this county", ri.rationale);
+          if (ri.intervention.priorityPopulations) labelValue("Priority populations", ri.intervention.priorityPopulations);
+          y += 2;
+        }
+
+      // ══════════════════════════════════════════════════════════════
+      // HEALTH SYSTEM BRIEFING
+      // ══════════════════════════════════════════════════════════════
+      } else if (audience === "health-system") {
+
+        // ── CHNA Alignment Summary ──
+        sectionTitle("CHNA Alignment Summary");
+        bodyText(`This briefing provides data aligned with IRS Form 990 Schedule H Community Health Needs Assessment requirements for ${c.name}, ${c.state}. The county (FIPS ${c.fips}) is classified as ${classify(c.ruralUrban)} with a population of ${c.population?.toLocaleString()}.`);
+        y += 1;
+        const chnaFlags = [];
+        if (c.maternityCareDesert === 1) chnaFlags.push("Maternity Care Desert designation");
+        if (c.hospitalClosureSince2010 === 1) chnaFlags.push("Hospital closure since 2010");
+        if ((c.hpsaScore || 0) > 15) chnaFlags.push(`High HPSA score (${fmt(c.hpsaScore)}/26)`);
+        if ((c.sviOverall || 0) > 0.7) chnaFlags.push(`High social vulnerability (SVI ${fmt(c.sviOverall, 2)})`);
+        if ((c.ejScreenIndex || 0) > 70) chnaFlags.push(`Elevated environmental justice concern (EJScreen ${fmt(c.ejScreenIndex)} percentile)`);
+        if (chnaFlags.length > 0) {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(9);
+          doc.setTextColor(192, 57, 43);
+          checkPage(5);
+          doc.text("Critical CHNA Flags:", margin + 2, y);
+          y += 4.5;
+          doc.setTextColor(50, 50, 50);
+          doc.setFont("helvetica", "normal");
+          for (const flag of chnaFlags) bulletItem(flag);
+        }
+        y += 2;
+
+        // ── Clinical Metrics Dashboard ──
+        sectionTitle("Clinical Metrics vs. Benchmarks");
+        checkPage(20);
+        doc.setFillColor(240, 238, 232);
+        doc.rect(margin, y - 3, contentWidth, 6, "F");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(26, 39, 68);
+        const hsCols = [margin, margin + 55, margin + 80, margin + 105, margin + 135];
+        doc.text("Clinical Indicator", hsCols[0] + 2, y);
+        doc.text("County", hsCols[1], y);
+        doc.text("National", hsCols[2], y);
+        doc.text("Variance", hsCols[3], y);
+        doc.text("Action Flag", hsCols[4], y);
+        y += 5;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(50, 50, 50);
+        const hsMetrics = [
+          { label: "Uninsured Rate", val: c.uninsuredRate, natl: nb.uninsuredRate, unit: "%", higher_worse: true },
+          { label: "Maternal Mortality", val: c.maternalMortalityRate, natl: nb.maternalMortalityRate, unit: "/100k", higher_worse: true },
+          { label: "Diabetes Prevalence", val: c.diabetesRate, natl: nb.diabetesRate, unit: "%", higher_worse: true },
+          { label: "Hypertension", val: c.hypertensionRate, natl: nb.hypertensionRate, unit: "%", higher_worse: true },
+          { label: "Obesity", val: c.obesityRate, natl: nb.obesityRate, unit: "%", higher_worse: true },
+          { label: "Heart Disease", val: c.heartDiseaseRate, natl: 6.2, unit: "%", higher_worse: true },
+          { label: "Life Expectancy", val: c.lifeExpectancy, natl: nb.lifeExpectancy, unit: " yr", higher_worse: false },
+          { label: "PCP per 100k", val: c.pcpPer100k, natl: nb.pcpPer100k, unit: "", higher_worse: false },
+          { label: "Mental Health/100k", val: c.mentalHealthPer100k, natl: 250, unit: "", higher_worse: false },
+          { label: "HPSA Score", val: c.hpsaScore, natl: 10, unit: "/26", higher_worse: true },
+        ];
+        for (const m of hsMetrics) {
+          checkPage(5);
+          const v = m.val != null ? m.val : null;
+          const variance = v != null ? (v - m.natl).toFixed(1) : "—";
+          const isWorse = v != null ? (m.higher_worse ? v > m.natl : v < m.natl) : false;
+          doc.text(m.label, hsCols[0] + 2, y);
+          doc.text(v != null ? `${v.toFixed(1)}${m.unit}` : "N/A", hsCols[1], y);
+          doc.text(`${m.natl}${m.unit}`, hsCols[2], y);
+          doc.text(v != null ? `${Number(variance) > 0 ? "+" : ""}${variance}` : "—", hsCols[3], y);
+          if (isWorse) {
+            doc.setTextColor(192, 57, 43);
+            doc.text("ACTION", hsCols[4], y);
+            doc.setTextColor(50, 50, 50);
+          } else {
+            doc.setTextColor(45, 125, 107);
+            doc.text("Monitor", hsCols[4], y);
+            doc.setTextColor(50, 50, 50);
+          }
+          y += 4.5;
+        }
+        y += 2;
+
+        // ── Payer Mix & Staffing Implications ──
+        sectionTitle("Payer Mix & Staffing Implications");
+        bulletItem(`Uninsured rate of ${fmt(c.uninsuredRate)}% implies elevated uncompensated care exposure (national: ${nb.uninsuredRate}%)`);
+        bulletItem(`HPSA designation score of ${fmt(c.hpsaScore)}/26 ${(c.hpsaScore || 0) > 15 ? "qualifies for enhanced Medicare/Medicaid reimbursement and NHSC recruitment incentives" : "may qualify for select federal workforce programs"}`);
+        if ((c.pcpPer100k || 999) < nb.pcpPer100k) {
+          bulletItem(`PCP shortage (${fmt(c.pcpPer100k)} vs ${nb.pcpPer100k} national) indicates recruitment priority \u2014 consider loan repayment, locum tenens, or scope-of-practice expansion`);
+        }
+        if (c.maternityCareDesert === 1) {
+          bulletItem(`Maternity Care Desert status creates OB service line opportunity \u2014 federal grants available for OB unit establishment or midwifery programs`);
+        }
+        bulletItem(`${fmt(c.noBroadbandRate)}% lack broadband; telehealth strategy must account for digital access barriers`);
+        y += 2;
+
+        // ── Intervention ROI Analysis ──
+        sectionTitle("Evidence-Based Interventions: Cost-Effectiveness & ROI");
+        for (const ri of briefingData.interventions) {
+          if (!ri.intervention) continue;
+          checkPage(30);
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(26, 39, 68);
+          doc.text(`#${ri.rank}  ${ri.intervention.name}`, margin, y);
+          y += 1;
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(45, 125, 107);
+          doc.text(`Evidence: ${ri.intervention.evidenceStrength}  |  Gap Score: ${ri.gapScore?.toFixed(1)}/100`, margin + 3, y + 3);
+          y += 7;
+          doc.setTextColor(50, 50, 50);
+          if (ri.intervention.costEffectiveness) labelValue("Cost-effectiveness", ri.intervention.costEffectiveness);
+          labelValue("Clinical rationale", ri.rationale);
+          labelValue("Key metric", ri.intervention.keyMetric);
+          if (ri.intervention.priorityPopulations) labelValue("Target populations", ri.intervention.priorityPopulations);
+          labelValue("Gap addressed", ri.intervention.gapAddressed);
+          y += 2;
+        }
+
+        // ── Facility & Infrastructure Notes ──
+        sectionTitle("Infrastructure Context");
+        bulletItem(`Distance to nearest hospital: ${fmt(c.distanceToHospital)} miles`);
+        bulletItem(`No-vehicle households: ${fmt(c.noVehicleRate)}%`);
+        bulletItem(`Food insecurity rate: ${fmt(c.foodInsecurityRate)}%`);
+        bulletItem(`Environmental exposure (EJScreen): ${fmt(c.ejScreenIndex)} percentile`);
+        bulletItem(`PM2.5 concentration: ${fmt(c.pm25)} \u00B5g/m\u00B3`);
+
+      // ══════════════════════════════════════════════════════════════
+      // NONPROFIT BRIEFING
+      // ══════════════════════════════════════════════════════════════
+      } else {
+
+        // ── Community Need Narrative ──
+        sectionTitle("Community Need Narrative");
+        const urgency = gapScore > 60 ? "among the most acute" : gapScore > 45 ? "significant" : gapScore > 30 ? "moderate but persistent" : "emerging";
+        bodyText(`${c.name}, ${c.state} is a ${classify(c.ruralUrban).toLowerCase()} community of ${c.population?.toLocaleString()} residents facing ${urgency} health equity challenges. With a Health Equity Gap Score of ${gapScore.toFixed(1)}/100, it ranks #${sc.countyRankInState} among ${sc.totalCountiesInState} counties in ${sc.stateName} for overall health need.`);
+        y += 1;
+        bodyText(`Residents live an average of ${fmt(c.lifeExpectancy)} years \u2014 ${(c.lifeExpectancy || 0) < nb.lifeExpectancy ? `${(nb.lifeExpectancy - (c.lifeExpectancy || 0)).toFixed(1)} years shorter than the national average` : "near the national average"}. ${fmt(c.uninsuredRate)}% lack health insurance, and ${fmt(c.foodInsecurityRate)}% experience food insecurity.`);
+        y += 2;
+
+        // ── Affected Population Demographics ──
+        sectionTitle("Affected Population Profile");
+        bulletItem(`Total population: ${c.population?.toLocaleString()}`);
+        bulletItem(`Classification: ${classify(c.ruralUrban)}`);
+        if (briefingData.affectedPop) bulletItem(`Estimated uninsured residents: ${briefingData.affectedPop.toLocaleString()}`);
+        bulletItem(`Social Vulnerability Index: ${fmt(c.sviOverall, 2)} (0-1 scale; higher = more vulnerable)`);
+        bulletItem(`Socioeconomic vulnerability: ${fmt(c.sviSocioeconomic, 2)}`);
+        bulletItem(`Minority status vulnerability: ${fmt(c.sviMinority, 2)}`);
+        bulletItem(`Housing & transportation vulnerability: ${fmt(c.sviHousingTransport, 2)}`);
+        bulletItem(`Limited English proficiency: ${fmt(c.lepRate)}%`);
+        bulletItem(`No-vehicle households: ${fmt(c.noVehicleRate)}%`);
+        bulletItem(`Food insecurity: ${fmt(c.foodInsecurityRate)}%`);
+        y += 2;
+
+        // ── Key Health Disparities ──
+        sectionTitle("Key Health Disparities");
+        const disparities = [
+          { label: "Uninsured Rate", val: c.uninsuredRate, natl: nb.uninsuredRate, unit: "%", worse: "higher" },
+          { label: "Maternal Mortality", val: c.maternalMortalityRate, natl: nb.maternalMortalityRate, unit: " per 100k births", worse: "higher" },
+          { label: "Diabetes", val: c.diabetesRate, natl: nb.diabetesRate, unit: "%", worse: "higher" },
+          { label: "Hypertension", val: c.hypertensionRate, natl: nb.hypertensionRate, unit: "%", worse: "higher" },
+          { label: "Obesity", val: c.obesityRate, natl: nb.obesityRate, unit: "%", worse: "higher" },
+          { label: "Life Expectancy", val: c.lifeExpectancy, natl: nb.lifeExpectancy, unit: " years", worse: "lower" },
+        ];
+        for (const d of disparities) {
+          const v = d.val != null ? d.val.toFixed(1) : "N/A";
+          const isWorse = d.val != null && (d.worse === "higher" ? d.val > d.natl : d.val < d.natl);
+          bulletItem(`${d.label}: ${v}${d.unit} (national: ${d.natl}${d.unit})${isWorse ? " \u2014 DISPARITY" : ""}`);
+        }
+        if (c.maternityCareDesert === 1) bulletItem("Designated Maternity Care Desert \u2014 no or limited OB care access");
+        if (c.hospitalClosureSince2010 === 1) bulletItem("Hospital closed since 2010 \u2014 reduced acute care access");
+        y += 2;
+
+        // ── Grant-Ready Interventions ──
+        sectionTitle("Evidence-Based Interventions for Grant Applications");
+        bodyText("The following interventions are ranked by estimated impact for this county. Each includes evidence strength, priority populations, and the specific community health gap it addresses \u2014 key elements for funder proposals.");
+        y += 2;
+        for (const ri of briefingData.interventions) {
+          if (!ri.intervention) continue;
+          checkPage(32);
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(26, 39, 68);
+          doc.text(`#${ri.rank}  ${ri.intervention.name}`, margin, y);
+          y += 5;
+          labelValue("Evidence strength", ri.intervention.evidenceStrength);
+          labelValue("Gap addressed", ri.intervention.gapAddressed);
+          labelValue("Why here", ri.rationale);
+          labelValue("Key evidence", ri.intervention.keyMetric);
+          if (ri.intervention.priorityPopulations) labelValue("Priority populations", ri.intervention.priorityPopulations);
+          if (ri.intervention.costEffectiveness) labelValue("Cost-effectiveness", ri.intervention.costEffectiveness);
+          y += 2;
+        }
+
+        // ── Partnership Opportunities ──
+        sectionTitle("Partnership & Collaboration Opportunities");
+        bulletItem(`Local health department partnership for ${classify(c.ruralUrban).toLowerCase()} community outreach`);
+        if (c.maternityCareDesert === 1) bulletItem("March of Dimes \u2014 maternity care desert designation creates alignment for maternal health grants");
+        if ((c.hpsaScore || 0) > 10) bulletItem("HRSA/NHSC \u2014 HPSA designation enables workforce development partnerships");
+        if ((c.noBroadbandRate || 0) > 15) bulletItem("FCC/broadband coalitions \u2014 digital access is a prerequisite for telehealth programs");
+        if ((c.sviOverall || 0) > 0.6) bulletItem("CDC/ATSDR Social Vulnerability programs \u2014 high SVI score aligns with federal priority");
+        bulletItem("Community health worker organizations for culturally competent intervention delivery");
+        bulletItem("Faith-based organizations and community centers as trusted outreach hubs");
+        if ((c.lepRate || 0) > 5) bulletItem(`Language access providers \u2014 ${fmt(c.lepRate)}% limited English proficiency requires multilingual programming`);
       }
 
-      // Footer
-      if (y > 230) { doc.addPage(); y = margin; }
-      y += 6;
-      doc.setFontSize(8);
+      // ══════════════════════════════════════════════════════════════
+      // SHARED FOOTER (all audiences)
+      // ══════════════════════════════════════════════════════════════
+      checkPage(24);
+      y += 4;
+      doc.setDrawColor(26, 39, 68);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y, margin + contentWidth, y);
+      y += 5;
+      doc.setFontSize(7);
       doc.setFont("helvetica", "italic");
       doc.setTextColor(120, 120, 120);
-      const sourceText = "Data Sources: County Health Rankings (UW/RWJF), CDC PLACES, HRSA HPSA, Census SAHIE/ACS, FCC BDC, EPA EJScreen, CDC/ATSDR SVI, March of Dimes, IHME. Intervention evidence from published meta-analyses and RCTs. thepulseatlas.com";
+      const sourceText = "Data Sources: County Health Rankings (University of Wisconsin/RWJF), CDC PLACES, HRSA Area Health Resource Files, Census SAHIE/ACS, FCC Broadband Data Collection, EPA EJScreen, CDC/ATSDR Social Vulnerability Index, March of Dimes Maternity Care Deserts, IHME. Intervention evidence drawn from published meta-analyses and randomized controlled trials. Full methodology and interactive data at thepulseatlas.com.";
       const sourceLines = doc.splitTextToSize(sourceText, contentWidth);
       for (const line of sourceLines) {
+        checkPage(4);
         doc.text(line, margin, y);
-        y += 3.5;
+        y += 3.2;
       }
+      y += 2;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.text("Pulse: U.S. Health Equity Atlas \u00B7 thepulseatlas.com \u00B7 Open-source county-level health equity data", margin, y);
 
+      // ── Download ──
       const blob = doc.output("blob");
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

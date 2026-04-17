@@ -158,7 +158,7 @@ export async function registerRoutes(server: Server, app: Express) {
     res.json(stats.stateAverages);
   });
 
-  // POST /api/briefing - generate PDF briefing data
+  // POST /api/briefing - generate PDF briefing data with peer/state context
   app.post("/api/briefing", (req, res) => {
     const { countyFips, audience } = req.body;
     
@@ -178,7 +178,25 @@ export async function registerRoutes(server: Server, app: Express) {
       const intervention = allInterventions.find(i => i.slug === ci.interventionSlug);
       return { ...ci, intervention };
     });
-    
+
+    // Peer county comparison — same state, sorted by gap score
+    const stateCounties = storage.getCountiesByState(county.stateAbbr);
+    const stateCountiesSorted = [...stateCounties].sort((a, b) => (b.healthEquityGapScore || 0) - (a.healthEquityGapScore || 0));
+    const stateRank = stateCountiesSorted.findIndex(c => c.fips === county.fips) + 1;
+    const stateCountyCount = stateCounties.length;
+    const stateAvgGap = Math.round(stateCounties.reduce((s, c) => s + (c.healthEquityGapScore || 0), 0) / stateCounties.length * 10) / 10;
+    const stateAvgUninsured = Math.round(stateCounties.reduce((s, c) => s + (c.uninsuredRate || 0), 0) / stateCounties.length * 10) / 10;
+    const stateAvgLifeExp = Math.round(stateCounties.reduce((s, c) => s + (c.lifeExpectancy || 0), 0) / stateCounties.length * 10) / 10;
+    const stateAvgPcp = Math.round(stateCounties.reduce((s, c) => s + (c.pcpPer100k || 0), 0) / stateCounties.length * 10) / 10;
+    const stateMaternityCareDeserts = stateCounties.filter(c => c.maternityCareDesert === 1).length;
+    const stateHospitalClosures = stateCounties.filter(c => c.hospitalClosureSince2010 === 1).length;
+    const stateTotalPop = stateCounties.reduce((s, c) => s + c.population, 0);
+
+    // Affected population estimate (county pop × uninsured rate or gap score proxy)
+    const affectedPop = county.population && county.uninsuredRate
+      ? Math.round(county.population * county.uninsuredRate / 100)
+      : null;
+
     // Return structured data for client-side PDF generation
     res.json({
       county,
@@ -193,7 +211,21 @@ export async function registerRoutes(server: Server, app: Express) {
         obesityRate: 31.9,
         lifeExpectancy: 78.4,
         pcpPer100k: 76.4,
-      }
+      },
+      stateContext: {
+        stateAbbr: county.stateAbbr,
+        stateName: county.state,
+        countyRankInState: stateRank,
+        totalCountiesInState: stateCountyCount,
+        stateAvgGapScore: stateAvgGap,
+        stateAvgUninsured: stateAvgUninsured,
+        stateAvgLifeExp: stateAvgLifeExp,
+        stateAvgPcp: stateAvgPcp,
+        stateMaternityCareDeserts: stateMaternityCareDeserts,
+        stateHospitalClosures: stateHospitalClosures,
+        stateTotalPop: stateTotalPop,
+      },
+      affectedPop,
     });
   });
 }
