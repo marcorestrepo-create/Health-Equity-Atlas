@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -6,7 +6,7 @@ import { apiRequest } from "@/lib/queryClient";
 import {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users,
   Search, Filter, MapPin, ChevronRight, AlertTriangle, Activity,
-  TrendingDown, Building2, Wifi, Shield, Layers, X, ChevronDown
+  TrendingDown, Building2, Wifi, Shield, Layers, X, ChevronDown, ArrowLeft
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PulseDivider, PulseLineSmall } from "@/components/PulseLayout";
@@ -29,6 +29,43 @@ export default function Dashboard() {
   const [ruralFilter, setRuralFilter] = useState<string>("all");
   const [showCountyList, setShowCountyList] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "map" | "interventions" | "states">("overview");
+
+  // Helper to drill into a state
+  const drillIntoState = (abbr: string) => {
+    setStateFilter(abbr);
+    setActiveTab("overview");
+    setShowCountyList(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const clearStateFilter = () => {
+    setStateFilter("all");
+    setShowCountyList(false);
+  };
+
+  // Pick up state drill-down from county detail page
+  useEffect(() => {
+    const drill = sessionStorage.getItem("pulse_state_drill");
+    if (drill) {
+      sessionStorage.removeItem("pulse_state_drill");
+      setStateFilter(drill);
+      setShowCountyList(true);
+    }
+  }, []);
+
+  const STATE_NAMES: Record<string, string> = {
+    AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+    CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "District of Columbia",
+    FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois",
+    IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana",
+    ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan", MN: "Minnesota",
+    MS: "Mississippi", MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada",
+    NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York",
+    NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma",
+    OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
+    SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont",
+    VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
+  };
 
   const countyApiUrl = useMemo(() => {
     const params = new URLSearchParams();
@@ -124,6 +161,33 @@ export default function Dashboard() {
 
         <PulseDivider />
 
+        {/* State drill-down banner */}
+        {stateFilter !== "all" && (
+          <section className="max-w-[1100px] mx-auto px-6 mb-6">
+            <div
+              className="flex items-center justify-between px-5 py-3 border"
+              style={{ borderColor: "var(--pulse-navy)", background: "var(--pulse-navy)" }}
+            >
+              <div className="flex items-center gap-3">
+                <MapPin className="w-4 h-4 text-white/60" />
+                <span className="font-serif text-lg text-white">
+                  {STATE_NAMES[stateFilter] || stateFilter}
+                </span>
+                <span className="font-data text-[11px] uppercase tracking-[0.12em] text-white/50">
+                  {sortedCounties.length} {sortedCounties.length === 1 ? "county" : "counties"}
+                </span>
+              </div>
+              <button
+                onClick={clearStateFilter}
+                className="flex items-center gap-1.5 font-data text-[11px] uppercase tracking-[0.1em] text-white/70 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                All States
+              </button>
+            </div>
+          </section>
+        )}
+
         {/* Tab navigation */}
         <section className="max-w-[1100px] mx-auto px-6">
           <div className="flex items-end justify-between gap-8 mb-8">
@@ -210,6 +274,7 @@ export default function Dashboard() {
               currentLayer={currentLayer}
               activeLayer={activeLayer}
               navigate={navigate}
+              drillIntoState={drillIntoState}
             />
           )}
           {activeTab === "map" && (
@@ -219,7 +284,7 @@ export default function Dashboard() {
             <InterventionsContent interventions={interventionsData} navigate={navigate} />
           )}
           {activeTab === "states" && (
-            <StateRankingsContent summary={summary} />
+            <StateRankingsContent summary={summary} drillIntoState={drillIntoState} />
           )}
 
           {/* County ranking toggle */}
@@ -256,7 +321,11 @@ export default function Dashboard() {
                             <span className="font-body text-[12px] font-medium" style={{ color: "var(--pulse-navy)" }}>
                               {county.name}
                             </span>
-                            <span className="font-data text-[10px] text-[var(--pulse-text-muted)] ml-2">
+                            <span
+                              className="font-data text-[10px] text-[var(--pulse-text-muted)] ml-2 hover:text-[var(--pulse-navy)] hover:underline cursor-pointer"
+                              onClick={(e) => { e.stopPropagation(); drillIntoState(county.stateAbbr); }}
+                              title={`View all ${county.stateAbbr} counties`}
+                            >
                               {county.stateAbbr}
                             </span>
                           </div>
@@ -314,7 +383,7 @@ function KPIStat({ label, value, unit, colorClass = "neutral", last = false }: {
 /* ================================================================
    Overview Content
    ================================================================ */
-function OverviewContent({ summary, summaryLoading, countyData, currentLayer, activeLayer, navigate }: any) {
+function OverviewContent({ summary, summaryLoading, countyData, currentLayer, activeLayer, navigate, drillIntoState }: any) {
   if (summaryLoading || !summary) {
     return (
       <div className="space-y-6">
@@ -375,7 +444,14 @@ function OverviewContent({ summary, summaryLoading, countyData, currentLayer, ac
               <div className="w-3 h-3" style={{ backgroundColor: "var(--pulse-alarm)" }} />
               <div className="flex-1">
                 <span className="font-body text-sm font-semibold" style={{ color: "var(--pulse-navy)" }}>
-                  {c.name}, {c.stateAbbr}
+                  {c.name},{" "}
+                  <span
+                    className="hover:underline cursor-pointer"
+                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); drillIntoState(c.stateAbbr); }}
+                    title={`View all ${c.stateAbbr} counties`}
+                  >
+                    {c.stateAbbr}
+                  </span>
                 </span>
                 <span className="font-data text-[11px] text-[var(--pulse-text-muted)] ml-3">
                   Pop: {(c.population / 1000).toFixed(0)}k
@@ -604,7 +680,7 @@ function InterventionsContent({ interventions, navigate }: any) {
 /* ================================================================
    State Rankings
    ================================================================ */
-function StateRankingsContent({ summary }: any) {
+function StateRankingsContent({ summary, drillIntoState }: any) {
   if (!summary?.stateAverages) {
     return <div className="h-96 animate-pulse" style={{ background: "var(--pulse-border)" }} />;
   }
@@ -631,12 +707,15 @@ function StateRankingsContent({ summary }: any) {
             {summary.stateAverages.map((s: any, i: number) => (
               <tr
                 key={s.stateAbbr}
-                className="hover:bg-[var(--pulse-parchment)] transition-colors"
+                className="hover:bg-[var(--pulse-parchment)] transition-colors cursor-pointer"
                 style={{ borderTop: "1px solid var(--pulse-border-faint)", background: "var(--pulse-cream)" }}
+                onClick={() => drillIntoState(s.stateAbbr)}
+                title={`View all ${s.state} counties`}
               >
                 <td className="px-4 py-2 text-[var(--pulse-text-muted)]">{i + 1}</td>
                 <td className="px-4 py-2 font-body font-medium" style={{ color: "var(--pulse-navy)" }}>
                   {s.state} <span className="text-[var(--pulse-text-muted)]">({s.stateAbbr})</span>
+                  <ChevronRight className="w-3 h-3 inline ml-1 text-[var(--pulse-text-muted)]" />
                 </td>
                 <td className="px-4 py-2 text-right font-semibold" style={{
                   color: s.avgGapScore > 50 ? "var(--pulse-alarm)" : s.avgGapScore > 40 ? "var(--pulse-caution)" : "var(--pulse-good)"

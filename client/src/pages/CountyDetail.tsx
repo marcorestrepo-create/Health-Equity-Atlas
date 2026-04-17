@@ -234,6 +234,15 @@ export default function CountyDetail() {
                 {county.name}, <em className="italic">{county.state}</em>
               </h1>
               <div className="flex items-center gap-3 mt-3 font-data text-[11px] text-[var(--pulse-text-muted)] uppercase tracking-[0.12em]">
+                <Link href="/" onClick={() => {
+                  // Set state filter via sessionStorage so Dashboard picks it up
+                  sessionStorage.setItem("pulse_state_drill", county.stateAbbr);
+                }}>
+                  <span className="hover:text-[var(--pulse-navy)] hover:underline cursor-pointer transition-colors">
+                    {county.state}
+                  </span>
+                </Link>
+                <span>·</span>
                 <span className="capitalize">{county.ruralUrban}</span>
                 <span>·</span>
                 <span>Pop: {county.population?.toLocaleString()}</span>

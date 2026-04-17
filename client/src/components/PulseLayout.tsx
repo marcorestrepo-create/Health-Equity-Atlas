@@ -1,8 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Search } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { SearchOverlay, useSearchShortcut } from "@/components/SearchOverlay";
 
 /** EKG/Pulse SVG line — used as a section divider */
 export function PulseDivider({ className = "" }: { className?: string }) {
@@ -40,13 +39,8 @@ export function PulseLineSmall({ color = "var(--pulse-alarm)", width = 80 }: { c
 /** Navigation bar */
 export function PulseNav() {
   const [location] = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [, navigate] = useLocation();
-
-  const { data: searchResults } = useQuery<any[]>({
-    queryKey: [`/api/counties/search/${encodeURIComponent(searchQuery)}`],
-    enabled: searchQuery.length >= 2,
-  });
+  const [searchOpen, setSearchOpen] = useState(false);
+  useSearchShortcut(searchOpen, setSearchOpen);
 
   const navLinks = [
     { href: "/", label: "Dashboard" },
@@ -96,47 +90,23 @@ export function PulseNav() {
           })}
         </div>
 
-        {/* Search */}
-        <div className="relative hidden md:block">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
-          <input
-            type="text"
-            placeholder="Search counties..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-7 pr-3 h-7 w-52 text-[11px] font-data bg-white/8 border border-white/12 text-white/90 placeholder:text-white/35 focus:outline-none focus:border-white/30 transition-colors"
-            data-testid="input-search"
-          />
-          {searchResults && searchResults.length > 0 && searchQuery.length >= 2 && (
-            <div
-              className="absolute top-full mt-1 left-0 right-0 shadow-lg z-50 max-h-64 overflow-auto border"
-              style={{ background: "var(--pulse-cream)", borderColor: "var(--pulse-border)" }}
-            >
-              {searchResults.map((r: any) => (
-                <button
-                  key={r.fips}
-                  onClick={() => {
-                    navigate(`/county/${r.fips}`);
-                    setSearchQuery("");
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-[var(--pulse-parchment)] text-xs flex justify-between items-center transition-colors"
-                  style={{ borderBottom: "1px solid var(--pulse-border-faint)" }}
-                  data-testid={`search-result-${r.fips}`}
-                >
-                  <span className="font-body font-medium text-[var(--pulse-navy)]">
-                    {r.name}, {r.stateAbbr}
-                  </span>
-                  <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">
-                    Gap: {r.healthEquityGapScore?.toFixed(1)}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Search trigger */}
+        <button
+          onClick={() => setSearchOpen(true)}
+          className="flex items-center gap-2 h-7 px-3 text-[11px] font-data bg-white/8 border border-white/12 text-white/60 hover:text-white/90 hover:border-white/25 transition-colors"
+          data-testid="btn-search"
+        >
+          <Search className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Search counties</span>
+          <kbd className="hidden md:inline font-data text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-white/40 ml-2">
+            ⌘K
+          </kbd>
+        </button>
+
+        <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
         {/* Meta */}
-        <span className="font-data text-[10.5px] uppercase tracking-[0.14em] text-white/50 ml-6 hidden lg:inline whitespace-nowrap">
+        <span className="font-data text-[10.5px] uppercase tracking-[0.14em] text-white/50 ml-4 hidden lg:inline whitespace-nowrap">
           3,144 Counties
         </span>
       </div>
