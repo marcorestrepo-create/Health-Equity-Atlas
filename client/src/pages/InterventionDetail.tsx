@@ -5,11 +5,7 @@ import {
   ArrowLeft, Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users,
   Activity, ExternalLink, ChevronRight, BookOpen, DollarSign, Target, MapPin
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
+import { PulseDivider } from "@/components/PulseLayout";
 import { INTERVENTION_COLORS } from "@/lib/constants";
 
 const iconMap: Record<string, any> = {
@@ -27,10 +23,10 @@ export default function InterventionDetail() {
 
   if (isLoading || !data) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <Skeleton className="h-8 w-64 mb-4" />
-        <Skeleton className="h-48 w-full mb-4" />
-        <Skeleton className="h-96 w-full" />
+      <div className="min-h-screen bg-background p-6 max-w-[1100px] mx-auto">
+        <div className="h-8 w-64 mb-8 animate-pulse" style={{ background: "var(--pulse-border)" }} />
+        <div className="h-48 w-full mb-4 animate-pulse" style={{ background: "var(--pulse-border)" }} />
+        <div className="h-96 w-full animate-pulse" style={{ background: "var(--pulse-border)" }} />
       </div>
     );
   }
@@ -45,134 +41,151 @@ export default function InterventionDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card px-4 py-3 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
+      {/* Hero */}
+      <section className="py-10" style={{ borderBottom: "1px solid var(--pulse-border)" }}>
+        <div className="max-w-[1100px] mx-auto px-6">
           <Link href="/">
-            <Button variant="ghost" size="sm" className="gap-1 text-xs" data-testid="button-back">
-              <ArrowLeft className="w-4 h-4" /> Atlas
-            </Button>
+            <a className="inline-flex items-center gap-1 font-data text-[11px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] hover:text-[var(--pulse-navy)] transition-colors mb-6" data-testid="button-back">
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Atlas
+            </a>
           </Link>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: color + "18" }}>
-              <IconComp className="w-5 h-5" style={{ color }} />
+
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 flex items-center justify-center shrink-0" style={{ backgroundColor: color + "18" }}>
+              <IconComp className="w-7 h-7" style={{ color }} />
             </div>
             <div>
-              <h1 className="text-base font-semibold">{intervention.name}</h1>
-              <Badge variant={intervention.evidenceStrength === "Strong" ? "default" : "secondary"} className="text-[10px] h-4">
+              <p className="eyebrow mb-2">Intervention</p>
+              <h1 className="font-serif text-4xl font-normal mb-3" style={{ color: "var(--pulse-navy)" }}>
+                {intervention.name}
+              </h1>
+              <span
+                className="font-data text-[10px] uppercase tracking-[0.12em] px-2 py-1 border inline-block"
+                style={{
+                  borderColor: intervention.evidenceStrength === "Strong" ? "var(--pulse-good)" : "var(--pulse-border)",
+                  color: intervention.evidenceStrength === "Strong" ? "var(--pulse-good)" : "var(--pulse-text-muted)",
+                }}
+              >
                 {intervention.evidenceStrength} Evidence
-              </Badge>
+              </span>
             </div>
           </div>
         </div>
-      </header>
+      </section>
 
-      <div className="p-4 space-y-4 max-w-5xl mx-auto">
+      <div className="max-w-[1100px] mx-auto px-6 py-8 space-y-8">
         {/* Description */}
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm">{intervention.description}</p>
-            <div className="mt-3 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">Gap addressed:</span> {intervention.gapAddressed}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="border p-5" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
+          <p className="font-body text-sm leading-relaxed" style={{ color: "var(--pulse-navy)" }}>
+            {intervention.description}
+          </p>
+          <div className="mt-3 font-body text-[12px] text-[var(--pulse-text-muted)]">
+            <span className="font-semibold" style={{ color: "var(--pulse-navy)" }}>Gap addressed:</span> {intervention.gapAddressed}
+          </div>
+        </div>
 
         {/* Key metric + cost-effectiveness */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Card>
-            <CardHeader className="pb-2 pt-3 px-4">
-              <CardTitle className="text-xs flex items-center gap-2">
-                <Target className="w-4 h-4" style={{ color }} /> Key Impact Metric
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 pb-3">
-              <p className="text-sm font-medium">{intervention.keyMetric}</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2 pt-3 px-4">
-              <CardTitle className="text-xs flex items-center gap-2">
-                <DollarSign className="w-4 h-4" style={{ color }} /> Cost-Effectiveness
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 pb-3">
-              <p className="text-sm">{intervention.costEffectiveness || "Data not available"}</p>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-px border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-border)" }}>
+          <div className="p-5" style={{ background: "var(--pulse-cream)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="w-4 h-4" style={{ color }} />
+              <span className="label-mono">Key Impact Metric</span>
+            </div>
+            <p className="font-body text-sm font-medium" style={{ color: "var(--pulse-navy)" }}>
+              {intervention.keyMetric}
+            </p>
+          </div>
+          <div className="p-5" style={{ background: "var(--pulse-cream)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <DollarSign className="w-4 h-4" style={{ color }} />
+              <span className="label-mono">Cost-Effectiveness</span>
+            </div>
+            <p className="font-body text-sm" style={{ color: "var(--pulse-navy)" }}>
+              {intervention.costEffectiveness || "Data not available"}
+            </p>
+          </div>
         </div>
 
         {/* Evidence summary */}
-        <Card>
-          <CardHeader className="pb-2 pt-3 px-4">
-            <CardTitle className="text-xs flex items-center gap-2">
-              <BookOpen className="w-4 h-4" style={{ color }} /> Evidence Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-3">
-            <p className="text-xs leading-relaxed">{intervention.evidenceSummary}</p>
-            <div className="mt-3 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">Priority populations:</span> {intervention.priorityPopulations}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="border p-5" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen className="w-4 h-4" style={{ color }} />
+            <span className="label-mono">Evidence Summary</span>
+          </div>
+          <p className="font-body text-[13px] leading-relaxed text-[var(--pulse-text-muted)]">
+            {intervention.evidenceSummary}
+          </p>
+          <div className="mt-3 font-body text-[12px] text-[var(--pulse-text-muted)]">
+            <span className="font-semibold" style={{ color: "var(--pulse-navy)" }}>Priority populations:</span> {intervention.priorityPopulations}
+          </div>
+        </div>
 
         {/* Sources */}
         {sources.length > 0 && (
-          <Card>
-            <CardHeader className="pb-2 pt-3 px-4">
-              <CardTitle className="text-xs">Sources & Citations</CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 pb-3 space-y-1.5">
+          <div className="border p-5" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
+            <span className="label-mono block mb-3">Sources & Citations</span>
+            <div className="space-y-2">
               {sources.map((s, i) => (
                 <a
                   key={i}
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-xs text-primary hover:underline"
+                  className="flex items-center gap-2 font-body text-[12px] hover:underline transition-colors"
+                  style={{ color: "var(--pulse-navy)" }}
                   data-testid={`source-link-${i}`}
                 >
-                  <ExternalLink className="w-3 h-3 shrink-0" />
+                  <ExternalLink className="w-3 h-3 shrink-0 text-[var(--pulse-text-muted)]" />
                   {s.name}
                 </a>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
-        {/* Top counties where this intervention is #1 priority */}
-        <Card>
-          <CardHeader className="pb-2 pt-3 px-4">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <MapPin className="w-4 h-4" style={{ color }} />
-              Counties Where This Is the Top Priority ({topCounties?.length || 0})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-3">
-            <div className="space-y-1">
-              {topCounties?.slice(0, 30).map((tc: any, i: number) => (
-                <button
-                  key={tc.countyFips}
-                  onClick={() => navigate(`/county/${tc.countyFips}`)}
-                  className="w-full flex items-center gap-2 p-2 rounded hover:bg-secondary text-xs text-left"
-                  data-testid={`top-county-${tc.countyFips}`}
-                >
-                  <span className="text-muted-foreground w-5 text-right font-mono">{i + 1}</span>
-                  <div className="flex-1">
-                    <span className="font-medium">{tc.county?.name}</span>
-                    <span className="text-muted-foreground ml-1">{tc.county?.stateAbbr}</span>
+        <PulseDivider />
+
+        {/* Top counties */}
+        <div>
+          <div className="flex items-end justify-between gap-8 mb-6">
+            <h2 className="font-serif text-3xl font-normal" style={{ color: "var(--pulse-navy)" }}>
+              Top Priority <em className="italic" style={{ color: color }}>Counties</em>
+            </h2>
+            <span className="font-data text-[11px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] pb-1">
+              {topCounties?.length || 0} counties
+            </span>
+          </div>
+          <div className="border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
+            {topCounties?.slice(0, 30).map((tc: any, i: number) => (
+              <button
+                key={tc.countyFips}
+                onClick={() => navigate(`/county/${tc.countyFips}`)}
+                className="w-full flex items-center gap-3 px-5 py-3 hover:bg-[var(--pulse-parchment)] text-left transition-colors"
+                style={{ borderBottom: "1px solid var(--pulse-border-faint)" }}
+                data-testid={`top-county-${tc.countyFips}`}
+              >
+                <span className="font-data text-[11px] text-[var(--pulse-text-muted)] w-5 text-right">{i + 1}</span>
+                <div className="flex-1">
+                  <span className="font-body text-[12px] font-medium" style={{ color: "var(--pulse-navy)" }}>
+                    {tc.county?.name}
+                  </span>
+                  <span className="font-data text-[10px] text-[var(--pulse-text-muted)] ml-2">
+                    {tc.county?.stateAbbr}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 w-16" style={{ background: "var(--pulse-border)" }}>
+                    <div className="h-full" style={{ width: `${tc.gapScore}%`, background: color }} />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Progress value={tc.gapScore} className="h-1.5 w-16" />
-                    <span className="font-mono w-8 text-right">{tc.gapScore?.toFixed(1)}</span>
-                  </div>
-                  <ChevronRight className="w-3 h-3 text-muted-foreground" />
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                  <span className="font-data text-[11px] w-8 text-right" style={{ color: "var(--pulse-navy)" }}>
+                    {tc.gapScore?.toFixed(1)}
+                  </span>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-[var(--pulse-text-muted)]" />
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

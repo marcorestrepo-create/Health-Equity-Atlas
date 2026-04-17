@@ -1,10 +1,18 @@
+import { useState } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, Database, Calculator, FlaskConical, BookOpen, Layers, ExternalLink, Info, BarChart3, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ArrowLeft,
+  Database,
+  Calculator,
+  FlaskConical,
+  BookOpen,
+  Layers,
+  ExternalLink,
+  Info,
+  BarChart3,
+  FileText,
+} from "lucide-react";
+import { PulseDivider } from "@/components/PulseLayout";
 
 const DATA_SOURCES = [
   {
@@ -358,300 +366,516 @@ const INTERVENTION_METHODS = [
   },
 ];
 
-export default function Methods() {
+type TabId = "metrics" | "composite" | "interventions" | "sources";
+
+const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
+  { id: "metrics", label: "Metric Definitions", icon: <Database className="w-3.5 h-3.5" /> },
+  { id: "composite", label: "Composite Score", icon: <Calculator className="w-3.5 h-3.5" /> },
+  { id: "interventions", label: "Intervention Scoring", icon: <FlaskConical className="w-3.5 h-3.5" /> },
+  { id: "sources", label: "Data Sources", icon: <BookOpen className="w-3.5 h-3.5" /> },
+];
+
+/* ─── small reusable pieces ─── */
+
+function PulseCard({ children, style = {} }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card px-4 py-3 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="gap-1 text-xs">
-              <ArrowLeft className="w-4 h-4" /> Atlas
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-base font-semibold">About the Atlas & Methods</h1>
-            <p className="text-xs text-muted-foreground">Data sources, definitions, and composite score methodology</p>
+    <div
+      style={{
+        border: "1px solid var(--pulse-border)",
+        background: "var(--pulse-cream)",
+        borderRadius: 0,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ExternalAnchor({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ color: "var(--pulse-good)", textDecoration: "underline", textDecorationColor: "rgba(45,125,107,0.35)" }}
+      className="inline-flex items-center gap-0.5 hover:opacity-75 transition-opacity"
+    >
+      {children}
+    </a>
+  );
+}
+
+/* ─── tab panels ─── */
+
+function MetricsTab() {
+  const categories = [...new Set(DATA_SOURCES.map((d) => d.category))];
+  return (
+    <div className="space-y-8">
+      <p className="font-body text-sm leading-relaxed" style={{ color: "var(--pulse-text-muted)" }}>
+        Definitions, sources, and data vintages for each metric displayed in the atlas. Modeled on the approach used by{" "}
+        <ExternalAnchor href="https://www.cdc.gov/places/methodology/">CDC PLACES</ExternalAnchor> and{" "}
+        <ExternalAnchor href="https://www.healthdata.org/research-analysis/about-gbd">IHME Global Burden of Disease</ExternalAnchor> methodology documentation.
+      </p>
+
+      {categories.map((cat) => (
+        <div key={cat}>
+          {/* Category header */}
+          <div className="flex items-center gap-3 mb-3">
+            <Layers className="w-4 h-4 shrink-0" style={{ color: "var(--pulse-alarm)" }} />
+            <span
+              className="font-data text-[11px] uppercase tracking-[0.18em]"
+              style={{ color: "var(--pulse-navy)" }}
+            >
+              {cat}
+            </span>
+            <div style={{ flex: 1, height: 1, background: "var(--pulse-border-faint)" }} />
+          </div>
+
+          <div className="space-y-2">
+            {DATA_SOURCES.filter((d) => d.category === cat).map((d) => (
+              <PulseCard key={d.field} style={{ borderLeft: "3px solid var(--pulse-border)" }}>
+                <div className="p-4">
+                  {/* Metric name + field badge */}
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <span className="font-body font-semibold text-sm" style={{ color: "var(--pulse-navy)" }}>
+                      {d.metric}
+                    </span>
+                    <span
+                      className="font-data text-[9px] uppercase tracking-[0.14em] px-1.5 py-0.5"
+                      style={{
+                        border: "1px solid var(--pulse-border)",
+                        color: "var(--pulse-text-muted)",
+                        background: "var(--pulse-parchment)",
+                        borderRadius: 0,
+                      }}
+                    >
+                      {d.field}
+                    </span>
+                  </div>
+
+                  {/* Definition */}
+                  <p className="font-body text-[12px] leading-relaxed mb-3" style={{ color: "var(--pulse-text-muted)" }}>
+                    {d.definition}
+                  </p>
+
+                  {/* Meta grid */}
+                  <div
+                    className="grid grid-cols-2 md:grid-cols-4 gap-px mb-3"
+                    style={{ background: "var(--pulse-border-faint)" }}
+                  >
+                    {[
+                      { label: "Unit", value: d.unit },
+                      { label: "Range", value: d.range },
+                      { label: "Vintage", value: d.vintage },
+                      { label: "Direction", value: d.direction },
+                    ].map(({ label, value }) => (
+                      <div
+                        key={label}
+                        className="px-3 py-2"
+                        style={{ background: "var(--pulse-cream)" }}
+                      >
+                        <div className="eyebrow mb-0.5">{label}</div>
+                        <div className="font-data text-[10px]" style={{ color: "var(--pulse-navy)" }}>
+                          {value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Source */}
+                  <div className="font-data text-[10px]" style={{ color: "var(--pulse-text-muted)" }}>
+                    Source:{" "}
+                    <ExternalAnchor href={d.url}>
+                      {d.source} <ExternalLink className="w-2.5 h-2.5" />
+                    </ExternalAnchor>
+                  </div>
+                </div>
+              </PulseCard>
+            ))}
           </div>
         </div>
-      </header>
+      ))}
+    </div>
+  );
+}
 
-      <div className="max-w-4xl mx-auto p-6 space-y-8">
-        {/* About section */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Info className="w-5 h-5 text-[hsl(195,85%,24%)]" />
-            <h2 className="text-lg font-semibold">About the Atlas</h2>
+function CompositeTab() {
+  return (
+    <div className="space-y-6">
+      <div className="font-body text-sm leading-relaxed space-y-3" style={{ color: "var(--pulse-text-muted)" }}>
+        <p>
+          The Health Equity Gap Score is a composite index from 0 to 100 that summarizes the overall health equity burden for each county. Higher scores indicate greater disparity across multiple dimensions. The score is designed for relative county-to-county comparison and prioritization — it is not a clinical measure.
+        </p>
+        <p>
+          The methodology draws on the weighted index approach used by the{" "}
+          <ExternalAnchor href="https://www.atsdr.cdc.gov/placeandhealth/svi/">CDC/ATSDR Social Vulnerability Index</ExternalAnchor>{" "}
+          and the multi-domain composite scoring of the{" "}
+          <ExternalAnchor href="https://www.countyhealthrankings.org/methodology">County Health Rankings model</ExternalAnchor>.
+        </p>
+      </div>
+
+      {/* Formula block */}
+      <PulseCard>
+        <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--pulse-border-faint)" }}>
+          <div className="flex items-center gap-2 mb-1">
+            <Calculator className="w-4 h-4" style={{ color: "var(--pulse-alarm)" }} />
+            <span className="eyebrow">Formula</span>
           </div>
-          <div className="prose prose-sm max-w-none text-sm text-muted-foreground space-y-3">
+        </div>
+        <div className="px-5 py-4" style={{ background: "var(--pulse-parchment)" }}>
+          <p className="font-body text-[11px] mb-3" style={{ color: "var(--pulse-text-muted)" }}>
+            The composite score is the sum of seven weighted domain sub-scores, each normalized to a 0–1 scale before weighting:
+          </p>
+          <p className="font-data text-[12px] font-semibold mb-2" style={{ color: "var(--pulse-navy)" }}>
+            Gap Score = Insurance + Maternal + Chronic + Access + Social + Environmental + Infrastructure
+          </p>
+          <p className="font-data text-[11px]" style={{ color: "var(--pulse-text-muted)" }}>
+            Final score is clamped to [5, 95] to avoid extreme outliers.
+          </p>
+        </div>
+      </PulseCard>
+
+      {/* Component weights */}
+      <div>
+        <h3 className="font-body text-sm font-semibold mb-3" style={{ color: "var(--pulse-navy)" }}>
+          Component Weights &amp; Formulas
+        </h3>
+        <div className="space-y-2">
+          {GAP_SCORE_COMPONENTS.map((comp, i) => (
+            <PulseCard key={i}>
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-4 mb-2 flex-wrap">
+                  <span className="font-body font-semibold text-sm" style={{ color: "var(--pulse-navy)" }}>
+                    {comp.name}
+                  </span>
+                  <span
+                    className="font-data text-[10px] uppercase tracking-[0.1em] px-2 py-0.5 shrink-0"
+                    style={{
+                      background: "var(--pulse-navy)",
+                      color: "var(--pulse-cream)",
+                      borderRadius: 0,
+                    }}
+                  >
+                    {comp.weight}
+                  </span>
+                </div>
+                <p className="font-body text-[12px] mb-3" style={{ color: "var(--pulse-text-muted)" }}>
+                  {comp.description}
+                </p>
+                <div
+                  className="px-3 py-2"
+                  style={{ background: "var(--pulse-parchment)", border: "1px solid var(--pulse-border-faint)" }}
+                >
+                  <code className="font-data text-[11px]" style={{ color: "var(--pulse-navy)" }}>
+                    {comp.formula}
+                  </code>
+                </div>
+              </div>
+            </PulseCard>
+          ))}
+        </div>
+      </div>
+
+      {/* Design rationale */}
+      <PulseCard style={{ borderLeft: "3px solid var(--pulse-caution)" }}>
+        <div className="p-4">
+          <div className="flex items-start gap-3">
+            <Info className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "var(--pulse-caution)" }} />
+            <div>
+              <p className="font-body font-semibold text-sm mb-1.5" style={{ color: "var(--pulse-navy)" }}>
+                Design Rationale
+              </p>
+              <p className="font-body text-[12px] leading-relaxed" style={{ color: "var(--pulse-text-muted)" }}>
+                Equal weighting across the seven domains (10–15% each) reflects the principle that health equity is multidimensional and no single factor should dominate. The environmental domain receives slightly lower weight (10%) because EJScreen is itself a composite of multiple sub-indicators. All normalization denominators are set near the observed maximum across U.S. counties to avoid artificial ceiling effects.
+              </p>
+            </div>
+          </div>
+        </div>
+      </PulseCard>
+    </div>
+  );
+}
+
+function InterventionsTab() {
+  return (
+    <div className="space-y-6">
+      <div className="font-body text-sm leading-relaxed space-y-3" style={{ color: "var(--pulse-text-muted)" }}>
+        <p>
+          For each county, six evidence-based interventions are scored from 0 to 95 based on how well the county's health profile matches the intervention's target conditions. Interventions are then ranked 1–6 by score to show which would likely close the biggest gap in that county.
+        </p>
+        <p>
+          Scoring logic uses the county's local health metrics as inputs. For example, a county with high maternal mortality and a maternity care desert designation will score higher for OB Access Expansion; a county with high diabetes and socioeconomic vulnerability will score higher for Community Health Workers.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        {INTERVENTION_METHODS.map((intv, i) => (
+          <PulseCard key={intv.slug}>
+            <div className="p-4">
+              {/* Header row */}
+              <div className="flex items-center gap-3 mb-3 flex-wrap">
+                <span
+                  className="font-data text-[10px] w-6 h-6 flex items-center justify-center shrink-0"
+                  style={{
+                    background: "var(--pulse-navy)",
+                    color: "var(--pulse-cream)",
+                    borderRadius: 0,
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <BarChart3 className="w-4 h-4 shrink-0" style={{ color: "var(--pulse-good)" }} />
+                <span className="font-body font-semibold text-sm" style={{ color: "var(--pulse-navy)" }}>
+                  {intv.name}
+                </span>
+                <span
+                  className="font-data text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5"
+                  style={{
+                    border: "1px solid var(--pulse-border)",
+                    color: "var(--pulse-text-muted)",
+                    background: "var(--pulse-parchment)",
+                    borderRadius: 0,
+                  }}
+                >
+                  {intv.slug}
+                </span>
+              </div>
+
+              {/* Scoring + Evidence */}
+              <div className="space-y-2.5">
+                <div>
+                  <span className="eyebrow block mb-1">Scoring Logic</span>
+                  <p className="font-body text-[12px] leading-relaxed" style={{ color: "var(--pulse-text-muted)" }}>
+                    {intv.scoring}
+                  </p>
+                </div>
+                <div
+                  style={{
+                    borderTop: "1px solid var(--pulse-border-faint)",
+                    paddingTop: "10px",
+                  }}
+                >
+                  <span className="eyebrow block mb-1">Evidence Base</span>
+                  <p className="font-body text-[12px] leading-relaxed" style={{ color: "var(--pulse-text-muted)" }}>
+                    {intv.evidence}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </PulseCard>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SourcesTab() {
+  const sections = [
+    {
+      title: "Population & Demographics",
+      sources: [
+        { name: "U.S. Census Bureau Population Estimates (2023)", url: "https://www.census.gov/programs-surveys/popest.html" },
+        { name: "American Community Survey 5-Year Estimates (2018–2022)", url: "https://data.census.gov/" },
+        { name: "Census Gazetteer Files (2023)", url: "https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html" },
+      ],
+    },
+    {
+      title: "Health Outcomes & Behaviors",
+      sources: [
+        { name: "CDC PLACES: Local Data for Better Health", url: "https://www.cdc.gov/places/" },
+        { name: "County Health Rankings & Roadmaps (UW/RWJF)", url: "https://www.countyhealthrankings.org/" },
+        { name: "CDC WONDER Natality & Mortality Data", url: "https://wonder.cdc.gov/" },
+        { name: "Institute for Health Metrics and Evaluation (IHME)", url: "https://www.healthdata.org/" },
+      ],
+    },
+    {
+      title: "Insurance & Coverage",
+      sources: [
+        { name: "Census Small Area Health Insurance Estimates (SAHIE)", url: "https://www.census.gov/programs-surveys/sahie.html" },
+      ],
+    },
+    {
+      title: "Provider & Facility Access",
+      sources: [
+        { name: "HRSA Health Professional Shortage Areas (HPSA)", url: "https://data.hrsa.gov/topics/health-workforce/shortage-areas" },
+        { name: "HRSA Area Health Resources Files (AHRF)", url: "https://data.hrsa.gov/topics/health-workforce/ahrf" },
+        { name: "March of Dimes Maternity Care Deserts Report (2024)", url: "https://www.marchofdimes.org/maternity-care-deserts-report" },
+        { name: "UNC Sheps Center Rural Hospital Closures Tracking", url: "https://www.shepscenter.unc.edu/programs-projects/rural-health/rural-hospital-closures/" },
+      ],
+    },
+    {
+      title: "Social Vulnerability & Environment",
+      sources: [
+        { name: "CDC/ATSDR Social Vulnerability Index (SVI, 2022)", url: "https://www.atsdr.cdc.gov/placeandhealth/svi/" },
+        { name: "EPA EJScreen Environmental Justice Screening Tool (v2.2)", url: "https://www.epa.gov/ejscreen" },
+      ],
+    },
+    {
+      title: "Infrastructure & Access",
+      sources: [
+        { name: "FCC Broadband Data Collection (BDC, June 2023)", url: "https://broadbandmap.fcc.gov/" },
+        { name: "Feeding America Map the Meal Gap", url: "https://map.feedingamerica.org/" },
+        { name: "USDA Food Environment Atlas", url: "https://www.ers.usda.gov/data-products/food-environment-atlas/" },
+      ],
+    },
+    {
+      title: "Intervention Evidence",
+      sources: [
+        { name: "NEJM — Barbershop Blood Pressure Study", url: "https://www.nejm.org/doi/full/10.1056/NEJMoa1717250" },
+        { name: "NEJM — CHW Meta-Analysis", url: "https://www.nejm.org/doi/10.1056/NEJMoa2204485" },
+        { name: "NEJM — Concordant Care and Outcomes", url: "https://www.nejm.org/doi/full/10.1056/NEJMsa2114537" },
+        { name: "Harvard Mobile Health Map", url: "https://www.mobilehealthmap.org/" },
+        { name: "CDC Million Hearts Initiative", url: "https://millionhearts.hhs.gov/" },
+        { name: "HRSA Telehealth Resources", url: "https://telehealth.hhs.gov/" },
+        { name: "AHA Target: Blood Pressure Initiative", url: "https://www.heart.org/en/professional/quality-improvement/target-blood-pressure" },
+      ],
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <p className="font-body text-sm leading-relaxed" style={{ color: "var(--pulse-text-muted)" }}>
+        Primary data sources and references used in the atlas. We follow the transparency standards of{" "}
+        <ExternalAnchor href="https://www.cdc.gov/places/methodology/">CDC PLACES</ExternalAnchor>{" "}
+        and the{" "}
+        <ExternalAnchor href="https://www.healthdata.org/research-analysis/about-gbd">IHME Global Burden of Disease</ExternalAnchor>{" "}
+        in documenting our sources.
+      </p>
+
+      <div className="space-y-2">
+        {sections.map((section, i) => (
+          <PulseCard key={i}>
+            <div
+              className="px-5 py-3 flex items-center gap-2"
+              style={{ borderBottom: "1px solid var(--pulse-border-faint)" }}
+            >
+              <FileText className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--pulse-alarm)" }} />
+              <span className="eyebrow">{section.title}</span>
+            </div>
+            <ul className="px-5 py-3 space-y-1.5">
+              {section.sources.map((s, j) => (
+                <li key={j} className="flex items-start gap-1.5">
+                  <span className="font-data text-[10px] mt-0.5" style={{ color: "var(--pulse-border)" }}>—</span>
+                  <ExternalAnchor href={s.url}>
+                    <span className="font-body text-[12px]">{s.name}</span>
+                    <ExternalLink className="w-2.5 h-2.5 shrink-0 ml-0.5" />
+                  </ExternalAnchor>
+                </li>
+              ))}
+            </ul>
+          </PulseCard>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── main page ─── */
+
+export default function Methods() {
+  const [activeTab, setActiveTab] = useState<TabId>("metrics");
+
+  return (
+    <div className="min-h-screen" style={{ background: "var(--pulse-parchment)" }}>
+      {/* Hero */}
+      <div
+        className="border-b"
+        style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}
+      >
+        <div className="max-w-4xl mx-auto px-6 pt-10 pb-8">
+          {/* Back link */}
+          <Link href="/">
+            <span
+              className="font-data text-[10px] uppercase tracking-[0.18em] inline-flex items-center gap-1.5 mb-6 transition-opacity hover:opacity-60"
+              style={{ color: "var(--pulse-text-muted)", cursor: "pointer" }}
+            >
+              <ArrowLeft className="w-3 h-3" />
+              Back to Atlas
+            </span>
+          </Link>
+
+          {/* Eyebrow */}
+          <span className="eyebrow block mb-3">Documentation</span>
+
+          {/* Title */}
+          <h1 className="font-serif text-4xl font-normal leading-tight mb-4" style={{ color: "var(--pulse-navy)" }}>
+            About the Atlas &amp; <em style={{ color: "var(--pulse-alarm)", fontStyle: "italic" }}>Methods</em>
+          </h1>
+
+          {/* Intro */}
+          <div className="font-body text-sm leading-relaxed space-y-3 max-w-2xl" style={{ color: "var(--pulse-text-muted)" }}>
             <p>
               The U.S. Health Equity Atlas is an interactive tool that visualizes health disparities across all 3,144 U.S. counties and county-equivalents. It was developed for National Minority Health Month 2026 to help policymakers, health systems, and community organizations identify where targeted interventions could close the biggest health equity gaps.
             </p>
             <p>
-              The atlas layers eight dimensions of health equity — insurance coverage, maternal mortality, chronic disease burden, provider shortages, hospital closures, transportation barriers, broadband access, and environmental exposure — and synthesizes them into a single composite Health Equity Gap Score for each county. It then ranks six evidence-based interventions by their estimated impact in each county, drawing on published meta-analyses and randomized controlled trials.
+              The atlas layers eight dimensions of health equity — insurance coverage, maternal mortality, chronic disease burden, provider shortages, hospital closures, transportation barriers, broadband access, and environmental exposure — and synthesizes them into a single composite Health Equity Gap Score for each county.
             </p>
             <p>
               This tool is designed for exploratory analysis and prioritization. County-level data are modeled estimates calibrated to national benchmarks from the sources listed below. For clinical or policy decisions, always consult primary data sources directly.
             </p>
           </div>
-        </section>
+        </div>
+      </div>
 
-        <Separator />
+      <PulseDivider />
 
-        <Tabs defaultValue="metrics">
-          <TabsList className="h-9 mb-4">
-            <TabsTrigger value="metrics" className="text-xs gap-1.5">
-              <Database className="w-3.5 h-3.5" /> Metric Definitions
-            </TabsTrigger>
-            <TabsTrigger value="composite" className="text-xs gap-1.5">
-              <Calculator className="w-3.5 h-3.5" /> Composite Score
-            </TabsTrigger>
-            <TabsTrigger value="interventions" className="text-xs gap-1.5">
-              <FlaskConical className="w-3.5 h-3.5" /> Intervention Scoring
-            </TabsTrigger>
-            <TabsTrigger value="sources" className="text-xs gap-1.5">
-              <BookOpen className="w-3.5 h-3.5" /> Data Sources
-            </TabsTrigger>
-          </TabsList>
+      {/* Tab nav + content */}
+      <div className="max-w-4xl mx-auto px-6 pb-16">
+        {/* Tab bar */}
+        <div
+          className="flex border-b mb-8 overflow-x-auto"
+          style={{ borderColor: "var(--pulse-border)" }}
+        >
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="font-data text-[11px] uppercase tracking-[0.14em] flex items-center gap-2 px-4 py-3 whitespace-nowrap transition-colors"
+                style={{
+                  borderBottom: isActive
+                    ? "2px solid var(--pulse-alarm)"
+                    : "2px solid transparent",
+                  color: isActive ? "var(--pulse-navy)" : "var(--pulse-text-muted)",
+                  background: "transparent",
+                  borderRadius: 0,
+                  cursor: "pointer",
+                  marginBottom: "-1px",
+                }}
+              >
+                <span style={{ color: isActive ? "var(--pulse-alarm)" : "var(--pulse-border)" }}>
+                  {tab.icon}
+                </span>
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Metric Definitions Tab */}
-          <TabsContent value="metrics" className="space-y-3">
-            <p className="text-sm text-muted-foreground mb-4">
-              Definitions, sources, and data vintages for each metric displayed in the atlas. Modeled on the approach used by <a href="https://www.cdc.gov/places/methodology/" className="text-[hsl(195,85%,24%)] underline" target="_blank" rel="noopener noreferrer">CDC PLACES</a> and <a href="https://www.healthdata.org/research-analysis/about-gbd" className="text-[hsl(195,85%,24%)] underline" target="_blank" rel="noopener noreferrer">IHME Global Burden of Disease</a> methodology documentation.
+        {/* Tab panels */}
+        {activeTab === "metrics" && <MetricsTab />}
+        {activeTab === "composite" && <CompositeTab />}
+        {activeTab === "interventions" && <InterventionsTab />}
+        {activeTab === "sources" && <SourcesTab />}
+
+        {/* Footer note */}
+        <PulseDivider className="mt-10" />
+        <footer className="pb-4">
+          <div className="font-data text-[10px] uppercase tracking-[0.14em] space-y-1.5" style={{ color: "var(--pulse-text-muted)" }}>
+            <p>U.S. Health Equity Atlas · National Minority Health Month 2026</p>
+            <p>
+              County-level estimates are modeled from the sources above and calibrated to published national benchmarks.
+              For clinical or policy decisions, consult primary data sources directly.
             </p>
-            {(() => {
-              const categories = [...new Set(DATA_SOURCES.map(d => d.category))];
-              return categories.map(cat => (
-                <div key={cat}>
-                  <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-[hsl(195,85%,24%)]" />
-                    {cat}
-                  </h3>
-                  <div className="space-y-2 mb-4">
-                    {DATA_SOURCES.filter(d => d.category === cat).map(d => (
-                      <Card key={d.field} className="border-l-2 border-l-[hsl(195,85%,24%)]/30">
-                        <CardContent className="p-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-semibold">{d.metric}</span>
-                                <Badge variant="outline" className="text-[9px] h-4 font-mono">{d.field}</Badge>
-                              </div>
-                              <p className="text-[11px] text-muted-foreground leading-relaxed">{d.definition}</p>
-                              <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 text-[10px]">
-                                <div><span className="text-muted-foreground">Unit:</span> <span className="font-mono">{d.unit}</span></div>
-                                <div><span className="text-muted-foreground">Range:</span> <span className="font-mono">{d.range}</span></div>
-                                <div><span className="text-muted-foreground">Vintage:</span> <span>{d.vintage}</span></div>
-                                <div><span className="text-muted-foreground">Direction:</span> <span>{d.direction}</span></div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-1.5 text-[10px] text-muted-foreground">
-                            Source: <a href={d.url} target="_blank" rel="noopener noreferrer" className="text-[hsl(195,85%,24%)] hover:underline inline-flex items-center gap-0.5">{d.source} <ExternalLink className="w-2.5 h-2.5" /></a>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              ));
-            })()}
-          </TabsContent>
-
-          {/* Composite Score Tab */}
-          <TabsContent value="composite" className="space-y-4">
-            <div className="space-y-3 text-sm text-muted-foreground">
-              <p>
-                The Health Equity Gap Score is a composite index from 0 to 100 that summarizes the overall health equity burden for each county. Higher scores indicate greater disparity across multiple dimensions. The score is designed for relative county-to-county comparison and prioritization — it is not a clinical measure.
-              </p>
-              <p>
-                The methodology draws on the weighted index approach used by the <a href="https://www.atsdr.cdc.gov/placeandhealth/svi/" className="text-[hsl(195,85%,24%)] underline" target="_blank" rel="noopener noreferrer">CDC/ATSDR Social Vulnerability Index</a> and the multi-domain composite scoring of the <a href="https://www.countyhealthrankings.org/methodology" className="text-[hsl(195,85%,24%)] underline" target="_blank" rel="noopener noreferrer">County Health Rankings model</a>.
-              </p>
-            </div>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Calculator className="w-4 h-4 text-[hsl(195,85%,24%)]" />
-                  Formula
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-secondary/50 rounded-lg p-4 font-mono text-xs leading-relaxed">
-                  <p className="mb-2 font-sans text-muted-foreground text-[11px]">The composite score is the sum of seven weighted domain sub-scores, each normalized to a 0–1 scale before weighting:</p>
-                  <p className="font-semibold text-foreground mb-1">Gap Score = Insurance + Maternal + Chronic + Access + Social + Environmental + Infrastructure</p>
-                  <p className="text-muted-foreground mt-2">Final score is clamped to [5, 95] to avoid extreme outliers.</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <h3 className="text-sm font-semibold">Component Weights & Formulas</h3>
-            <div className="space-y-2">
-              {GAP_SCORE_COMPONENTS.map((comp, i) => (
-                <Card key={i}>
-                  <CardContent className="p-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-semibold">{comp.name}</span>
-                          <Badge className="text-[9px] h-4 bg-[hsl(195,85%,24%)]">{comp.weight}</Badge>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground">{comp.description}</p>
-                      </div>
-                    </div>
-                    <div className="mt-2 bg-secondary/50 rounded px-2 py-1.5">
-                      <code className="text-[10px] font-mono text-foreground">{comp.formula}</code>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <Card className="border-amber-200/50 bg-amber-50/30">
-              <CardContent className="p-3">
-                <div className="flex items-start gap-2">
-                  <Info className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                  <div className="text-[11px] text-muted-foreground space-y-1">
-                    <p className="font-semibold text-foreground">Design Rationale</p>
-                    <p>Equal weighting across the seven domains (10–15% each) reflects the principle that health equity is multidimensional and no single factor should dominate. The environmental domain receives slightly lower weight (10%) because EJScreen is itself a composite of multiple sub-indicators. All normalization denominators are set near the observed maximum across U.S. counties to avoid artificial ceiling effects.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Intervention Scoring Tab */}
-          <TabsContent value="interventions" className="space-y-4">
-            <div className="text-sm text-muted-foreground space-y-3">
-              <p>
-                For each county, six evidence-based interventions are scored from 0 to 95 based on how well the county's health profile matches the intervention's target conditions. Interventions are then ranked 1–6 by score to show which would likely close the biggest gap in that county.
-              </p>
-              <p>
-                Scoring logic uses the county's local health metrics as inputs. For example, a county with high maternal mortality and a maternity care desert designation will score higher for OB Access Expansion; a county with high diabetes and socioeconomic vulnerability will score higher for Community Health Workers.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              {INTERVENTION_METHODS.map((intv) => (
-                <Card key={intv.slug}>
-                  <CardContent className="p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <BarChart3 className="w-4 h-4 text-[hsl(195,85%,24%)]" />
-                      <span className="text-xs font-semibold">{intv.name}</span>
-                      <Badge variant="outline" className="text-[9px] h-4 font-mono">{intv.slug}</Badge>
-                    </div>
-                    <div className="space-y-1.5">
-                      <div>
-                        <span className="text-[10px] font-semibold text-foreground">Scoring Logic: </span>
-                        <span className="text-[11px] text-muted-foreground">{intv.scoring}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-semibold text-foreground">Evidence Base: </span>
-                        <span className="text-[11px] text-muted-foreground">{intv.evidence}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Data Sources Tab */}
-          <TabsContent value="sources" className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Primary data sources and references used in the atlas. We follow the transparency standards of <a href="https://www.cdc.gov/places/methodology/" className="text-[hsl(195,85%,24%)] underline" target="_blank" rel="noopener noreferrer">CDC PLACES</a> and the <a href="https://www.healthdata.org/research-analysis/about-gbd" className="text-[hsl(195,85%,24%)] underline" target="_blank" rel="noopener noreferrer">IHME Global Burden of Disease</a> in documenting our sources.
+            <p>
+              Methodology modeled on{" "}
+              <ExternalAnchor href="https://www.cdc.gov/places/methodology/">CDC PLACES</ExternalAnchor>,{" "}
+              <ExternalAnchor href="https://www.healthdata.org/research-analysis/about-gbd">IHME GBD</ExternalAnchor>, and{" "}
+              <ExternalAnchor href="https://www.countyhealthrankings.org/methodology">County Health Rankings</ExternalAnchor>.
             </p>
-
-            {[
-              {
-                title: "Population & Demographics",
-                sources: [
-                  { name: "U.S. Census Bureau Population Estimates (2023)", url: "https://www.census.gov/programs-surveys/popest.html" },
-                  { name: "American Community Survey 5-Year Estimates (2018–2022)", url: "https://data.census.gov/" },
-                  { name: "Census Gazetteer Files (2023)", url: "https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html" },
-                ]
-              },
-              {
-                title: "Health Outcomes & Behaviors",
-                sources: [
-                  { name: "CDC PLACES: Local Data for Better Health", url: "https://www.cdc.gov/places/" },
-                  { name: "County Health Rankings & Roadmaps (UW/RWJF)", url: "https://www.countyhealthrankings.org/" },
-                  { name: "CDC WONDER Natality & Mortality Data", url: "https://wonder.cdc.gov/" },
-                  { name: "Institute for Health Metrics and Evaluation (IHME)", url: "https://www.healthdata.org/" },
-                ]
-              },
-              {
-                title: "Insurance & Coverage",
-                sources: [
-                  { name: "Census Small Area Health Insurance Estimates (SAHIE)", url: "https://www.census.gov/programs-surveys/sahie.html" },
-                ]
-              },
-              {
-                title: "Provider & Facility Access",
-                sources: [
-                  { name: "HRSA Health Professional Shortage Areas (HPSA)", url: "https://data.hrsa.gov/topics/health-workforce/shortage-areas" },
-                  { name: "HRSA Area Health Resources Files (AHRF)", url: "https://data.hrsa.gov/topics/health-workforce/ahrf" },
-                  { name: "March of Dimes Maternity Care Deserts Report (2024)", url: "https://www.marchofdimes.org/maternity-care-deserts-report" },
-                  { name: "UNC Sheps Center Rural Hospital Closures Tracking", url: "https://www.shepscenter.unc.edu/programs-projects/rural-health/rural-hospital-closures/" },
-                ]
-              },
-              {
-                title: "Social Vulnerability & Environment",
-                sources: [
-                  { name: "CDC/ATSDR Social Vulnerability Index (SVI, 2022)", url: "https://www.atsdr.cdc.gov/placeandhealth/svi/" },
-                  { name: "EPA EJScreen Environmental Justice Screening Tool (v2.2)", url: "https://www.epa.gov/ejscreen" },
-                ]
-              },
-              {
-                title: "Infrastructure & Access",
-                sources: [
-                  { name: "FCC Broadband Data Collection (BDC, June 2023)", url: "https://broadbandmap.fcc.gov/" },
-                  { name: "Feeding America Map the Meal Gap", url: "https://map.feedingamerica.org/" },
-                  { name: "USDA Food Environment Atlas", url: "https://www.ers.usda.gov/data-products/food-environment-atlas/" },
-                ]
-              },
-              {
-                title: "Intervention Evidence",
-                sources: [
-                  { name: "NEJM — Barbershop Blood Pressure Study", url: "https://www.nejm.org/doi/full/10.1056/NEJMoa1717250" },
-                  { name: "NEJM — CHW Meta-Analysis", url: "https://www.nejm.org/doi/10.1056/NEJMoa2204485" },
-                  { name: "NEJM — Concordant Care and Outcomes", url: "https://www.nejm.org/doi/full/10.1056/NEJMsa2114537" },
-                  { name: "Harvard Mobile Health Map", url: "https://www.mobilehealthmap.org/" },
-                  { name: "CDC Million Hearts Initiative", url: "https://millionhearts.hhs.gov/" },
-                  { name: "HRSA Telehealth Resources", url: "https://telehealth.hhs.gov/" },
-                  { name: "AHA Target: Blood Pressure Initiative", url: "https://www.heart.org/en/professional/quality-improvement/target-blood-pressure" },
-                ]
-              },
-            ].map((section, i) => (
-              <Card key={i}>
-                <CardHeader className="pb-2 pt-3 px-4">
-                  <CardTitle className="text-xs flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-[hsl(195,85%,24%)]" />
-                    {section.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-4 pb-3">
-                  <ul className="space-y-1">
-                    {section.sources.map((s, j) => (
-                      <li key={j} className="text-[11px]">
-                        <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-[hsl(195,85%,24%)] hover:underline inline-flex items-center gap-1">
-                          {s.name} <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </TabsContent>
-        </Tabs>
-
-        {/* Footer */}
-        <Separator />
-        <footer className="text-[11px] text-muted-foreground space-y-1 pb-8">
-          <p>U.S. Health Equity Atlas · National Minority Health Month 2026</p>
-          <p>County-level estimates are modeled from the sources above and calibrated to published national benchmarks. For clinical or policy decisions, consult primary data sources directly.</p>
-          <p>Methodology modeled on <a href="https://www.cdc.gov/places/methodology/" className="text-[hsl(195,85%,24%)] hover:underline" target="_blank" rel="noopener noreferrer">CDC PLACES</a>, <a href="https://www.healthdata.org/research-analysis/about-gbd" className="text-[hsl(195,85%,24%)] hover:underline" target="_blank" rel="noopener noreferrer">IHME GBD</a>, and <a href="https://www.countyhealthrankings.org/methodology" className="text-[hsl(195,85%,24%)] hover:underline" target="_blank" rel="noopener noreferrer">County Health Rankings</a>.</p>
+          </div>
         </footer>
       </div>
     </div>

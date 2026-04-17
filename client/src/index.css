@@ -1,98 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Health Equity Atlas — deep navy/teal + warm amber accent
-   Palette inspired by CDC/WHO health equity visual language:
-   authoritative blues, compassionate warmth, high-contrast data readability */
+/* ================================================================
+   PULSE — U.S. Health Equity Atlas
+   Design System: warm parchment, serif display, EKG motif
+   ================================================================ */
 
 @layer base {
   :root {
-    /* Surfaces — warm gray with subtle blue undertone */
-    --background: 220 20% 97%;
-    --foreground: 215 28% 12%;
-    --card: 220 18% 98%;
-    --card-foreground: 215 28% 12%;
-    --popover: 220 18% 98%;
-    --popover-foreground: 215 28% 12%;
+    /* Pulse palette — warm parchment + editorial tones */
+    --background: 38 33% 93%;         /* #F5F0E8 warm parchment */
+    --foreground: 217 43% 18%;        /* #1A2744 deep navy */
+    --card: 42 100% 99%;              /* #FFFDF8 cream */
+    --card-foreground: 217 43% 18%;
+    --popover: 42 100% 99%;
+    --popover-foreground: 217 43% 18%;
 
-    /* Primary — deep teal-navy (authoritative, health-focused) */
-    --primary: 195 85% 24%;
-    --primary-foreground: 0 0% 98%;
+    /* Primary — deep navy */
+    --primary: 217 43% 18%;
+    --primary-foreground: 42 100% 99%;
 
-    /* Secondary — muted blue-gray */
-    --secondary: 210 12% 92%;
-    --secondary-foreground: 215 20% 25%;
+    /* Secondary — warm tan surface */
+    --secondary: 36 28% 89%;
+    --secondary-foreground: 217 43% 18%;
 
-    /* Muted */
-    --muted: 210 10% 94%;
-    --muted-foreground: 215 10% 45%;
+    /* Muted — warm gray */
+    --muted: 36 20% 91%;
+    --muted-foreground: 33 14% 43%;   /* #7A6F5F */
 
-    /* Accent — warm amber for action/highlight */
-    --accent: 32 90% 52%;
-    --accent-foreground: 32 95% 15%;
+    /* Accent — terracotta alarm */
+    --accent: 6 62% 47%;              /* #C0392B */
+    --accent-foreground: 0 0% 98%;
 
-    /* Destructive — for critical alerts */
-    --destructive: 0 72% 51%;
+    /* Destructive — same terracotta for critical */
+    --destructive: 6 62% 47%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 210 12% 87%;
-    --input: 210 12% 87%;
-    --ring: 195 85% 24%;
-    --radius: 0.5rem;
+    --border: 34 22% 77%;             /* #D4CBBA warm tan */
+    --input: 34 22% 77%;
+    --ring: 217 43% 18%;
+    --radius: 0px;                    /* sharp corners for editorial feel */
 
-    /* Chart colors for data visualization — accessible sequence */
-    --chart-1: 195 85% 24%; /* deep teal */
-    --chart-2: 15 65% 42%;  /* terra/rust */
-    --chart-3: 195 60% 18%; /* dark teal */
-    --chart-4: 188 55% 82%; /* light cyan */
-    --chart-5: 345 35% 45%; /* mauve */
+    /* Chart colors — Pulse semantic scale */
+    --chart-1: 160 48% 33%;  /* teal/good #2D7D6B */
+    --chart-2: 25 58% 56%;   /* amber/caution #D4854A */
+    --chart-3: 6 62% 47%;    /* terracotta/alarm #C0392B */
+    --chart-4: 217 43% 18%;  /* navy */
+    --chart-5: 33 14% 43%;   /* warm gray */
 
-    /* Sidebar */
-    --sidebar-background: 215 28% 12%;
-    --sidebar-foreground: 210 15% 85%;
-    --sidebar-primary: 188 55% 55%;
+    /* Sidebar — deep navy */
+    --sidebar-background: 218 52% 12%;   /* #0F1B2D */
+    --sidebar-foreground: 0 0% 85%;
+    --sidebar-primary: 160 48% 33%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 215 20% 18%;
-    --sidebar-accent-foreground: 210 15% 85%;
-    --sidebar-border: 215 20% 20%;
-    --sidebar-ring: 195 85% 24%;
+    --sidebar-accent: 217 43% 18%;
+    --sidebar-accent-foreground: 0 0% 85%;
+    --sidebar-border: 217 40% 20%;
+    --sidebar-ring: 217 43% 18%;
+
+    /* Pulse semantic colors */
+    --pulse-alarm: #C0392B;
+    --pulse-caution: #D4854A;
+    --pulse-good: #2D7D6B;
+    --pulse-navy: #1A2744;
+    --pulse-parchment: #F5F0E8;
+    --pulse-cream: #FFFDF8;
+    --pulse-border: #D4CBBA;
+    --pulse-border-faint: #E4DCCB;
+    --pulse-text-muted: #7A6F5F;
+    --pulse-nav-bg: #0F1B2D;
+
+    /* Font stacks */
+    --font-sans: "Source Serif 4", Georgia, serif;
+    --font-serif: "Instrument Serif", "Playfair Display", Georgia, serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
   }
 
   .dark {
-    --background: 215 28% 8%;
-    --foreground: 210 15% 88%;
-    --card: 215 25% 10%;
-    --card-foreground: 210 15% 88%;
-    --popover: 215 25% 10%;
-    --popover-foreground: 210 15% 88%;
-    --primary: 188 45% 48%;
-    --primary-foreground: 215 28% 8%;
-    --secondary: 215 18% 16%;
-    --secondary-foreground: 210 12% 80%;
-    --muted: 215 15% 14%;
-    --muted-foreground: 210 8% 55%;
-    --accent: 32 75% 55%;
-    --accent-foreground: 32 95% 95%;
-    --destructive: 0 62% 55%;
+    /* Dark mode — deep navy with warm accents */
+    --background: 218 52% 8%;
+    --foreground: 36 20% 88%;
+    --card: 218 45% 11%;
+    --card-foreground: 36 20% 88%;
+    --popover: 218 45% 11%;
+    --popover-foreground: 36 20% 88%;
+    --primary: 36 20% 88%;
+    --primary-foreground: 218 52% 8%;
+    --secondary: 217 35% 16%;
+    --secondary-foreground: 36 20% 80%;
+    --muted: 217 30% 14%;
+    --muted-foreground: 36 12% 55%;
+    --accent: 6 55% 52%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 6 55% 52%;
     --destructive-foreground: 0 0% 98%;
-    --border: 215 15% 18%;
-    --input: 215 15% 18%;
-    --ring: 188 45% 48%;
-    --chart-1: 188 55% 48%;
-    --chart-2: 15 55% 50%;
-    --chart-3: 188 40% 35%;
-    --chart-4: 188 45% 70%;
-    --chart-5: 345 30% 55%;
+    --border: 217 25% 22%;
+    --input: 217 25% 22%;
+    --ring: 36 20% 80%;
+    --chart-1: 160 42% 42%;
+    --chart-2: 25 50% 58%;
+    --chart-3: 6 55% 52%;
+    --chart-4: 36 20% 80%;
+    --chart-5: 36 12% 55%;
 
-    --sidebar-background: 215 30% 6%;
-    --sidebar-foreground: 210 12% 80%;
-    --sidebar-primary: 188 50% 50%;
+    --sidebar-background: 218 55% 5%;
+    --sidebar-foreground: 36 15% 78%;
+    --sidebar-primary: 160 42% 42%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 215 25% 12%;
-    --sidebar-accent-foreground: 210 12% 80%;
-    --sidebar-border: 215 20% 14%;
-    --sidebar-ring: 188 45% 48%;
+    --sidebar-accent: 217 38% 14%;
+    --sidebar-accent-foreground: 36 15% 78%;
+    --sidebar-border: 217 30% 16%;
+    --sidebar-ring: 36 20% 80%;
   }
 }
 
@@ -103,17 +124,61 @@
   body {
     @apply bg-background text-foreground;
     font-variant-numeric: tabular-nums lining-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+  ::selection {
+    background: rgba(192, 57, 43, 0.18);
+    color: var(--pulse-navy);
   }
 }
 
-/* Equity gap color scale — 5 quintile classes */
-.gap-q1 { --gap-color: #1a6b4a; } /* lowest gap — green */
-.gap-q2 { --gap-color: #6ba84a; }
-.gap-q3 { --gap-color: #e8b84a; }
-.gap-q4 { --gap-color: #d4723c; }
-.gap-q5 { --gap-color: #b5282e; } /* highest gap — red */
+/* ================================================================
+   Pulse typography utilities
+   ================================================================ */
+.font-display {
+  font-family: var(--font-serif);
+}
+.font-body {
+  font-family: var(--font-sans);
+}
+.font-data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
 
-/* Scrollbar styling for data panels */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--pulse-text-muted);
+  font-weight: 500;
+}
+
+.label-mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--pulse-text-muted);
+  font-weight: 500;
+}
+
+/* ================================================================
+   Equity gap color scale — 5 quintile classes
+   ================================================================ */
+.gap-q1 { --gap-color: var(--pulse-good); }
+.gap-q2 { --gap-color: #6ba84a; }
+.gap-q3 { --gap-color: var(--pulse-caution); }
+.gap-q4 { --gap-color: #d4723c; }
+.gap-q5 { --gap-color: var(--pulse-alarm); }
+
+/* ================================================================
+   Scrollbar styling — editorial warm
+   ================================================================ */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -121,9 +186,35 @@
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
+  background: var(--pulse-border);
   border-radius: 3px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground));
+  background: var(--pulse-text-muted);
 }
+
+/* ================================================================
+   KPI animation
+   ================================================================ */
+@keyframes kpiIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.kpi-value {
+  animation: kpiIn 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* ================================================================
+   Pulse line motif animation
+   ================================================================ */
+@keyframes ringPulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0; }
+}
+
+/* ================================================================
+   Override shadcn component radiuses for editorial feel
+   ================================================================ */
+.rounded-lg { border-radius: 2px !important; }
+.rounded-md { border-radius: 1px !important; }
+.rounded-sm { border-radius: 0px !important; }

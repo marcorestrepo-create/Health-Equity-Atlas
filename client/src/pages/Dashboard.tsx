@@ -5,17 +5,10 @@ import { apiRequest } from "@/lib/queryClient";
 import {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users,
   Search, Filter, MapPin, ChevronRight, AlertTriangle, Activity,
-  TrendingDown, Building2, Wifi, Shield, Layers, Info, X, Menu
+  TrendingDown, Building2, Wifi, Shield, Layers, X, ChevronDown
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { PulseDivider, PulseLineSmall } from "@/components/PulseLayout";
 import { DATA_LAYERS, STATE_ABBRS, getGapColor, formatMetricValue, INTERVENTION_COLORS } from "@/lib/constants";
 import type { DataLayerKey } from "@/lib/constants";
 
@@ -28,10 +21,9 @@ export default function Dashboard() {
   const [activeLayer, setActiveLayer] = useState<DataLayerKey>("healthEquityGapScore");
   const [stateFilter, setStateFilter] = useState<string>("all");
   const [ruralFilter, setRuralFilter] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showCountyList, setShowCountyList] = useState(false);
+  const [activeTab, setActiveTab] = useState<"overview" | "map" | "interventions" | "states">("overview");
 
-  // Build query params URL
   const countyApiUrl = useMemo(() => {
     const params = new URLSearchParams();
     if (stateFilter !== "all") params.set("state", stateFilter);
@@ -52,11 +44,6 @@ export default function Dashboard() {
     queryKey: ["/api/interventions"],
   });
 
-  const { data: searchResults } = useQuery<any[]>({
-    queryKey: [`/api/counties/search/${encodeURIComponent(searchQuery)}`],
-    enabled: searchQuery.length >= 2,
-  });
-
   const currentLayer = DATA_LAYERS.find(l => l.key === activeLayer) || DATA_LAYERS[0];
 
   const sortedCounties = useMemo(() => {
@@ -73,322 +60,356 @@ export default function Dashboard() {
 
   return (
     <TooltipProvider>
-      <div className="h-screen flex flex-col overflow-hidden bg-background">
-        {/* Top bar */}
-        <header className="border-b bg-card px-4 py-2.5 flex items-center justify-between shrink-0 z-20">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-1.5 rounded-md hover:bg-secondary"
-              data-testid="toggle-sidebar"
+      <div className="bg-background min-h-screen">
+        {/* Hero */}
+        <section className="relative py-16 md:py-20 overflow-hidden">
+          {/* Background EKG motif */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none">
+            <svg width="140%" height="auto" viewBox="0 0 1400 100" preserveAspectRatio="none">
+              <path d="M0,50 L400,50 L440,10 L460,90 L480,20 L500,80 L520,40 L560,50 L900,50 L940,15 L960,85 L980,25 L1000,75 L1020,45 L1060,50 L1400,50" stroke="var(--pulse-navy)" strokeWidth="2" fill="none" />
+            </svg>
+          </div>
+
+          <div className="relative z-10 max-w-[1100px] mx-auto px-6">
+            <p className="eyebrow mb-6">National Minority Health Month · April 2026</p>
+            <h1
+              className="font-serif font-normal leading-[1.02] tracking-[-0.012em] mb-6"
+              style={{ fontSize: "clamp(36px, 5vw, 64px)", color: "var(--pulse-navy)" }}
             >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2">
-              <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-label="Health Equity Atlas">
-                <circle cx="16" cy="16" r="14" stroke="hsl(195, 85%, 24%)" strokeWidth="2.5" fill="none" />
-                <path d="M16 6 L16 26 M6 16 L26 16" stroke="hsl(195, 85%, 24%)" strokeWidth="1.5" opacity="0.3" />
-                <circle cx="16" cy="16" r="5" fill="hsl(195, 85%, 24%)" opacity="0.2" />
-                <circle cx="16" cy="16" r="2" fill="hsl(32, 90%, 52%)" />
-                <circle cx="11" cy="11" r="1.5" fill="hsl(195, 85%, 24%)" opacity="0.6" />
-                <circle cx="21" cy="12" r="1.2" fill="hsl(15, 65%, 42%)" opacity="0.7" />
-                <circle cx="13" cy="21" r="1.3" fill="hsl(195, 60%, 18%)" opacity="0.5" />
-              </svg>
-              <div>
-                <h1 className="text-sm font-semibold leading-tight tracking-tight text-foreground">
-                  U.S. Health Equity Atlas
-                </h1>
-                <p className="text-[10px] text-muted-foreground leading-tight">
-                  National Minority Health Month 2026
-                </p>
-              </div>
-            </div>
+              Mapping the gaps<br />
+              in <em className="italic" style={{ color: "var(--pulse-alarm)" }}>American health equity</em>
+            </h1>
+            <p
+              className="font-body text-lg leading-relaxed max-w-[680px]"
+              style={{ color: "var(--pulse-text-muted)", fontSize: "18px", lineHeight: 1.55 }}
+            >
+              Insurance coverage, maternal mortality, chronic disease, provider shortages,
+              hospital closures, transportation barriers, broadband access, and environmental
+              exposure — layered across <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>3,144 U.S. counties</strong> to
+              show where targeted interventions could close the biggest gaps.
+            </p>
           </div>
+        </section>
 
-          <div className="flex items-center gap-2">
-            <Link href="/methods">
-              <Button variant="ghost" size="sm" className="gap-1 text-xs hidden md:inline-flex">
-                <Info className="w-3.5 h-3.5" /> Methods
-              </Button>
-            </Link>
-            <div className="relative hidden md:block">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Search counties..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="pl-8 h-8 w-56 text-xs"
-                data-testid="input-search"
-              />
-              {searchResults && searchResults.length > 0 && searchQuery.length >= 2 && (
-                <div className="absolute top-full mt-1 left-0 right-0 bg-card border rounded-md shadow-lg z-50 max-h-64 overflow-auto">
-                  {searchResults.map((r: any) => (
-                    <button
-                      key={r.fips}
-                      onClick={() => { navigate(`/county/${r.fips}`); setSearchQuery(""); }}
-                      className="w-full text-left px-3 py-2 hover:bg-secondary text-xs flex justify-between items-center"
-                      data-testid={`search-result-${r.fips}`}
-                    >
-                      <span className="font-medium">{r.name}, {r.stateAbbr}</span>
-                      <Badge variant="outline" className="text-[10px] h-5">
-                        Gap: {r.healthEquityGapScore?.toFixed(1)}
-                      </Badge>
-                    </button>
-                  ))}
+        <PulseDivider />
+
+        {/* KPI Row */}
+        {summaryLoading || !summary ? (
+          <section className="max-w-[1100px] mx-auto px-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="p-8 animate-pulse" style={{ borderRight: i < 3 ? "1px solid var(--pulse-border)" : "none" }}>
+                  <div className="h-3 w-20 bg-[var(--pulse-border)] mb-4" />
+                  <div className="h-10 w-24 bg-[var(--pulse-border)]" />
                 </div>
-              )}
+              ))}
             </div>
-          </div>
-        </header>
-
-        <div className="flex flex-1 overflow-hidden">
-          {/* Left sidebar — filters & county list */}
-          <aside className={`${sidebarOpen ? "w-72" : "w-0"} shrink-0 border-r bg-card overflow-hidden transition-all duration-200 flex flex-col`}>
-            <div className="p-3 border-b space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Filter className="w-3.5 h-3.5" />
-                Filters
-              </div>
-              <Select value={stateFilter} onValueChange={setStateFilter}>
-                <SelectTrigger className="h-7 text-xs" data-testid="select-state">
-                  <SelectValue placeholder="All States" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All States</SelectItem>
-                  {STATE_ABBRS.map(s => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={ruralFilter} onValueChange={setRuralFilter}>
-                <SelectTrigger className="h-7 text-xs" data-testid="select-rural">
-                  <SelectValue placeholder="All Areas" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Areas</SelectItem>
-                  <SelectItem value="rural">Rural</SelectItem>
-                  <SelectItem value="micro">Micropolitan</SelectItem>
-                  <SelectItem value="metro">Metropolitan</SelectItem>
-                </SelectContent>
-              </Select>
+          </section>
+        ) : (
+          <section className="max-w-[1100px] mx-auto px-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
+              <KPIStat label="Counties Analyzed" value={summary.totalCounties.toLocaleString()} colorClass="neutral" />
+              <KPIStat label="Avg Gap Score" value={summary.avgGapScore.toFixed(1)} unit="/100" colorClass="caution" />
+              <KPIStat label="Maternity Care Deserts" value={summary.maternityCareDeserts.toString()} unit={`${((summary.maternityCareDeserts / summary.totalCounties) * 100).toFixed(0)}%`} colorClass="alarm" />
+              <KPIStat label="Hospital Closures" value={summary.hospitalClosures.toString()} unit="since 2010" colorClass="alarm" last />
             </div>
+          </section>
+        )}
 
-            {/* Data layer selector */}
-            <div className="p-3 border-b space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <Layers className="w-3.5 h-3.5" />
-                Map Layer
-              </div>
-              <Select value={activeLayer} onValueChange={(v) => setActiveLayer(v as DataLayerKey)}>
-                <SelectTrigger className="h-7 text-xs" data-testid="select-layer">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DATA_LAYERS.map(l => (
-                    <SelectItem key={l.key} value={l.key}>{l.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {/* Legend */}
-              <div className="flex items-center gap-0.5 mt-1">
-                <span className="text-[10px] text-muted-foreground">
-                  {activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k" ? "Worst" : "Best"}
-                </span>
-                {currentLayer.colors.map((c, i) => (
-                  <div key={i} className="h-2.5 flex-1 first:rounded-l last:rounded-r" style={{ backgroundColor: c }} />
+        <PulseDivider />
+
+        {/* Tab navigation */}
+        <section className="max-w-[1100px] mx-auto px-6">
+          <div className="flex items-end justify-between gap-8 mb-8">
+            <div className="flex gap-6">
+              {(["overview", "map", "interventions", "states"] as const).map((tab) => {
+                const labels = { overview: "Overview", map: "Bubble Map", interventions: "Interventions", states: "State Rankings" };
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`font-data text-[11px] uppercase tracking-[0.14em] pb-1 transition-colors ${
+                      activeTab === tab
+                        ? "text-[var(--pulse-navy)] border-b-2 border-[var(--pulse-navy)]"
+                        : "text-[var(--pulse-text-muted)] hover:text-[var(--pulse-navy)]"
+                    }`}
+                    data-testid={`tab-${tab}`}
+                  >
+                    {labels[tab]}
+                  </button>
+                );
+              })}
+            </div>
+            
+            {/* Filters */}
+            <div className="hidden md:flex items-center gap-2">
+              <span className="label-mono text-[10px]">Layer:</span>
+              <select
+                value={activeLayer}
+                onChange={(e) => setActiveLayer(e.target.value as DataLayerKey)}
+                className="font-data text-[11px] h-7 px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
+                style={{ borderColor: "var(--pulse-border)" }}
+                data-testid="select-layer"
+              >
+                {DATA_LAYERS.map(l => (
+                  <option key={l.key} value={l.key}>{l.label}</option>
                 ))}
-                <span className="text-[10px] text-muted-foreground">
-                  {activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k" ? "Best" : "Worst"}
-                </span>
-              </div>
+              </select>
+              <select
+                value={stateFilter}
+                onChange={(e) => setStateFilter(e.target.value)}
+                className="font-data text-[11px] h-7 px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
+                style={{ borderColor: "var(--pulse-border)" }}
+                data-testid="select-state"
+              >
+                <option value="all">All States</option>
+                {STATE_ABBRS.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <select
+                value={ruralFilter}
+                onChange={(e) => setRuralFilter(e.target.value)}
+                className="font-data text-[11px] h-7 px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
+                style={{ borderColor: "var(--pulse-border)" }}
+                data-testid="select-rural"
+              >
+                <option value="all">All Areas</option>
+                <option value="rural">Rural</option>
+                <option value="micro">Micropolitan</option>
+                <option value="metro">Metropolitan</option>
+              </select>
             </div>
+          </div>
 
-            {/* County ranking list */}
-            <ScrollArea className="flex-1">
-              <div className="p-2 space-y-0.5">
-                <div className="text-[10px] text-muted-foreground px-2 pb-1 font-medium">
-                  {sortedCounties.length} counties · sorted by {currentLayer.label}
-                </div>
+          {/* Legend */}
+          <div className="flex items-center gap-1.5 mb-6">
+            <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">
+              {activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k" ? "WORST" : "BEST"}
+            </span>
+            {currentLayer.colors.map((c, i) => (
+              <div key={i} className="h-2.5 flex-1" style={{ backgroundColor: c }} />
+            ))}
+            <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">
+              {activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k" ? "BEST" : "WORST"}
+            </span>
+          </div>
+
+          {/* Tab content */}
+          {activeTab === "overview" && (
+            <OverviewContent
+              summary={summary}
+              summaryLoading={summaryLoading}
+              countyData={sortedCounties}
+              currentLayer={currentLayer}
+              activeLayer={activeLayer}
+              navigate={navigate}
+            />
+          )}
+          {activeTab === "map" && (
+            <BubbleMap counties={sortedCounties} activeLayer={activeLayer} currentLayer={currentLayer} navigate={navigate} />
+          )}
+          {activeTab === "interventions" && (
+            <InterventionsContent interventions={interventionsData} navigate={navigate} />
+          )}
+          {activeTab === "states" && (
+            <StateRankingsContent summary={summary} />
+          )}
+
+          {/* County ranking toggle */}
+          <div className="mt-10">
+            <button
+              onClick={() => setShowCountyList(!showCountyList)}
+              className="flex items-center gap-2 eyebrow hover:text-[var(--pulse-navy)] transition-colors"
+            >
+              <ChevronDown className={`w-4 h-4 transition-transform ${showCountyList ? "rotate-180" : ""}`} />
+              {sortedCounties.length} Counties · Sorted by {currentLayer.label}
+            </button>
+            {showCountyList && (
+              <div className="mt-4 border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
                 {countiesLoading ? (
-                  Array.from({ length: 15 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-full" />
-                  ))
+                  <div className="p-8 text-center text-[var(--pulse-text-muted)] font-data text-xs">Loading...</div>
                 ) : (
-                  sortedCounties.slice(0, 100).map((county: any, idx: number) => {
-                    const val = county[activeLayer];
-                    const color = getGapColor(val, currentLayer);
-                    return (
-                      <button
-                        key={county.fips}
-                        onClick={() => navigate(`/county/${county.fips}`)}
-                        className="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-secondary/80 transition-colors flex items-center gap-2"
-                        data-testid={`county-row-${county.fips}`}
-                      >
-                        <span className="text-[10px] text-muted-foreground w-5 text-right shrink-0">
-                          {idx + 1}
-                        </span>
-                        <div
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: color }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="truncate font-medium text-[11px]">{county.name}</div>
-                          <div className="text-[10px] text-muted-foreground">{county.stateAbbr}</div>
-                        </div>
-                        <span className="text-[11px] font-mono font-medium shrink-0" style={{ color }}>
-                          {formatMetricValue(val, activeLayer)}
-                        </span>
-                      </button>
-                    );
-                  })
+                  <div className="max-h-[500px] overflow-auto custom-scrollbar">
+                    {sortedCounties.slice(0, 200).map((county: any, idx: number) => {
+                      const val = county[activeLayer];
+                      const color = getGapColor(val, currentLayer);
+                      return (
+                        <button
+                          key={county.fips}
+                          onClick={() => navigate(`/county/${county.fips}`)}
+                          className="w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-[var(--pulse-parchment)] transition-colors"
+                          style={{ borderBottom: "1px solid var(--pulse-border-faint)" }}
+                          data-testid={`county-row-${county.fips}`}
+                        >
+                          <span className="font-data text-[10px] text-[var(--pulse-text-muted)] w-6 text-right shrink-0">
+                            {idx + 1}
+                          </span>
+                          <div className="w-2.5 h-2.5 shrink-0" style={{ backgroundColor: color }} />
+                          <div className="flex-1 min-w-0">
+                            <span className="font-body text-[12px] font-medium" style={{ color: "var(--pulse-navy)" }}>
+                              {county.name}
+                            </span>
+                            <span className="font-data text-[10px] text-[var(--pulse-text-muted)] ml-2">
+                              {county.stateAbbr}
+                            </span>
+                          </div>
+                          <span className="font-data text-[12px] font-medium shrink-0" style={{ color }}>
+                            {formatMetricValue(val, activeLayer)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
-            </ScrollArea>
-          </aside>
-
-          {/* Main content */}
-          <main className="flex-1 overflow-auto custom-scrollbar">
-            <Tabs defaultValue="overview" className="h-full flex flex-col">
-              <div className="border-b bg-card px-4">
-                <TabsList className="h-9">
-                  <TabsTrigger value="overview" className="text-xs" data-testid="tab-overview">Overview</TabsTrigger>
-                  <TabsTrigger value="map" className="text-xs" data-testid="tab-map">Bubble Map</TabsTrigger>
-                  <TabsTrigger value="interventions" className="text-xs" data-testid="tab-interventions">Interventions</TabsTrigger>
-                  <TabsTrigger value="states" className="text-xs" data-testid="tab-states">State Rankings</TabsTrigger>
-                </TabsList>
-              </div>
-
-              <TabsContent value="overview" className="flex-1 overflow-auto p-4 space-y-4 mt-0">
-                <OverviewTab summary={summary} summaryLoading={summaryLoading} countyData={sortedCounties} currentLayer={currentLayer} activeLayer={activeLayer} navigate={navigate} />
-              </TabsContent>
-
-              <TabsContent value="map" className="flex-1 overflow-auto p-4 mt-0">
-                <BubbleMap counties={sortedCounties} activeLayer={activeLayer} currentLayer={currentLayer} navigate={navigate} />
-              </TabsContent>
-
-              <TabsContent value="interventions" className="flex-1 overflow-auto p-4 space-y-4 mt-0">
-                <InterventionsTab interventions={interventionsData} navigate={navigate} />
-              </TabsContent>
-
-              <TabsContent value="states" className="flex-1 overflow-auto p-4 mt-0">
-                <StateRankingsTab summary={summary} />
-              </TabsContent>
-            </Tabs>
-          </main>
-        </div>
+            )}
+          </div>
+        </section>
       </div>
     </TooltipProvider>
   );
 }
 
-function OverviewTab({ summary, summaryLoading, countyData, currentLayer, activeLayer, navigate }: any) {
-  if (summaryLoading || !summary) {
-    return <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
-    </div>;
-  }
+/* ================================================================
+   KPI Stat — editorial style
+   ================================================================ */
+function KPIStat({ label, value, unit, colorClass = "neutral", last = false }: {
+  label: string; value: string; unit?: string; colorClass?: "alarm" | "caution" | "good" | "neutral"; last?: boolean;
+}) {
+  const colorMap = {
+    alarm: "var(--pulse-alarm)",
+    caution: "var(--pulse-caution)",
+    good: "var(--pulse-good)",
+    neutral: "var(--pulse-navy)",
+  };
 
   return (
-    <>
-      {/* April — National Minority Health Month banner */}
-      <div className="rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20 p-4">
-        <div className="flex items-start gap-3">
-          <Shield className="w-8 h-8 text-primary shrink-0 mt-0.5" />
-          <div>
-            <h2 className="text-base font-semibold text-foreground">April is National Minority Health Month</h2>
-            <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
-              This atlas layers insurance coverage, maternal mortality, chronic disease, provider shortages, hospital closures, transportation barriers, broadband access, and environmental exposure data across {summary.totalCounties} U.S. counties to identify where targeted interventions could close the biggest health equity gaps.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* KPI cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KPICard label="Counties Analyzed" value={summary.totalCounties} icon={<MapPin className="w-4 h-4" />} />
-        <KPICard label="Avg Gap Score" value={summary.avgGapScore} suffix="/100" icon={<Activity className="w-4 h-4" />} delta="higher = worse" />
-        <KPICard label="Maternity Care Deserts" value={summary.maternityCareDeserts} icon={<Baby className="w-4 h-4" />} delta={`${((summary.maternityCareDeserts / summary.totalCounties) * 100).toFixed(0)}% of counties`} bad />
-        <KPICard label="Hospital Closures Since 2010" value={summary.hospitalClosures} icon={<Building2 className="w-4 h-4" />} bad />
-        <KPICard label="Avg Uninsured" value={summary.avgUninsuredRate} suffix="%" icon={<AlertTriangle className="w-4 h-4" />} />
-        <KPICard label="Avg Life Expectancy" value={summary.avgLifeExpectancy} suffix=" yrs" icon={<TrendingDown className="w-4 h-4" />} />
-        <KPICard label="Avg Maternal Mortality" value={summary.avgMaternalMortalityRate} suffix="/100k" icon={<HeartPulse className="w-4 h-4" />} />
-        <KPICard label="Avg Diabetes Rate" value={summary.avgDiabetesRate} suffix="%" icon={<Activity className="w-4 h-4" />} />
-      </div>
-
-      {/* Distribution bar chart */}
-      <Card>
-        <CardHeader className="pb-2 pt-3 px-4">
-          <CardTitle className="text-sm">Distribution: {currentLayer.label}</CardTitle>
-        </CardHeader>
-        <CardContent className="px-4 pb-3">
-          <DistributionChart counties={countyData} activeLayer={activeLayer} currentLayer={currentLayer} />
-        </CardContent>
-      </Card>
-
-      {/* Highest need counties */}
-      <Card>
-        <CardHeader className="pb-2 pt-3 px-4">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-destructive" />
-            Highest-Need Counties
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-4 pb-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {summary.highestNeedCounties?.slice(0, 10).map((c: any, i: number) => (
-              <button
-                key={c.fips}
-                onClick={() => navigate(`/county/${c.fips}`)}
-                className="flex items-center gap-2 p-2 rounded hover:bg-secondary text-left text-xs"
-                data-testid={`highest-need-${c.fips}`}
-              >
-                <span className="font-mono text-muted-foreground w-5 text-right">{i + 1}</span>
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#b5282e" }} />
-                <div className="flex-1">
-                  <span className="font-medium">{c.name}, {c.stateAbbr}</span>
-                  <span className="text-muted-foreground ml-2">Pop: {(c.population / 1000).toFixed(0)}k</span>
-                </div>
-                <Badge variant="destructive" className="text-[10px] h-5">
-                  {c.gapScore?.toFixed(1)}
-                </Badge>
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </>
+    <div
+      className="p-6 md:p-8 relative"
+      style={{ borderRight: last ? "none" : "1px solid var(--pulse-border)" }}
+    >
+      <span className="label-mono block mb-4">{label}</span>
+      <span
+        className="font-data text-3xl md:text-[44px] font-medium tracking-[-0.015em] leading-none kpi-value"
+        style={{ color: colorMap[colorClass] }}
+      >
+        {value}
+      </span>
+      {unit && (
+        <span className="font-data text-sm font-normal text-[var(--pulse-text-muted)] ml-1">
+          {unit}
+        </span>
+      )}
+    </div>
   );
 }
 
-function KPICard({ label, value, suffix = "", icon, delta, bad }: any) {
+/* ================================================================
+   Overview Content
+   ================================================================ */
+function OverviewContent({ summary, summaryLoading, countyData, currentLayer, activeLayer, navigate }: any) {
+  if (summaryLoading || !summary) {
+    return (
+      <div className="space-y-6">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-32 animate-pulse" style={{ background: "var(--pulse-border)" }} />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <Card>
-      <CardContent className="p-3">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] text-muted-foreground">{label}</span>
-          <span className="text-muted-foreground">{icon}</span>
+    <div className="space-y-10">
+      {/* Secondary KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-px border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-border)" }}>
+        <MiniKPI label="Avg Uninsured" value={`${summary.avgUninsuredRate.toFixed(1)}%`} />
+        <MiniKPI label="Avg Life Expectancy" value={`${summary.avgLifeExpectancy.toFixed(1)} yrs`} />
+        <MiniKPI label="Avg Maternal Mortality" value={`${summary.avgMaternalMortalityRate.toFixed(1)}/100k`} />
+        <MiniKPI label="Avg Diabetes Rate" value={`${summary.avgDiabetesRate.toFixed(1)}%`} />
+      </div>
+
+      {/* Distribution chart */}
+      <div>
+        <div className="flex items-end justify-between gap-8 mb-6">
+          <h2 className="font-serif text-3xl font-normal" style={{ color: "var(--pulse-navy)" }}>
+            Distribution
+          </h2>
+          <span className="font-data text-[11px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] pb-1">
+            {currentLayer.label}
+          </span>
         </div>
-        <div className="mt-1">
-          <span className="text-xl font-semibold">{typeof value === "number" ? value.toLocaleString() : value}</span>
-          <span className="text-xs text-muted-foreground ml-0.5">{suffix}</span>
+        <div className="border p-6" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
+          <DistributionChart counties={countyData} activeLayer={activeLayer} currentLayer={currentLayer} />
         </div>
-        {delta && (
-          <span className={`text-[10px] ${bad ? "text-destructive" : "text-muted-foreground"}`}>{delta}</span>
-        )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Highest need counties */}
+      <div>
+        <div className="flex items-end justify-between gap-8 mb-6">
+          <h2 className="font-serif text-3xl font-normal" style={{ color: "var(--pulse-navy)" }}>
+            Highest-Need <em className="italic" style={{ color: "var(--pulse-alarm)" }}>Counties</em>
+          </h2>
+          <span className="font-data text-[11px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] pb-1">
+            Top 10 by gap score
+          </span>
+        </div>
+        <div className="border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
+          {summary.highestNeedCounties?.slice(0, 10).map((c: any, i: number) => (
+            <button
+              key={c.fips}
+              onClick={() => navigate(`/county/${c.fips}`)}
+              className="w-full text-left px-5 py-3.5 flex items-center gap-4 hover:bg-[var(--pulse-parchment)] transition-colors"
+              style={{ borderBottom: "1px solid var(--pulse-border-faint)" }}
+              data-testid={`highest-need-${c.fips}`}
+            >
+              <span className="font-data text-sm text-[var(--pulse-text-muted)] w-6 text-right">
+                {i + 1}
+              </span>
+              <div className="w-3 h-3" style={{ backgroundColor: "var(--pulse-alarm)" }} />
+              <div className="flex-1">
+                <span className="font-body text-sm font-semibold" style={{ color: "var(--pulse-navy)" }}>
+                  {c.name}, {c.stateAbbr}
+                </span>
+                <span className="font-data text-[11px] text-[var(--pulse-text-muted)] ml-3">
+                  Pop: {(c.population / 1000).toFixed(0)}k
+                </span>
+              </div>
+              <span
+                className="font-data text-sm font-semibold"
+                style={{ color: "var(--pulse-alarm)" }}
+              >
+                {c.gapScore?.toFixed(1)}
+              </span>
+              <ChevronRight className="w-4 h-4 text-[var(--pulse-text-muted)]" />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniKPI({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="p-4 md:p-5" style={{ background: "var(--pulse-cream)" }}>
+      <span className="label-mono block mb-2 text-[10px]">{label}</span>
+      <span className="font-data text-lg font-medium" style={{ color: "var(--pulse-navy)" }}>
+        {value}
+      </span>
+    </div>
   );
 }
 
 function DistributionChart({ counties, activeLayer, currentLayer }: any) {
   if (!counties || counties.length === 0) return null;
-  
+
   const values = counties.map((c: any) => c[activeLayer]).filter((v: any) => v != null);
   if (values.length === 0) return null;
   const min = Math.min(...values);
   const max = Math.max(...values);
   if (min === max) return null;
-  const bucketCount = 20;
+  const bucketCount = 24;
   const bucketSize = (max - min) / bucketCount;
   const buckets = Array.from({ length: bucketCount }, (_, i) => {
     const lo = min + i * bucketSize;
@@ -402,31 +423,46 @@ function DistributionChart({ counties, activeLayer, currentLayer }: any) {
   const maxCount = Math.max(...buckets.map(b => b.count));
 
   return (
-    <div className="flex items-end gap-px h-28">
-      {buckets.map((b, i) => (
-        <Tooltip key={i}>
-          <TooltipTrigger asChild>
-            <div
-              className="flex-1 rounded-t transition-opacity hover:opacity-80 cursor-default"
-              style={{
-                height: `${(b.count / maxCount) * 100}%`,
-                backgroundColor: b.color,
-                minHeight: b.count > 0 ? 2 : 0,
-              }}
-            />
-          </TooltipTrigger>
-          <TooltipContent className="text-xs">
-            {b.lo.toFixed(1)} – {b.hi.toFixed(1)}: {b.count} counties
-          </TooltipContent>
-        </Tooltip>
-      ))}
+    <div>
+      <div className="flex items-end gap-px h-32">
+        {buckets.map((b, i) => (
+          <Tooltip key={i}>
+            <TooltipTrigger asChild>
+              <div
+                className="flex-1 transition-opacity hover:opacity-80 cursor-default"
+                style={{
+                  height: `${(b.count / maxCount) * 100}%`,
+                  backgroundColor: b.color,
+                  minHeight: b.count > 0 ? 3 : 0,
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              <span className="font-data text-xs">
+                {b.lo.toFixed(1)} – {b.hi.toFixed(1)}: {b.count} counties
+              </span>
+            </TooltipContent>
+          </Tooltip>
+        ))}
+      </div>
+      <div className="flex justify-between mt-2">
+        <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">{min.toFixed(1)}</span>
+        <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">{max.toFixed(1)}</span>
+      </div>
     </div>
   );
 }
 
+/* ================================================================
+   Bubble Map
+   ================================================================ */
 function BubbleMap({ counties, activeLayer, currentLayer, navigate }: any) {
   if (!counties || counties.length === 0) {
-    return <div className="flex items-center justify-center h-96 text-muted-foreground text-sm">Loading map data...</div>;
+    return (
+      <div className="flex items-center justify-center h-96 text-[var(--pulse-text-muted)] font-body text-sm">
+        Loading map data...
+      </div>
+    );
   }
 
   const width = 960;
@@ -436,15 +472,13 @@ function BubbleMap({ counties, activeLayer, currentLayer, navigate }: any) {
   const projectY = (lat: number) => ((latMax - lat) / (latMax - latMin)) * height;
 
   return (
-    <div className="space-y-3">
-      <div className="text-xs text-muted-foreground">
+    <div className="space-y-4">
+      <p className="font-body text-sm text-[var(--pulse-text-muted)]">
         Bubble size reflects population. Color reflects {currentLayer.label}. Click any county for details.
-      </div>
-      <div className="border rounded-lg bg-card overflow-hidden">
+      </p>
+      <div className="border overflow-hidden" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ maxHeight: "65vh" }}>
-          <rect x="0" y="0" width={width} height={height} fill="hsl(210, 12%, 94%)" rx="8" />
-          
-          {/* Sort so smaller bubbles render on top */}
+          <rect x="0" y="0" width={width} height={height} fill="var(--pulse-parchment)" />
           {[...counties]
             .filter((c: any) => c.lat && c.lng && c.lng >= lonMin && c.lng <= lonMax && c.lat >= latMin && c.lat <= latMax)
             .sort((a: any, b: any) => b.population - a.population)
@@ -463,7 +497,8 @@ function BubbleMap({ counties, activeLayer, currentLayer, navigate }: any) {
                   stroke={color}
                   strokeWidth={0.8}
                   strokeOpacity={0.9}
-                  className="cursor-pointer hover:stroke-foreground hover:stroke-2 transition-all"
+                  className="cursor-pointer hover:stroke-2 transition-all"
+                  style={{ "--hover-stroke": "var(--pulse-navy)" } as any}
                   onClick={() => navigate(`/county/${c.fips}`)}
                 >
                   <title>{`${c.name}, ${c.stateAbbr}\n${currentLayer.label}: ${formatMetricValue(val, activeLayer)}\nPop: ${c.population.toLocaleString()}`}</title>
@@ -472,25 +507,24 @@ function BubbleMap({ counties, activeLayer, currentLayer, navigate }: any) {
             })}
         </svg>
       </div>
-      
-      <div className="flex items-center justify-between text-[10px] text-muted-foreground px-2">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between font-data text-[10px] text-[var(--pulse-text-muted)] px-1">
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full border" style={{ backgroundColor: currentLayer.colors[0] }} />
+            <div className="w-3 h-3" style={{ backgroundColor: currentLayer.colors[0] }} />
             <span>{activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k" ? "Worst" : "Best"}</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full border" style={{ backgroundColor: currentLayer.colors[4] }} />
+            <div className="w-3 h-3" style={{ backgroundColor: currentLayer.colors[4] }} />
             <span>{activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k" ? "Best" : "Worst"}</span>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-muted-foreground" />
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--pulse-text-muted)" }} />
             <span>Small pop.</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-4 h-4 rounded-full bg-muted-foreground" />
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "var(--pulse-text-muted)" }} />
             <span>Large pop.</span>
           </div>
         </div>
@@ -499,48 +533,61 @@ function BubbleMap({ counties, activeLayer, currentLayer, navigate }: any) {
   );
 }
 
-function InterventionsTab({ interventions, navigate }: any) {
-  if (!interventions) return <Skeleton className="h-96" />;
+/* ================================================================
+   Interventions
+   ================================================================ */
+function InterventionsContent({ interventions, navigate }: any) {
+  if (!interventions) {
+    return <div className="h-96 animate-pulse" style={{ background: "var(--pulse-border)" }} />;
+  }
 
   return (
-    <div className="space-y-3">
-      <div className="text-xs text-muted-foreground">
+    <div className="space-y-4">
+      <p className="font-body text-sm text-[var(--pulse-text-muted)]">
         Evidence-based interventions ranked by potential impact. Each is matched to counties where it would close the biggest gap.
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-px border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-border)" }}>
         {interventions.map((intervention: any) => {
           const IconComp = iconMap[intervention.icon] || Activity;
           const color = INTERVENTION_COLORS[intervention.slug] || "#888";
           return (
-            <Card
+            <div
               key={intervention.slug}
-              className="cursor-pointer hover:shadow-md transition-shadow"
+              className="p-5 cursor-pointer hover:bg-[var(--pulse-parchment)] transition-colors"
+              style={{ background: "var(--pulse-cream)" }}
               onClick={() => navigate(`/intervention/${intervention.slug}`)}
               data-testid={`intervention-card-${intervention.slug}`}
             >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: color + "18" }}>
-                    <IconComp className="w-5 h-5" style={{ color }} />
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 flex items-center justify-center shrink-0" style={{ backgroundColor: color + "18" }}>
+                  <IconComp className="w-5 h-5" style={{ color }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-body text-sm font-semibold flex items-center gap-2" style={{ color: "var(--pulse-navy)" }}>
+                    {intervention.name}
+                    <span
+                      className="font-data text-[9px] uppercase tracking-[0.1em] px-1.5 py-0.5 border"
+                      style={{
+                        borderColor: intervention.evidenceStrength === "Strong" ? "var(--pulse-good)" : "var(--pulse-border)",
+                        color: intervention.evidenceStrength === "Strong" ? "var(--pulse-good)" : "var(--pulse-text-muted)",
+                      }}
+                    >
+                      {intervention.evidenceStrength}
+                    </span>
+                  </h3>
+                  <p className="font-body text-[12px] text-[var(--pulse-text-muted)] mt-1 line-clamp-2">
+                    {intervention.description}
+                  </p>
+                  <div className="mt-3 px-3 py-2 font-data text-[11px]" style={{ background: "var(--pulse-parchment)" }}>
+                    <span className="font-semibold" style={{ color: "var(--pulse-navy)" }}>Key metric:</span>{" "}
+                    <span className="text-[var(--pulse-text-muted)]">{intervention.keyMetric}</span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      {intervention.name}
-                      <Badge variant={intervention.evidenceStrength === "Strong" ? "default" : "secondary"} className="text-[10px] h-4">
-                        {intervention.evidenceStrength}
-                      </Badge>
-                    </h3>
-                    <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{intervention.description}</p>
-                    <div className="mt-2 p-2 rounded bg-secondary/50 text-[11px]">
-                      <span className="font-medium">Key metric:</span> {intervention.keyMetric}
-                    </div>
-                    <div className="mt-2 flex items-center gap-1 text-[11px] text-primary font-medium">
-                      View evidence & top counties <ChevronRight className="w-3 h-3" />
-                    </div>
+                  <div className="mt-2 flex items-center gap-1 font-data text-[11px] font-medium" style={{ color: "var(--pulse-navy)" }}>
+                    View evidence & top counties <ChevronRight className="w-3 h-3" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           );
         })}
       </div>
@@ -548,41 +595,52 @@ function InterventionsTab({ interventions, navigate }: any) {
   );
 }
 
-function StateRankingsTab({ summary }: any) {
-  if (!summary?.stateAverages) return <Skeleton className="h-96" />;
+/* ================================================================
+   State Rankings
+   ================================================================ */
+function StateRankingsContent({ summary }: any) {
+  if (!summary?.stateAverages) {
+    return <div className="h-96 animate-pulse" style={{ background: "var(--pulse-border)" }} />;
+  }
 
   return (
-    <div className="space-y-3">
-      <div className="text-xs text-muted-foreground">
-        State-level averages across all counties. States sorted by average health equity gap score (highest need first).
-      </div>
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full text-xs">
+    <div className="space-y-4">
+      <p className="font-body text-sm text-[var(--pulse-text-muted)]">
+        State-level averages across all counties. Sorted by average health equity gap score (highest need first).
+      </p>
+      <div className="border overflow-hidden" style={{ borderColor: "var(--pulse-border)" }}>
+        <table className="w-full font-data text-[12px]">
           <thead>
-            <tr className="bg-secondary/50 text-left">
-              <th className="px-3 py-2 font-medium">#</th>
-              <th className="px-3 py-2 font-medium">State</th>
-              <th className="px-3 py-2 font-medium text-right">Avg Gap Score</th>
-              <th className="px-3 py-2 font-medium text-right">Avg Uninsured</th>
-              <th className="px-3 py-2 font-medium text-right">Avg Life Exp.</th>
-              <th className="px-3 py-2 font-medium text-right">Counties</th>
-              <th className="px-3 py-2 font-medium text-right">Total Pop.</th>
+            <tr style={{ background: "var(--pulse-parchment)" }}>
+              <th className="px-4 py-3 text-left font-medium label-mono text-[10px]">#</th>
+              <th className="px-4 py-3 text-left font-medium label-mono text-[10px]">State</th>
+              <th className="px-4 py-3 text-right font-medium label-mono text-[10px]">Avg Gap</th>
+              <th className="px-4 py-3 text-right font-medium label-mono text-[10px]">Uninsured</th>
+              <th className="px-4 py-3 text-right font-medium label-mono text-[10px] hidden md:table-cell">Life Exp.</th>
+              <th className="px-4 py-3 text-right font-medium label-mono text-[10px] hidden md:table-cell">Counties</th>
+              <th className="px-4 py-3 text-right font-medium label-mono text-[10px] hidden lg:table-cell">Population</th>
             </tr>
           </thead>
           <tbody>
             {summary.stateAverages.map((s: any, i: number) => (
-              <tr key={s.stateAbbr} className="border-t hover:bg-secondary/30">
-                <td className="px-3 py-1.5 text-muted-foreground">{i + 1}</td>
-                <td className="px-3 py-1.5 font-medium">{s.state} ({s.stateAbbr})</td>
-                <td className="px-3 py-1.5 text-right font-mono">
-                  <span style={{ color: s.avgGapScore > 50 ? "#b5282e" : s.avgGapScore > 40 ? "#d4723c" : "#1a6b4a" }}>
-                    {s.avgGapScore}
-                  </span>
+              <tr
+                key={s.stateAbbr}
+                className="hover:bg-[var(--pulse-parchment)] transition-colors"
+                style={{ borderTop: "1px solid var(--pulse-border-faint)", background: "var(--pulse-cream)" }}
+              >
+                <td className="px-4 py-2 text-[var(--pulse-text-muted)]">{i + 1}</td>
+                <td className="px-4 py-2 font-body font-medium" style={{ color: "var(--pulse-navy)" }}>
+                  {s.state} <span className="text-[var(--pulse-text-muted)]">({s.stateAbbr})</span>
                 </td>
-                <td className="px-3 py-1.5 text-right font-mono">{s.avgUninsured}%</td>
-                <td className="px-3 py-1.5 text-right font-mono">{s.avgLifeExp} yrs</td>
-                <td className="px-3 py-1.5 text-right">{s.countyCount}</td>
-                <td className="px-3 py-1.5 text-right">{(s.totalPop / 1000).toFixed(0)}k</td>
+                <td className="px-4 py-2 text-right font-semibold" style={{
+                  color: s.avgGapScore > 50 ? "var(--pulse-alarm)" : s.avgGapScore > 40 ? "var(--pulse-caution)" : "var(--pulse-good)"
+                }}>
+                  {s.avgGapScore}
+                </td>
+                <td className="px-4 py-2 text-right">{s.avgUninsured}%</td>
+                <td className="px-4 py-2 text-right hidden md:table-cell">{s.avgLifeExp} yrs</td>
+                <td className="px-4 py-2 text-right hidden md:table-cell">{s.countyCount}</td>
+                <td className="px-4 py-2 text-right hidden lg:table-cell">{(s.totalPop / 1000).toFixed(0)}k</td>
               </tr>
             ))}
           </tbody>
