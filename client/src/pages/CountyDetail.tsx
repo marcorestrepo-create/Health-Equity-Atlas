@@ -522,8 +522,8 @@ function MetricCell({ icon, label, value, unit, benchmark, worse }: any) {
           className="font-data text-[10px] flex items-center gap-1 mt-1"
           style={{ color: comparison.isWorse ? "var(--pulse-alarm)" : "var(--pulse-good)" }}
         >
-          {comparison.isWorse ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-          {Math.abs(comparison.diff).toFixed(1)} {comparison.isWorse ? "above" : "below"} {comparison.label}
+          {comparison.diff > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+          {Math.abs(comparison.diff).toFixed(1)} {comparison.diff > 0 ? "above" : "below"} {comparison.label}
         </div>
       )}
     </div>
