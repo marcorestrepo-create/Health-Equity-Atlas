@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { PulseDivider, PulseLineSmall } from "@/components/PulseLayout";
 import { DATA_LAYERS, STATE_ABBRS, getGapColor, formatMetricValue, INTERVENTION_COLORS } from "@/lib/constants";
 import type { DataLayerKey } from "@/lib/constants";
+import { buildHomepageNarrative } from "@shared/narratives";
 
 const iconMap: Record<string, any> = {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
@@ -101,6 +102,21 @@ export default function Dashboard() {
     });
   }, [countyData, activeLayer]);
 
+  // Homepage narrative — computed from summary data; falls back to static text before summary loads
+  const severeGapCounties = useMemo(() => {
+    if (!countyData) return null;
+    return countyData.filter((c: any) => (c.healthEquityGapScore ?? 0) > 60).length;
+  }, [countyData]);
+
+  const homepageNarrative = useMemo(() => {
+    return buildHomepageNarrative({
+      totalCounties: summary?.totalCounties ?? 3144,
+      maternityCareDeserts: summary?.maternityCareDeserts ?? null,
+      hospitalClosures: summary?.hospitalClosures ?? null,
+      severeGapCounties: severeGapCounties,
+    });
+  }, [summary, severeGapCounties]);
+
   return (
     <TooltipProvider>
       <div className="bg-background min-h-screen">
@@ -131,6 +147,24 @@ export default function Dashboard() {
               exposure — layered across <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>3,144 U.S. counties</strong> to
               show where targeted interventions could close the biggest gaps.
             </p>
+          </div>
+        </section>
+
+        <PulseDivider />
+
+        {/* Homepage narrative — value proposition, audience framing */}
+        <section className="max-w-[1100px] mx-auto px-6 py-8" data-testid="section-homepage-narrative">
+          <p className="eyebrow mb-5">What Pulse Atlas Is</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+            {homepageNarrative.map((paragraph, i) => (
+              <p
+                key={i}
+                className="font-body text-[14.5px] leading-[1.65]"
+                style={{ color: "var(--pulse-text)" }}
+              >
+                {paragraph}
+              </p>
+            ))}
           </div>
         </section>
 

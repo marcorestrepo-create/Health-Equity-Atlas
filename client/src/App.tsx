@@ -8,6 +8,7 @@ import Dashboard from "@/pages/Dashboard";
 import CountyDetail from "@/pages/CountyDetail";
 import InterventionDetail from "@/pages/InterventionDetail";
 import Methods from "@/pages/Methods";
+import Contact from "@/pages/Contact";
 import NotFound from "@/pages/not-found";
 
 function AppContent() {
@@ -21,6 +22,7 @@ function AppContent() {
             <Route path="/county/:fips" component={CountyDetail} />
             <Route path="/intervention/:slug" component={InterventionDetail} />
             <Route path="/methods" component={Methods} />
+            <Route path="/contact" component={Contact} />
             <Route component={NotFound} />
           </Switch>
         </main>

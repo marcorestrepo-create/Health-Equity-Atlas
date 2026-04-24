@@ -1,0 +1,347 @@
+/**
+ * Build-time pre-rendering for Pulse Atlas.
+ *
+ * After Vite builds the SPA shell into dist/public/index.html, this script
+ * generates static HTML files at path-based URLs (e.g. /county/48113/index.html,
+ * /methods/index.html, /contact/index.html) so search engines see real,
+ * unique, indexable content without having to execute JS.
+ *
+ * Each pre-rendered file:
+ *   1. Has a route-specific <title> and <meta name="description">
+ *   2. Has a route-specific <link rel="canonical"> (path URL, not hash)
+ *   3. Injects a small SEO shell into <body> BEFORE the React root mounts —
+ *      an <h1>, a paragraph of context, and JSON-LD — so crawlers see real
+ *      content even without running JS. React replaces it on hydration.
+ *   4. Includes a tiny redirect <script> that converts path routes to hash
+ *      routes client-side (since the React app uses hash routing) — this
+ *      runs BEFORE React mounts, so users land on /county/48113 and end up
+ *      at the same interactive experience they'd have at /#/county/48113.
+ *
+ * Run after `vite build` completes.
+ */
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+// Inline county type — intentionally kept tiny so we don't pull in server/schema
+type Row = {
+  fips: string;
+  name: string;
+  state: string;
+  stateAbbr: string;
+  population: number;
+  lat: number;
+  lng: number;
+};
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = path.resolve(__dirname, "..");
+const DIST_PUBLIC = path.join(PROJECT_ROOT, "dist", "public");
+const SHELL_PATH = path.join(DIST_PUBLIC, "index.html");
+const COUNTIES_JSON = path.join(PROJECT_ROOT, "server", "real_counties.json");
+
+const BASE_URL = "https://www.thepulseatlas.com";
+
+// ─── Intervention slugs (mirror seed.ts / storage) ─────────────────────────
+const INTERVENTIONS: Array<{ slug: string; name: string; description: string }> = [
+  {
+    slug: "ob-access-expansion",
+    name: "OB Access Expansion",
+    description:
+      "Expand obstetric provider supply in maternity care deserts through mobile clinics, certified nurse midwife placement, and telehealth consults.",
+  },
+  {
+    slug: "mobile-health-clinics",
+    name: "Mobile Health Clinics",
+    description:
+      "Deploy mobile clinics to rural and transportation-poor counties to bring primary care, screening, and chronic-disease management to patients.",
+  },
+  {
+    slug: "language-access",
+    name: "Language Access",
+    description:
+      "Expand qualified medical interpreter services, translated clinical materials, and multilingual care navigators in counties with high LEP populations.",
+  },
+  {
+    slug: "community-health-workers",
+    name: "Community Health Workers",
+    description:
+      "Embed CHWs in primary care teams to support chronic-disease self-management, navigation, and social needs screening in high-SVI counties.",
+  },
+  {
+    slug: "telehealth-expansion",
+    name: "Telehealth Expansion",
+    description:
+      "Expand broadband-enabled telehealth for specialty care, mental health, and chronic-disease follow-up in broadband-limited counties.",
+  },
+  {
+    slug: "care-coordination",
+    name: "Care Coordination",
+    description:
+      "Fund care-management programs for high-need Medicare/Medicaid populations in counties with hospital closures or provider shortages.",
+  },
+];
+
+// ─── HTML helpers ──────────────────────────────────────────────────────────
+const esc = (s: string) =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+function buildRedirectScript(hashTarget: string): string {
+  // Runs before React mounts. If we landed on a path URL, convert it to
+  // the hash URL the SPA understands, then let React take over.
+  return `<script>(function(){var h=${JSON.stringify(hashTarget)};if(location.hash!=="#"+h){history.replaceState(null,"","/#"+h);}})();</script>`;
+}
+
+function buildCountyJSONLD(c: Row, pathUrl: string): object {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    name: `${c.name}, ${c.stateAbbr} — Health Equity Profile`,
+    description: `Health equity data for ${c.name}, ${c.state} (FIPS ${c.fips}): insurance coverage, maternal mortality, chronic disease prevalence, provider shortages, social vulnerability, and ranked evidence-based interventions. Part of the Pulse U.S. Health Equity Atlas.`,
+    url: `${BASE_URL}${pathUrl}`,
+    isPartOf: {
+      "@type": "Dataset",
+      name: "Pulse U.S. County Health Equity Atlas Dataset",
+      url: BASE_URL,
+    },
+    spatialCoverage: {
+      "@type": "Place",
+      name: `${c.name}, ${c.state}, United States`,
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: c.lat,
+        longitude: c.lng,
+      },
+    },
+    license: "https://creativecommons.org/licenses/by/4.0/",
+    isAccessibleForFree: true,
+    creator: {
+      "@type": "Organization",
+      name: "Pulse: U.S. Health Equity Atlas",
+      url: BASE_URL,
+    },
+  };
+}
+
+function buildInterventionJSONLD(i: { slug: string; name: string; description: string }, pathUrl: string): object {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: `${i.name} — Evidence-Based Health Equity Intervention`,
+    description: i.description,
+    url: `${BASE_URL}${pathUrl}`,
+    isPartOf: { "@type": "WebSite", name: "Pulse: U.S. Health Equity Atlas", url: BASE_URL },
+    author: { "@type": "Organization", name: "Pulse: U.S. Health Equity Atlas", url: BASE_URL },
+    publisher: { "@type": "Organization", name: "Pulse: U.S. Health Equity Atlas", url: BASE_URL },
+  };
+}
+
+// ─── Route config ──────────────────────────────────────────────────────────
+type RouteSpec = {
+  /** Path URL (e.g. "/methods"). Written to dist/public/<path>/index.html */
+  pathUrl: string;
+  /** Hash URL the SPA uses internally (e.g. "/methods") */
+  hashUrl: string;
+  title: string;
+  description: string;
+  h1: string;
+  /** Paragraph of real content crawlers can see without running JS */
+  shellBody: string;
+  /** Optional extra JSON-LD to inject (will be wrapped in a <script type="application/ld+json"> tag) */
+  extraJsonLd?: object;
+};
+
+// ─── Core render ───────────────────────────────────────────────────────────
+function renderShell(shell: string, route: RouteSpec): string {
+  let html = shell;
+
+  // 0. Vite builds with base:"./" which produces relative asset URLs like
+  //    href="./assets/x.css" and src="./assets/y.js". That works at the root
+  //    index.html but breaks when the same HTML lives under /county/06037/,
+  //    where the browser would request /county/assets/x.css (404). Rewrite
+  //    all relative asset references to root-absolute paths so every
+  //    pre-rendered page loads the same bundle.
+  html = html.replace(/(href|src)="\.\/(assets\/[^"]+)"/g, '$1="/$2"');
+
+  // 1. Replace <title>
+  html = html.replace(
+    /<title>[\s\S]*?<\/title>/,
+    `<title>${esc(route.title)}</title>`,
+  );
+
+  // 2. Replace <meta name="description">
+  html = html.replace(
+    /<meta\s+name=["']description["'][^>]*>/,
+    `<meta name="description" content="${esc(route.description)}" />`,
+  );
+
+  // 3. Replace <link rel="canonical">
+  const canonical = `${BASE_URL}${route.pathUrl}`;
+  if (/<link[^>]+rel=["']canonical["']/.test(html)) {
+    html = html.replace(
+      /<link[^>]+rel=["']canonical["'][^>]*>/,
+      `<link rel="canonical" href="${esc(canonical)}" />`,
+    );
+  } else {
+    html = html.replace("</head>", `  <link rel="canonical" href="${esc(canonical)}" />\n</head>`);
+  }
+
+  // 4. Update Open Graph URL + title
+  html = html.replace(
+    /<meta\s+property=["']og:url["'][^>]*>/,
+    `<meta property="og:url" content="${esc(canonical)}" />`,
+  );
+  html = html.replace(
+    /<meta\s+property=["']og:title["'][^>]*>/,
+    `<meta property="og:title" content="${esc(route.title)}" />`,
+  );
+  html = html.replace(
+    /<meta\s+property=["']og:description["'][^>]*>/,
+    `<meta property="og:description" content="${esc(route.description)}" />`,
+  );
+  html = html.replace(
+    /<meta\s+name=["']twitter:title["'][^>]*>/,
+    `<meta name="twitter:title" content="${esc(route.title)}" />`,
+  );
+  html = html.replace(
+    /<meta\s+name=["']twitter:description["'][^>]*>/,
+    `<meta name="twitter:description" content="${esc(route.description)}" />`,
+  );
+
+  // 5. Inject extra JSON-LD before </head>
+  if (route.extraJsonLd) {
+    const jsonLdScript = `  <script type="application/ld+json">${JSON.stringify(route.extraJsonLd)}</script>\n`;
+    html = html.replace("</head>", `${jsonLdScript}</head>`);
+  }
+
+  // 6. Inject SEO shell + redirect script into <body> before <div id="root">
+  //    - Shell is hidden (display:none) but crawlable
+  //    - Redirect script rewrites URL to hash route before React boots
+  const seoShell = [
+    `<noscript><div style="max-width:780px;margin:40px auto;padding:0 20px;font-family:Georgia,serif;line-height:1.6;color:#28251D;">`,
+    `<h1 style="font-size:32px;margin:0 0 16px;color:#1A2744;">${esc(route.h1)}</h1>`,
+    `<p style="font-size:16px;margin:0 0 14px;">${esc(route.shellBody)}</p>`,
+    `<p><a href="${esc(canonical)}" style="color:#C0392B;">${esc(canonical)}</a></p>`,
+    `</div></noscript>`,
+    `<div data-prerender-seo style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">`,
+    `<h1>${esc(route.h1)}</h1>`,
+    `<p>${esc(route.shellBody)}</p>`,
+    `</div>`,
+  ].join("");
+
+  const redirect = buildRedirectScript(route.hashUrl);
+
+  html = html.replace(
+    /<div id="root"><\/div>/,
+    `${seoShell}${redirect}<div id="root"></div>`,
+  );
+
+  return html;
+}
+
+// ─── Write helper ──────────────────────────────────────────────────────────
+async function writeRoute(shell: string, route: RouteSpec): Promise<void> {
+  const html = renderShell(shell, route);
+  // pathUrl "/county/48113" → dist/public/county/48113/index.html
+  // pathUrl "/" → dist/public/index.html (already exists, overwrite)
+  const relDir = route.pathUrl === "/" ? "" : route.pathUrl.replace(/^\//, "");
+  const outDir = path.join(DIST_PUBLIC, relDir);
+  await mkdir(outDir, { recursive: true });
+  await writeFile(path.join(outDir, "index.html"), html, "utf-8");
+}
+
+// ─── Main ──────────────────────────────────────────────────────────────────
+async function main() {
+  console.log("[prerender] reading shell...");
+  const shell = await readFile(SHELL_PATH, "utf-8");
+
+  console.log("[prerender] loading counties...");
+  const countiesRaw = await readFile(COUNTIES_JSON, "utf-8");
+  const counties: Row[] = JSON.parse(countiesRaw);
+  console.log(`[prerender] ${counties.length} counties loaded`);
+
+  // ─── Static routes ───
+  const staticRoutes: RouteSpec[] = [
+    {
+      pathUrl: "/",
+      hashUrl: "/",
+      title: "Pulse — U.S. Health Equity Atlas | 3,144 Counties Mapped",
+      description:
+        "Interactive county-by-county atlas mapping health equity gaps across all 3,144 U.S. counties. Insurance, maternal mortality, chronic disease, provider shortages, and evidence-based interventions.",
+      h1: "Pulse: U.S. Health Equity Atlas — Mapping the Gaps in American Health Equity",
+      shellBody: `Pulse Atlas maps the structural determinants of health across every one of the 3,144 counties in the United States. Each county is scored on a composite Health Equity Gap Score (0–100) combining insurance coverage, maternal mortality, chronic disease prevalence, provider supply, hospital access, transportation, broadband, and environmental exposure. Data is free, open, and licensed under CC BY 4.0. Built for policymakers, health systems, and community coalitions.`,
+    },
+    {
+      pathUrl: "/methods",
+      hashUrl: "/methods",
+      title: "Methods & Data Sources — Pulse U.S. Health Equity Atlas",
+      description:
+        "Full methodology for the Pulse Atlas Health Equity Gap Score: data sources (CDC PLACES, Census SAHIE, HRSA, EJScreen, March of Dimes), formulas, vintage years, and transformations.",
+      h1: "Methods & Data Sources",
+      shellBody: `Pulse Atlas combines more than a dozen federal datasets — CDC PLACES, Census SAHIE and ACS, HRSA HPSA, FCC Broadband Data Collection, EPA EJScreen, CDC/ATSDR SVI, March of Dimes Maternity Care Deserts, IHME, and County Health Rankings — normalizes them to FIPS codes, and recomputes a composite gap score when underlying indicators change. This page documents every source, vintage year, formula, and intervention-scoring rule.`,
+    },
+    {
+      pathUrl: "/contact",
+      hashUrl: "/contact",
+      title: "Contact — Pulse: U.S. Health Equity Atlas",
+      description:
+        "Contact the Pulse Atlas team about data partnerships, corrections, custom briefings, press inquiries, or research collaboration. Email contact@thepulseatlas.com.",
+      h1: "Contact the Pulse Atlas Team",
+      shellBody: `Email contact@thepulseatlas.com. We answer questions from researchers, policymakers, health systems, funders, journalists, and community organizations — data corrections, partnership ideas, custom analysis requests, press inquiries, and research collaboration. We typically reply within 2 business days.`,
+    },
+  ];
+
+  for (const r of staticRoutes) {
+    await writeRoute(shell, r);
+  }
+  console.log(`[prerender] ${staticRoutes.length} static routes written`);
+
+  // ─── Intervention routes ───
+  for (const i of INTERVENTIONS) {
+    const pathUrl = `/intervention/${i.slug}`;
+    await writeRoute(shell, {
+      pathUrl,
+      hashUrl: pathUrl,
+      title: `${i.name} — Evidence-Based Intervention | Pulse Atlas`,
+      description: `${i.description.slice(0, 155)}`,
+      h1: i.name,
+      shellBody: i.description,
+      extraJsonLd: buildInterventionJSONLD(i, pathUrl),
+    });
+  }
+  console.log(`[prerender] ${INTERVENTIONS.length} intervention routes written`);
+
+  // ─── County routes ───
+  let countyCount = 0;
+  for (const c of counties) {
+    const pathUrl = `/county/${c.fips}`;
+    const popText = c.population ? ` Population ${c.population.toLocaleString()}.` : "";
+    await writeRoute(shell, {
+      pathUrl,
+      hashUrl: pathUrl,
+      title: `${c.name}, ${c.stateAbbr} — Health Equity Profile | Pulse Atlas`,
+      description: `Health equity data for ${c.name}, ${c.stateAbbr} (FIPS ${c.fips}): uninsured rate, maternal mortality, chronic disease, provider shortages, hospital closures, social vulnerability, and ranked interventions.`,
+      h1: `${c.name}, ${c.state} — Health Equity Profile`,
+      shellBody: `${c.name} is a county in ${c.state} (FIPS code ${c.fips}).${popText} Pulse Atlas tracks its Health Equity Gap Score along with insurance coverage, maternal mortality, chronic disease prevalence (diabetes, hypertension, obesity, heart disease), primary care provider supply, hospital access, social vulnerability, and environmental exposure — then ranks evidence-based interventions most likely to close the local gap.`,
+      extraJsonLd: buildCountyJSONLD(c, pathUrl),
+    });
+    countyCount++;
+    if (countyCount % 500 === 0) {
+      console.log(`[prerender]   ${countyCount}/${counties.length} counties...`);
+    }
+  }
+  console.log(`[prerender] ${countyCount} county routes written`);
+
+  const total = staticRoutes.length + INTERVENTIONS.length + countyCount;
+  console.log(`[prerender] ✅ done — ${total} static HTML files written to dist/public/`);
+}
+
+main().catch((err) => {
+  console.error("[prerender] failed:", err);
+  process.exit(1);
+});

@@ -40,7 +40,7 @@ export function buildCountyStructuredData(county: {
   lng?: number | null;
   healthEquityGapScore?: number | null;
 }) {
-  const pageUrl = `https://thepulseatlas.com/#/county/${county.fips}`;
+  const pageUrl = `https://www.thepulseatlas.com/county/${county.fips}`;
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -53,13 +53,13 @@ export function buildCountyStructuredData(county: {
         isPartOf: {
           "@type": "Dataset",
           name: "Pulse U.S. County Health Equity Atlas Dataset",
-          url: "https://thepulseatlas.com",
+          url: "https://www.thepulseatlas.com",
         },
         identifier: `FIPS:${county.fips}`,
         creator: {
           "@type": "Organization",
           name: "Pulse: U.S. Health Equity Atlas",
-          url: "https://thepulseatlas.com",
+          url: "https://www.thepulseatlas.com",
         },
         license: "https://creativecommons.org/licenses/by/4.0/",
         isAccessibleForFree: true,
@@ -103,13 +103,13 @@ export function buildCountyStructuredData(county: {
             "@type": "ListItem",
             position: 1,
             name: "Pulse Atlas",
-            item: "https://thepulseatlas.com",
+            item: "https://www.thepulseatlas.com",
           },
           {
             "@type": "ListItem",
             position: 2,
             name: county.state,
-            item: `https://thepulseatlas.com/#/state/${county.stateAbbr}`,
+            item: `https://www.thepulseatlas.com/state/${county.stateAbbr}`,
           },
           {
             "@type": "ListItem",

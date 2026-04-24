@@ -11,31 +11,32 @@ export async function registerRoutes(server: Server, app: Express) {
   app.get("/robots.txt", (_req, res) => {
     res.setHeader("Content-Type", "text/plain");
     res.send(
-      "User-agent: *\nAllow: /\nSitemap: https://thepulseatlas.com/sitemap.xml\n"
+      "User-agent: *\nAllow: /\nSitemap: https://www.thepulseatlas.com/sitemap.xml\n"
     );
   });
 
   // GET /sitemap.xml
   app.get("/sitemap.xml", (_req, res) => {
     const today = new Date().toISOString().split("T")[0];
-    const baseUrl = "https://thepulseatlas.com";
+    const baseUrl = "https://www.thepulseatlas.com";
 
     const counties = storage.getFilteredCounties({});
     const interventions = storage.getAllInterventions();
 
     const staticUrls = [
       `  <url>\n    <loc>${baseUrl}/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>`,
-      `  <url>\n    <loc>${baseUrl}/#/methods</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
+      `  <url>\n    <loc>${baseUrl}/methods</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
+      `  <url>\n    <loc>${baseUrl}/contact</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>yearly</changefreq>\n    <priority>0.4</priority>\n  </url>`,
     ];
 
     const countyUrls = counties.map(
       (c) =>
-        `  <url>\n    <loc>${baseUrl}/#/county/${c.fips}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>`
+        `  <url>\n    <loc>${baseUrl}/county/${c.fips}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>`
     );
 
     const interventionUrls = interventions.map(
       (i) =>
-        `  <url>\n    <loc>${baseUrl}/#/intervention/${i.slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`
+        `  <url>\n    <loc>${baseUrl}/intervention/${i.slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`
     );
 
     const xml = [

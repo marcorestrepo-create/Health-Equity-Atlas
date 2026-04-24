@@ -45,6 +45,7 @@ export function PulseNav() {
   const navLinks = [
     { href: "/", label: "Dashboard" },
     { href: "/methods", label: "Methods" },
+    { href: "/contact", label: "Contact" },
   ];
 
   return (
@@ -138,6 +139,11 @@ export function PulseFooter() {
             County-level estimates are modeled from the sources above and calibrated to
             published national benchmarks. For clinical or policy decisions, consult
             primary data sources directly.
+          </p>
+          <p>
+            <Link href="/contact" className="hover:opacity-70 transition-opacity">Contact</Link>
+            {" · "}
+            <a href="mailto:contact@thepulseatlas.com" className="hover:opacity-70 transition-opacity normal-case tracking-normal">contact@thepulseatlas.com</a>
           </p>
         </div>
       </div>

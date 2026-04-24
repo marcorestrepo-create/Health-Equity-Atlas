@@ -12,6 +12,7 @@ import { INTERVENTION_COLORS } from "@/lib/constants";
 import { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useStructuredData, buildCountyStructuredData } from "@/hooks/useStructuredData";
+import { buildCountyNarrative } from "@shared/narratives";
 
 const iconMap: Record<string, any> = {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
@@ -701,6 +702,41 @@ export default function CountyDetail() {
             <span>LOW DISPARITY</span>
             <span>HIGH DISPARITY</span>
           </div>
+        </div>
+      </section>
+
+      {/* Narrative — data-driven, SEO-rich prose */}
+      <section className="max-w-[1100px] mx-auto px-6 pt-2 pb-8">
+        <p className="eyebrow mb-4">County Overview</p>
+        <div className="space-y-4 font-body text-[15.5px] leading-[1.7] max-w-[780px]" style={{ color: "var(--pulse-text)" }} data-testid="text-county-narrative">
+          {buildCountyNarrative({
+            name: county.name,
+            state: county.state,
+            stateAbbr: county.stateAbbr,
+            fips: county.fips,
+            population: county.population,
+            ruralUrban: county.ruralUrban,
+            healthEquityGapScore: county.healthEquityGapScore,
+            uninsuredRate: county.uninsuredRate,
+            maternalMortalityRate: county.maternalMortalityRate,
+            diabetesRate: county.diabetesRate,
+            hypertensionRate: county.hypertensionRate,
+            obesityRate: county.obesityRate,
+            heartDiseaseRate: county.heartDiseaseRate,
+            lifeExpectancy: county.lifeExpectancy,
+            pcpPer100k: county.pcpPer100k,
+            hpsaScore: county.hpsaScore,
+            maternityCareDesert: county.maternityCareDesert === 1,
+            hospitalClosureSince2010: county.hospitalClosureSince2010 === 1,
+            obUnitClosure: county.obUnitClosure === 1,
+            noBroadbandRate: county.noBroadbandRate,
+            noVehicleRate: county.noVehicleRate,
+            sviOverall: county.sviOverall,
+            ejScreenIndex: county.ejScreenIndex,
+            pm25: county.pm25,
+          }).map((paragraph, i) => (
+            <p key={i}>{paragraph}</p>
+          ))}
         </div>
       </section>
 

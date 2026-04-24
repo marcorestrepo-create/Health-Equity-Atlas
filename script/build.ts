@@ -36,6 +36,11 @@ async function buildAll() {
   console.log("building client...");
   await viteBuild();
 
+  console.log("pre-rendering static routes...");
+  // Dynamic import — tsx resolves .ts extensions at runtime
+  // @ts-expect-error - tsx handles .ts ESM resolution
+  await import("./prerender.ts");
+
   console.log("building server...");
   const pkg = JSON.parse(await readFile("package.json", "utf-8"));
   const allDeps = [
