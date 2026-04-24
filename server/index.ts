@@ -1,10 +1,32 @@
 import express, { type Request, Response, NextFunction } from "express";
+import compression from "compression";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
 const app = express();
 const httpServer = createServer(app);
+
+// Gzip compression for all responses (JSON API + static assets)
+// Large JSON payloads like /api/counties (1.7MB) compress ~75% smaller.
+app.use(compression({
+  threshold: 1024, // only compress responses > 1KB
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  },
+}));
+
+// Cache headers for immutable API data (counties, interventions rarely change)
+app.use((req, res, next) => {
+  if (req.path === '/api/counties' || req.path === '/api/interventions' || req.path === '/api/counties/summary') {
+    // 1 hour browser cache, 24 hour CDN cache, stale-while-revalidate for 7 days
+    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800');
+  } else if (req.path === '/sitemap.xml' || req.path === '/robots.txt') {
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+  }
+  next();
+});
 
 declare module "http" {
   interface IncomingMessage {

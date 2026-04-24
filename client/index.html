@@ -26,15 +26,7 @@
     <meta name="twitter:description" content="Interactive county-by-county atlas mapping health equity gaps across 3,144 U.S. counties. Insurance, maternal mortality, chronic disease, provider shortages, and more." />
     <meta name="twitter:image" content="https://thepulseatlas.com/og-image.png" />
 
-    <!-- Google Analytics 4 -->
-    <!-- Replace with actual GA4 measurement ID -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
-    </script>
+    <!-- Google Analytics 4 — ID wired at runtime via VITE_GA4_ID env var in main.tsx -->
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -47,27 +39,92 @@
         "url": "https://thepulseatlas.com",
         "applicationCategory": "HealthApplication",
         "operatingSystem": "Web",
+        "browserRequirements": "Requires JavaScript. Modern browsers (Chrome, Firefox, Safari, Edge).",
         "creator": {
           "@type": "Organization",
           "name": "Pulse: U.S. Health Equity Atlas",
           "url": "https://thepulseatlas.com"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
         },
         "keywords": "health equity, county health data, health disparities, maternal mortality, rural health, social vulnerability"
       },
       {
         "@context": "https://schema.org",
         "@type": "Dataset",
-        "name": "U.S. County Health Equity Data",
-        "description": "Comprehensive health equity metrics for all 3,144 U.S. counties, including uninsured rates, maternal mortality, chronic disease prevalence, provider availability, social vulnerability indices, and environmental justice scores.",
+        "name": "Pulse U.S. County Health Equity Atlas Dataset",
+        "alternateName": "Pulse Atlas County Health Equity Data",
+        "description": "Comprehensive health equity metrics for all 3,144 U.S. counties, including uninsured rates, maternal mortality ratios, chronic disease prevalence (diabetes, hypertension, obesity, heart disease), primary care provider density, HPSA shortage scores, social vulnerability indices, environmental justice screens, broadband access, food insecurity, and transportation barriers. Includes a composite Health Equity Gap Score (0–100) and ranked evidence-based intervention recommendations per county.",
         "url": "https://thepulseatlas.com",
+        "sameAs": "https://github.com/marcorestrepo-create/Health-Equity-Atlas",
+        "identifier": "https://thepulseatlas.com",
         "creator": {
           "@type": "Organization",
           "name": "Pulse: U.S. Health Equity Atlas",
           "url": "https://thepulseatlas.com"
         },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Pulse: U.S. Health Equity Atlas",
+          "url": "https://thepulseatlas.com"
+        },
         "datePublished": "2024-01-01",
+        "dateModified": "2026-04-24",
+        "version": "1.1",
         "license": "https://creativecommons.org/licenses/by/4.0/",
-        "keywords": ["health equity", "county health", "health disparities", "maternal mortality", "uninsured rate", "rural health", "social vulnerability index", "environmental justice", "public health", "U.S. counties"]
+        "isAccessibleForFree": true,
+        "spatialCoverage": {
+          "@type": "Place",
+          "name": "United States of America",
+          "geo": {
+            "@type": "GeoShape",
+            "box": "24.396308 -124.848974 49.384358 -66.885444"
+          }
+        },
+        "temporalCoverage": "2018/2024",
+        "measurementTechnique": [
+          "Population-weighted composite gap scoring",
+          "County-level data aggregation from federal sources",
+          "Evidence-based intervention ranking"
+        ],
+        "variableMeasured": [
+          "Health Equity Gap Score (0-100 composite)",
+          "Uninsured rate (%)",
+          "Maternal mortality ratio (per 100,000 live births)",
+          "Diabetes prevalence (%)",
+          "Hypertension prevalence (%)",
+          "Obesity rate (%)",
+          "Heart disease prevalence (%)",
+          "Life expectancy (years)",
+          "Primary care physicians per 100,000",
+          "HPSA shortage score (0-26)",
+          "Maternity care desert designation",
+          "Hospital closure since 2010",
+          "Social Vulnerability Index",
+          "EJScreen environmental justice percentile",
+          "Broadband non-access rate (%)",
+          "Food insecurity rate (%)",
+          "No-vehicle household rate (%)"
+        ],
+        "distribution": [
+          {
+            "@type": "DataDownload",
+            "encodingFormat": "application/json",
+            "contentUrl": "https://thepulseatlas.com/api/counties",
+            "name": "Full county dataset (JSON)"
+          },
+          {
+            "@type": "DataDownload",
+            "encodingFormat": "application/pdf",
+            "contentUrl": "https://thepulseatlas.com",
+            "name": "Per-county PDF briefings (Policymaker, Health System, Nonprofit)"
+          }
+        ],
+        "citation": "Pulse: U.S. Health Equity Atlas. (2026). County-level health equity data and intervention recommendations. https://thepulseatlas.com",
+        "keywords": ["health equity", "county health", "health disparities", "maternal mortality", "uninsured rate", "rural health", "social vulnerability index", "environmental justice", "public health", "U.S. counties", "HPSA", "maternity care desert"]
       }
     ]
     </script>

@@ -11,6 +11,7 @@ import { PulseDivider, PulseLineSmall } from "@/components/PulseLayout";
 import { INTERVENTION_COLORS } from "@/lib/constants";
 import { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useStructuredData, buildCountyStructuredData } from "@/hooks/useStructuredData";
 
 const iconMap: Record<string, any> = {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
@@ -48,6 +49,23 @@ export default function CountyDetail() {
     ? `Health equity data for ${countyName}, ${stateAbbr}: uninsured rates, maternal mortality, chronic disease, provider shortages, and evidence-based interventions.`
     : undefined;
   usePageTitle(pageTitle, pageDescription);
+
+  const countyForSchema = data?.county
+    ? {
+        name: data.county.name,
+        state: data.county.state,
+        stateAbbr: data.county.stateAbbr,
+        fips: data.county.fips,
+        population: data.county.population ?? null,
+        lat: data.county.lat ?? null,
+        lng: data.county.lng ?? null,
+        healthEquityGapScore: data.county.healthEquityGapScore ?? null,
+      }
+    : null;
+  useStructuredData(
+    "county-jsonld",
+    countyForSchema ? buildCountyStructuredData(countyForSchema) : null,
+  );
 
   if (isLoading || !data) {
     return (
