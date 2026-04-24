@@ -6,13 +6,26 @@ import { apiRequest } from "@/lib/queryClient";
 import {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users,
   Search, Filter, MapPin, ChevronRight, AlertTriangle, Activity,
-  TrendingDown, Building2, Wifi, Shield, Layers, X, ChevronDown, ArrowLeft
+  TrendingDown, Building2, Wifi, Shield, Layers, X, ArrowLeft
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PulseDivider, PulseLineSmall } from "@/components/PulseLayout";
 import { DATA_LAYERS, STATE_ABBRS, getGapColor, formatMetricValue, INTERVENTION_COLORS } from "@/lib/constants";
 import type { DataLayerKey } from "@/lib/constants";
 import { buildHomepageTagline } from "@shared/narratives";
+
+/** Format a population number compactly: 940,123 → "940K"; 2,940,123 → "2.9M". */
+function formatPopulation(pop: number | null | undefined): string {
+  if (pop == null || !isFinite(pop)) return "—";
+  if (pop >= 1_000_000) {
+    const m = pop / 1_000_000;
+    return `${m >= 10 ? m.toFixed(0) : m.toFixed(1)}M`;
+  }
+  if (pop >= 1_000) {
+    return `${Math.round(pop / 1_000).toLocaleString()}K`;
+  }
+  return pop.toLocaleString();
+}
 
 const iconMap: Record<string, any> = {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
@@ -28,20 +41,17 @@ export default function Dashboard() {
   const [activeLayer, setActiveLayer] = useState<DataLayerKey>("healthEquityGapScore");
   const [stateFilter, setStateFilter] = useState<string>("all");
   const [ruralFilter, setRuralFilter] = useState<string>("all");
-  const [showCountyList, setShowCountyList] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "map" | "interventions" | "states">("overview");
 
   // Helper to drill into a state
   const drillIntoState = (abbr: string) => {
     setStateFilter(abbr);
     setActiveTab("overview");
-    setShowCountyList(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const clearStateFilter = () => {
     setStateFilter("all");
-    setShowCountyList(false);
   };
 
   // Pick up state drill-down from county detail page
@@ -50,7 +60,6 @@ export default function Dashboard() {
     if (drill) {
       sessionStorage.removeItem("pulse_state_drill");
       setStateFilter(drill);
-      setShowCountyList(true);
     }
   }, []);
 
@@ -76,7 +85,7 @@ export default function Dashboard() {
     return qs ? `/api/counties?${qs}` : "/api/counties";
   }, [stateFilter, ruralFilter]);
 
-  const { data: countyData, isLoading: countiesLoading } = useQuery<any[]>({
+  const { data: countyData } = useQuery<any[]>({
     queryKey: [countyApiUrl],
   });
 
@@ -181,7 +190,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
               <KPIStat label="Counties Analyzed" value={summary.totalCounties.toLocaleString()} colorClass="neutral" />
               <KPIStat label="Avg Gap Score" value={summary.avgGapScore.toFixed(1)} unit="/100" colorClass="caution" />
-              <KPIStat label="Maternity Care Deserts" value={summary.maternityCareDeserts.toString()} unit={`${((summary.maternityCareDeserts / summary.totalCounties) * 100).toFixed(0)}%`} colorClass="alarm" />
+              <KPIStat label="Maternity Care Deserts" value={summary.maternityCareDeserts.toString()} unit={`${((summary.maternityCareDeserts / summary.totalCounties) * 100).toFixed(0)}% of counties`} colorClass="alarm" />
               <KPIStat label="Hospital Closures" value={summary.hospitalClosures.toString()} unit="since 2010" colorClass="alarm" last />
             </div>
           </section>
@@ -315,59 +324,6 @@ export default function Dashboard() {
             <StateRankingsContent summary={summary} drillIntoState={drillIntoState} />
           )}
 
-          {/* County ranking toggle */}
-          <div className="mt-10">
-            <button
-              onClick={() => setShowCountyList(!showCountyList)}
-              className="flex items-center gap-2 eyebrow hover:text-[var(--pulse-navy)] transition-colors"
-            >
-              <ChevronDown className={`w-4 h-4 transition-transform ${showCountyList ? "rotate-180" : ""}`} />
-              {sortedCounties.length} Counties · Sorted by {currentLayer.label}
-            </button>
-            {showCountyList && (
-              <div className="mt-4 border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
-                {countiesLoading ? (
-                  <div className="p-8 text-center text-[var(--pulse-text-muted)] font-data text-xs">Loading...</div>
-                ) : (
-                  <div className="max-h-[500px] overflow-auto custom-scrollbar">
-                    {sortedCounties.slice(0, 200).map((county: any, idx: number) => {
-                      const val = county[activeLayer];
-                      const color = getGapColor(val, currentLayer);
-                      return (
-                        <button
-                          key={county.fips}
-                          onClick={() => navigate(`/county/${county.fips}`)}
-                          className="w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-[var(--pulse-parchment)] transition-colors"
-                          style={{ borderBottom: "1px solid var(--pulse-border-faint)" }}
-                          data-testid={`county-row-${county.fips}`}
-                        >
-                          <span className="font-data text-[10px] text-[var(--pulse-text-muted)] w-6 text-right shrink-0">
-                            {idx + 1}
-                          </span>
-                          <div className="w-2.5 h-2.5 shrink-0" style={{ backgroundColor: color }} />
-                          <div className="flex-1 min-w-0">
-                            <span className="font-body text-[12px] font-medium" style={{ color: "var(--pulse-navy)" }}>
-                              {county.name}
-                            </span>
-                            <span
-                              className="font-data text-[10px] text-[var(--pulse-text-muted)] ml-2 hover:text-[var(--pulse-navy)] hover:underline cursor-pointer"
-                              onClick={(e) => { e.stopPropagation(); drillIntoState(county.stateAbbr); }}
-                              title={`View all ${county.stateAbbr} counties`}
-                            >
-                              {county.stateAbbr}
-                            </span>
-                          </div>
-                          <span className="font-data text-[12px] font-medium shrink-0" style={{ color }}>
-                            {formatMetricValue(val, activeLayer)}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
         </section>
       </div>
     </TooltipProvider>
@@ -434,7 +390,7 @@ function OverviewContent({ summary, summaryLoading, countyData, currentLayer, ac
 
       {/* Distribution chart */}
       <div>
-        <div className="flex items-end justify-between gap-8 mb-6">
+        <div className="flex items-end justify-between gap-8 mb-3">
           <h2 className="font-serif text-3xl font-normal" style={{ color: "var(--pulse-navy)" }}>
             Distribution
           </h2>
@@ -442,6 +398,9 @@ function OverviewContent({ summary, summaryLoading, countyData, currentLayer, ac
             {currentLayer.label}
           </span>
         </div>
+        <p className="font-body text-[13.5px] leading-[1.55] text-[var(--pulse-text-muted)] max-w-[720px] mb-5">
+          Each bar is a value range; bar height shows how many counties fall in it. Hover for details. Tall bars on the right mean many counties with <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>worse</strong> outcomes — the gap to close.
+        </p>
         <div className="border p-6" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
           <DistributionChart counties={countyData} activeLayer={activeLayer} currentLayer={currentLayer} />
         </div>
@@ -482,7 +441,7 @@ function OverviewContent({ summary, summaryLoading, countyData, currentLayer, ac
                   </span>
                 </span>
                 <span className="font-data text-[11px] text-[var(--pulse-text-muted)] ml-3">
-                  Pop: {(c.population / 1000).toFixed(0)}k
+                  Pop: {formatPopulation(c.population)}
                 </span>
               </div>
               <span
@@ -521,6 +480,7 @@ function DistributionChart({ counties, activeLayer, currentLayer }: any) {
   if (min === max) return null;
   const bucketCount = 24;
   const bucketSize = (max - min) / bucketCount;
+  const total = values.length;
   const buckets = Array.from({ length: bucketCount }, (_, i) => {
     const lo = min + i * bucketSize;
     const hi = lo + bucketSize;
@@ -532,32 +492,69 @@ function DistributionChart({ counties, activeLayer, currentLayer }: any) {
   });
   const maxCount = Math.max(...buckets.map(b => b.count));
 
+  // For metrics where higher = better (life expectancy, pcp supply), flip the left/right axis language
+  const higherIsBetter = activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k";
+  const leftLabel = higherIsBetter ? "Worse outcomes" : "Better outcomes";
+  const rightLabel = higherIsBetter ? "Better outcomes" : "Worse outcomes";
+
   return (
     <div>
-      <div className="flex items-end gap-px h-32">
-        {buckets.map((b, i) => (
-          <Tooltip key={i}>
-            <TooltipTrigger asChild>
-              <div
-                className="flex-1 transition-opacity hover:opacity-80 cursor-default"
-                style={{
-                  height: `${(b.count / maxCount) * 100}%`,
-                  backgroundColor: b.color,
-                  minHeight: b.count > 0 ? 3 : 0,
-                }}
-              />
-            </TooltipTrigger>
-            <TooltipContent>
-              <span className="font-data text-xs">
-                {b.lo.toFixed(1)} – {b.hi.toFixed(1)}: {b.count} counties
-              </span>
-            </TooltipContent>
-          </Tooltip>
-        ))}
-      </div>
-      <div className="flex justify-between mt-2">
-        <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">{min.toFixed(1)}</span>
-        <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">{max.toFixed(1)}</span>
+      {/* Y-axis hint (subtle) */}
+      <div className="flex items-end gap-4">
+        <div className="font-data text-[9px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] rotate-180 [writing-mode:vertical-rl] pb-2 shrink-0">
+          County count →
+        </div>
+        <div className="flex-1">
+          <div className="flex items-end gap-px h-32">
+            {buckets.map((b, i) => {
+              const pct = total > 0 ? (b.count / total) * 100 : 0;
+              return (
+                <Tooltip key={i}>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="flex-1 transition-opacity hover:opacity-80 cursor-default"
+                      style={{
+                        height: `${(b.count / maxCount) * 100}%`,
+                        backgroundColor: b.color,
+                        minHeight: b.count > 0 ? 3 : 0,
+                      }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[240px]">
+                    <div className="font-data text-[10px] uppercase tracking-[0.12em] text-[var(--pulse-text-muted)] mb-1">
+                      {currentLayer.label}
+                    </div>
+                    <div className="font-data text-xs font-semibold" style={{ color: "var(--pulse-navy)" }}>
+                      {formatMetricValue(b.lo, activeLayer)} – {formatMetricValue(b.hi, activeLayer)}
+                    </div>
+                    <div className="font-body text-xs mt-1" style={{ color: "var(--pulse-text)" }}>
+                      {b.count.toLocaleString()} {b.count === 1 ? "county" : "counties"}{" "}
+                      <span className="text-[var(--pulse-text-muted)]">· {pct.toFixed(1)}% of total</span>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+          {/* X-axis: min/max values */}
+          <div className="flex justify-between mt-2">
+            <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">
+              {formatMetricValue(min, activeLayer)}
+            </span>
+            <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">
+              {formatMetricValue(max, activeLayer)}
+            </span>
+          </div>
+          {/* X-axis directional labels */}
+          <div className="flex justify-between mt-1">
+            <span className="font-data text-[9px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)]">
+              ← {leftLabel}
+            </span>
+            <span className="font-data text-[9px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)]">
+              {rightLabel} →
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -753,7 +750,7 @@ function StateRankingsContent({ summary, drillIntoState }: any) {
                 <td className="px-4 py-2 text-right">{s.avgUninsured}%</td>
                 <td className="px-4 py-2 text-right hidden md:table-cell">{s.avgLifeExp} yrs</td>
                 <td className="px-4 py-2 text-right hidden md:table-cell">{s.countyCount}</td>
-                <td className="px-4 py-2 text-right hidden lg:table-cell">{(s.totalPop / 1000).toFixed(0)}k</td>
+                <td className="px-4 py-2 text-right hidden lg:table-cell">{formatPopulation(s.totalPop)}</td>
               </tr>
             ))}
           </tbody>
