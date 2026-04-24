@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { PulseDivider, PulseLineSmall } from "@/components/PulseLayout";
 import { DATA_LAYERS, STATE_ABBRS, getGapColor, formatMetricValue, INTERVENTION_COLORS } from "@/lib/constants";
 import type { DataLayerKey } from "@/lib/constants";
-import { buildHomepageNarrative } from "@shared/narratives";
+import { buildHomepageTagline } from "@shared/narratives";
 
 const iconMap: Record<string, any> = {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
@@ -102,20 +102,12 @@ export default function Dashboard() {
     });
   }, [countyData, activeLayer]);
 
-  // Homepage narrative — computed from summary data; falls back to static text before summary loads
-  const severeGapCounties = useMemo(() => {
-    if (!countyData) return null;
-    return countyData.filter((c: any) => (c.healthEquityGapScore ?? 0) > 60).length;
-  }, [countyData]);
-
-  const homepageNarrative = useMemo(() => {
-    return buildHomepageNarrative({
+  // Homepage tagline — short, single-paragraph framing. Long-form content lives on /about.
+  const homepageTagline = useMemo(() => {
+    return buildHomepageTagline({
       totalCounties: summary?.totalCounties ?? 3144,
-      maternityCareDeserts: summary?.maternityCareDeserts ?? null,
-      hospitalClosures: summary?.hospitalClosures ?? null,
-      severeGapCounties: severeGapCounties,
     });
-  }, [summary, severeGapCounties]);
+  }, [summary]);
 
   return (
     <TooltipProvider>
@@ -152,20 +144,22 @@ export default function Dashboard() {
 
         <PulseDivider />
 
-        {/* Homepage narrative — value proposition, audience framing */}
-        <section className="max-w-[1100px] mx-auto px-6 py-8" data-testid="section-homepage-narrative">
-          <p className="eyebrow mb-5">What Pulse Atlas Is</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
-            {homepageNarrative.map((paragraph, i) => (
-              <p
-                key={i}
-                className="font-body text-[14.5px] leading-[1.65]"
-                style={{ color: "var(--pulse-text)" }}
-              >
-                {paragraph}
-              </p>
-            ))}
-          </div>
+        {/* Homepage tagline — short orientation paragraph. Full story on /about. */}
+        <section className="max-w-[820px] mx-auto px-6 py-8" data-testid="section-homepage-tagline">
+          <p
+            className="font-body text-[16px] md:text-[17px] leading-[1.6]"
+            style={{ color: "var(--pulse-text)" }}
+          >
+            {homepageTagline}{" "}
+            <Link
+              href="/about"
+              className="font-data text-[11px] uppercase tracking-[0.14em] hover:opacity-70 transition-opacity whitespace-nowrap"
+              style={{ color: "var(--pulse-alarm)", marginLeft: 4 }}
+              data-testid="link-about-from-home"
+            >
+              About the project →
+            </Link>
+          </p>
         </section>
 
         <PulseDivider />

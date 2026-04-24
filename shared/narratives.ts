@@ -272,6 +272,90 @@ export function buildCountyNarrative(c: CountyNarrativeInput): string[] {
 }
 
 // ────────────────────────────────────────────────────────────
+// Per-county summary — short single paragraph (~40-55 words) for the
+// county page UI. Picks the 2-3 most notable data points and states
+// them as a confident sentence or two. The long-form narrative above
+// is still used for the pre-render SEO shell.
+// ────────────────────────────────────────────────────────────
+export function buildCountySummary(c: CountyNarrativeInput): string {
+  const countyLabel = `${c.name}, ${c.stateAbbr}`;
+  const tier = gapTier(c.healthEquityGapScore);
+  const pops = fmtPop(c.population ?? null);
+  const ruralText =
+    c.ruralUrban === "rural"
+      ? "rural "
+      : c.ruralUrban === "urban"
+        ? "urban "
+        : c.ruralUrban === "suburban"
+          ? "suburban "
+          : "";
+
+  // Sentence 1: place + gap score tier
+  const s1 =
+    tier && isNum(c.healthEquityGapScore)
+      ? `${countyLabel} (${pops}) scores ${c.healthEquityGapScore!.toFixed(1)} on the Pulse Atlas Health Equity Gap — ${tier} gap territory.`
+      : `${countyLabel} is a ${ruralText}county of ${pops} tracked in the Pulse Atlas dataset.`;
+
+  // Sentence 2: pick the 1-2 most striking findings from flags + worst metrics
+  const highlights: string[] = [];
+  if (c.maternityCareDesert) highlights.push("it's a maternity care desert");
+  if (c.hospitalClosureSince2010) highlights.push("it's lost a hospital since 2010");
+
+  // Worst chronic/coverage metric vs national
+  type Candidate = { label: string; pct: number };
+  const cands: Candidate[] = [];
+  const uninsuredCmp = compare(c.uninsuredRate, NAT.uninsuredRate);
+  if (uninsuredCmp?.direction === "worse" && isNum(c.uninsuredRate)) {
+    cands.push({
+      label: `${fmtPct(c.uninsuredRate)} of residents are uninsured (${uninsuredCmp.pct.toFixed(0)}% above the U.S. rate)`,
+      pct: uninsuredCmp.pct,
+    });
+  }
+  const mmCmp = compare(c.maternalMortalityRate, NAT.maternalMortalityRate);
+  if (mmCmp?.direction === "worse" && isNum(c.maternalMortalityRate)) {
+    cands.push({
+      label: `maternal mortality runs ${fmtNum(c.maternalMortalityRate, 1)} per 100k (${mmCmp.pct.toFixed(0)}% above benchmark)`,
+      pct: mmCmp.pct,
+    });
+  }
+  const diseases: Array<{ label: string; local: number | null | undefined; nat: number }> = [
+    { label: "diabetes", local: c.diabetesRate, nat: NAT.diabetesRate },
+    { label: "hypertension", local: c.hypertensionRate, nat: NAT.hypertensionRate },
+    { label: "heart disease", local: c.heartDiseaseRate, nat: NAT.heartDiseaseRate },
+    { label: "obesity", local: c.obesityRate, nat: NAT.obesityRate },
+  ];
+  for (const d of diseases) {
+    const cmp = compare(d.local, d.nat);
+    if (cmp?.direction === "worse" && isNum(d.local)) {
+      cands.push({
+        label: `${d.label} prevalence of ${fmtPct(d.local, 1)} (${cmp.pct.toFixed(0)}% above average)`,
+        pct: cmp.pct,
+      });
+    }
+  }
+  cands.sort((a, b) => b.pct - a.pct);
+  const topMetric = cands[0]?.label;
+  if (topMetric) highlights.push(topMetric);
+
+  let s2 = "";
+  if (highlights.length >= 2) {
+    s2 = `The headline findings: ${highlights[0]}, and ${highlights[1]}.`;
+  } else if (highlights.length === 1) {
+    s2 = `The headline finding: ${highlights[0]}.`;
+  }
+
+  // Sentence 3: brief call to the interventions ranking (only if severe/elevated)
+  let s3 = "";
+  if (tier === "severe" || tier === "elevated") {
+    s3 = `Scroll down for ranked evidence-based interventions and a downloadable briefing.`;
+  } else if (tier) {
+    s3 = `Even at ${tier} overall risk, targeted interventions in specific domains can sustain progress.`;
+  }
+
+  return [s1, s2, s3].filter(Boolean).join(" ");
+}
+
+// ────────────────────────────────────────────────────────────
 // Per-county meta description — for <meta name="description">
 // 150–160 char target
 // ────────────────────────────────────────────────────────────
@@ -299,6 +383,19 @@ export type HomepageNarrativeInput = {
   hospitalClosures?: number | null;
   severeGapCounties?: number | null; // count of counties with gapScore > 60
 };
+
+/**
+ * Short single-paragraph framing for the homepage (~45-55 words).
+ * The long-form content moved to the About page; this stays above the KPI row
+ * to give newcomers enough orientation without slowing them down.
+ */
+export function buildHomepageTagline(input: HomepageNarrativeInput): string {
+  const total = input.totalCounties || 3144;
+  return [
+    `Pulse Atlas scores all ${total.toLocaleString()} U.S. counties on a composite Health Equity Gap — combining insurance coverage, maternal mortality, chronic disease, provider supply, hospital access, transportation, broadband, and environmental exposure —`,
+    `so you can see where the gaps are concentrated, what's driving them, and which evidence-based interventions are most likely to close them.`,
+  ].join(" ");
+}
 
 export function buildHomepageNarrative(input: HomepageNarrativeInput): string[] {
   const total = input.totalCounties || 3144;

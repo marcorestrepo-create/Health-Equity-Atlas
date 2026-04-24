@@ -45,6 +45,7 @@ export function PulseNav() {
   const navLinks = [
     { href: "/", label: "Dashboard" },
     { href: "/methods", label: "Methods" },
+    { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
 

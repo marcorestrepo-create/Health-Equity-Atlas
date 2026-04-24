@@ -12,7 +12,7 @@ import { INTERVENTION_COLORS } from "@/lib/constants";
 import { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useStructuredData, buildCountyStructuredData } from "@/hooks/useStructuredData";
-import { buildCountyNarrative } from "@shared/narratives";
+import { buildCountySummary } from "@shared/narratives";
 
 const iconMap: Record<string, any> = {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
@@ -705,11 +705,15 @@ export default function CountyDetail() {
         </div>
       </section>
 
-      {/* Narrative — data-driven, SEO-rich prose */}
+      {/* Narrative — tight single-paragraph summary, aligned full-width with graphics above/below */}
       <section className="max-w-[1100px] mx-auto px-6 pt-2 pb-8">
         <p className="eyebrow mb-4">County Overview</p>
-        <div className="space-y-4 font-body text-[15.5px] leading-[1.7] max-w-[780px]" style={{ color: "var(--pulse-text)" }} data-testid="text-county-narrative">
-          {buildCountyNarrative({
+        <p
+          className="font-body text-[16px] leading-[1.7]"
+          style={{ color: "var(--pulse-text)" }}
+          data-testid="text-county-narrative"
+        >
+          {buildCountySummary({
             name: county.name,
             state: county.state,
             stateAbbr: county.stateAbbr,
@@ -734,10 +738,8 @@ export default function CountyDetail() {
             sviOverall: county.sviOverall,
             ejScreenIndex: county.ejScreenIndex,
             pm25: county.pm25,
-          }).map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
-          ))}
-        </div>
+          })}
+        </p>
       </section>
 
       <PulseDivider className="max-w-[1100px] mx-auto px-6" />

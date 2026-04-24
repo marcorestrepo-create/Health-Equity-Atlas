@@ -294,6 +294,15 @@ async function main() {
       h1: "Contact the Pulse Atlas Team",
       shellBody: `Email contact@thepulseatlas.com. We answer questions from researchers, policymakers, health systems, funders, journalists, and community organizations — data corrections, partnership ideas, custom analysis requests, press inquiries, and research collaboration. We typically reply within 2 business days.`,
     },
+    {
+      pathUrl: "/about",
+      hashUrl: "/about",
+      title: "About — Pulse: A County-Level Atlas of American Health Equity",
+      description:
+        "About Pulse Atlas: what the atlas measures, who it's built for, and why health equity data should be free and open. 3,144 U.S. counties scored on insurance, maternal care, chronic disease, provider supply, and social infrastructure. CC BY 4.0.",
+      h1: "A county-level atlas of American health equity",
+      shellBody: `Pulse Atlas is a free, open atlas mapping structural health inequities across all 3,144 U.S. counties. It combines more than a dozen federal datasets — CDC PLACES, Census SAHIE and ACS, HRSA HPSA, FCC Broadband, EPA EJScreen, CDC/ATSDR SVI, March of Dimes — into a single Health Equity Gap Score (0–100) and surfaces ranked, evidence-based interventions. Built for policymakers, health systems, and nonprofit coalitions who need defensible, comparable numbers. All data is licensed CC BY 4.0 — reuse it, cite it, build on it.`,
+    },
   ];
 
   for (const r of staticRoutes) {

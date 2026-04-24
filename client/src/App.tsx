@@ -9,6 +9,7 @@ import CountyDetail from "@/pages/CountyDetail";
 import InterventionDetail from "@/pages/InterventionDetail";
 import Methods from "@/pages/Methods";
 import Contact from "@/pages/Contact";
+import About from "@/pages/About";
 import NotFound from "@/pages/not-found";
 
 function AppContent() {
@@ -23,6 +24,7 @@ function AppContent() {
             <Route path="/intervention/:slug" component={InterventionDetail} />
             <Route path="/methods" component={Methods} />
             <Route path="/contact" component={Contact} />
+            <Route path="/about" component={About} />
             <Route component={NotFound} />
           </Switch>
         </main>
