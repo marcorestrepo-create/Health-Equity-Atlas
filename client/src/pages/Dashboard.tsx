@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -34,7 +34,7 @@ const iconMap: Record<string, any> = {
 export default function Dashboard() {
   usePageTitle(
     "Pulse — U.S. Health Equity Atlas | 3,144 Counties Mapped",
-    "Interactive county-by-county atlas mapping health equity gaps across 3,144 U.S. counties. Insurance, maternal mortality, chronic disease, provider shortages, and more."
+    "See where America's health equity gaps are widest — and what to do about them. County-level atlas for policymakers, health systems, and nonprofits. 3,144 counties, 8 structural factors, ranked evidence-based interventions. Free under CC BY 4.0."
   );
 
   const [, navigate] = useLocation();
@@ -136,18 +136,37 @@ export default function Dashboard() {
               className="font-serif font-normal leading-[1.02] tracking-[-0.012em] mb-6"
               style={{ fontSize: "clamp(36px, 5vw, 64px)", color: "var(--pulse-navy)" }}
             >
-              Mapping the gaps<br />
-              in <em className="italic" style={{ color: "var(--pulse-alarm)" }}>American health equity</em>
+              See where America's<br />
+              <em className="italic" style={{ color: "var(--pulse-alarm)" }}>health equity gaps</em> are widest —<br />
+              and what to do about them.
             </h1>
             <p
-              className="font-body text-lg leading-relaxed max-w-[680px]"
+              className="font-body text-lg leading-relaxed max-w-[720px]"
               style={{ color: "var(--pulse-text-muted)", fontSize: "18px", lineHeight: 1.55 }}
             >
-              Insurance coverage, maternal mortality, chronic disease, provider shortages,
-              hospital closures, transportation barriers, broadband access, and environmental
-              exposure — layered across <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>3,144 U.S. counties</strong> to
-              show where targeted interventions could close the biggest gaps.
+              A county-level atlas for <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>policymakers, health systems, and nonprofit coalitions</strong> —
+              one comparable Health Equity Gap Score across <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>3,144 U.S. counties</strong>,
+              with ranked, evidence-based interventions for each.
             </p>
+
+            {/* Proof strip */}
+            <div
+              className="mt-8 flex flex-wrap gap-x-6 gap-y-2 font-data text-[11px] uppercase tracking-[0.14em]"
+              style={{ color: "var(--pulse-text-muted)" }}
+              data-testid="proof-strip"
+            >
+              <span><strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>3,144</strong> counties</span>
+              <span className="opacity-40">·</span>
+              <span><strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>8</strong> structural factors</span>
+              <span className="opacity-40">·</span>
+              <span><strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>12+</strong> federal data sources</span>
+              <span className="opacity-40">·</span>
+              <span>
+                <Link href="/about" className="hover:opacity-70 transition-opacity" data-testid="link-license">
+                  CC BY 4.0 · free to use
+                </Link>
+              </span>
+            </div>
           </div>
         </section>
 
@@ -193,6 +212,14 @@ export default function Dashboard() {
               <KPIStat label="Maternity Care Deserts" value={summary.maternityCareDeserts.toString()} unit={`${((summary.maternityCareDeserts / summary.totalCounties) * 100).toFixed(0)}% of counties`} colorClass="alarm" />
               <KPIStat label="Hospital Closures" value={summary.hospitalClosures.toString()} unit="since 2010" colorClass="alarm" last />
             </div>
+            {/* How to read this */}
+            <p
+              className="mt-3 font-body text-[13px] leading-[1.55]"
+              style={{ color: "var(--pulse-text-muted)" }}
+              data-testid="text-how-to-read"
+            >
+              How to read this: the <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>Gap Score</strong> ranges 0–100 — higher means wider health equity gaps. Click any county below to see its profile and ranked interventions, or open the <Link href="/methods" className="underline underline-offset-2 hover:opacity-70" style={{ color: "var(--pulse-alarm)" }}>methodology</Link> for how it's calculated.
+            </p>
           </section>
         )}
 
@@ -455,6 +482,104 @@ function OverviewContent({ summary, summaryLoading, countyData, currentLayer, ac
           ))}
         </div>
       </div>
+
+      {/* Who uses Pulse */}
+      <div data-testid="section-audiences">
+        <div className="flex items-end justify-between gap-8 mb-6">
+          <h2 className="font-serif text-3xl font-normal" style={{ color: "var(--pulse-navy)" }}>
+            Who uses <em className="italic" style={{ color: "var(--pulse-alarm)" }}>Pulse</em>
+          </h2>
+          <Link
+            href="/about"
+            className="font-data text-[11px] uppercase tracking-[0.14em] pb-1 hover:opacity-70 transition-opacity whitespace-nowrap"
+            style={{ color: "var(--pulse-alarm)" }}
+          >
+            About the project →
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-border)" }}>
+          <AudienceCard
+            eyebrow="Policymakers"
+            title="Target interventions where gaps are widest"
+            body="Compare counties inside your state, benchmark against national averages, and pull evidence-ranked interventions for legislative briefings and state-health-department planning."
+          />
+          <AudienceCard
+            eyebrow="Health Systems"
+            title="Prioritize service-area expansion and CHNAs"
+            body="Identify underserved counties in your catchment, quantify community need for the next Community Health Needs Assessment, and build a defensible case for new services or partnerships."
+          />
+          <AudienceCard
+            eyebrow="Nonprofits & Funders"
+            title="Direct grants by county-level need"
+            body="Allocate philanthropic capital where it can close the biggest gaps. Export county profiles for grant applications, RFPs, and program evaluations."
+          />
+        </div>
+      </div>
+
+      {/* How it's used — concrete scenarios */}
+      <div data-testid="section-use-cases">
+        <div className="flex items-end justify-between gap-8 mb-6">
+          <h2 className="font-serif text-3xl font-normal" style={{ color: "var(--pulse-navy)" }}>
+            How it's used
+          </h2>
+          <span className="font-data text-[11px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] pb-1">
+            Three scenarios
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <UseCaseScenario
+            number="01"
+            body={<>A <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>state health department</strong> prioritizing maternal-health funding across its 75 rural counties identifies the 12 counties that are both maternity-care deserts and score in the top quartile for gap.</>}
+          />
+          <UseCaseScenario
+            number="02"
+            body={<>A <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>regional hospital system</strong> evaluating expansion into three adjacent counties compares uninsured rates, provider supply, and hospital-closure history to build the investment case.</>}
+          />
+          <UseCaseScenario
+            number="03"
+            body={<>A <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>community foundation</strong> allocating a $10M health-equity grant ranks counties in its region by gap score, then uses matched interventions to structure the RFP.</>}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AudienceCard({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
+  return (
+    <div className="p-6 md:p-7" style={{ background: "var(--pulse-cream)" }}>
+      <p className="eyebrow mb-3">{eyebrow}</p>
+      <h3
+        className="font-serif text-[19px] leading-[1.25] mb-3"
+        style={{ color: "var(--pulse-navy)" }}
+      >
+        {title}
+      </h3>
+      <p className="font-body text-[13.5px] leading-[1.6]" style={{ color: "var(--pulse-text-muted)" }}>
+        {body}
+      </p>
+    </div>
+  );
+}
+
+function UseCaseScenario({ number, body }: { number: string; body: ReactNode }) {
+  return (
+    <div
+      className="border-t pt-5"
+      style={{ borderColor: "var(--pulse-border)" }}
+    >
+      <p
+        className="font-data text-[10px] uppercase tracking-[0.18em] mb-3"
+        style={{ color: "var(--pulse-alarm)" }}
+      >
+        Scenario {number}
+      </p>
+      <p
+        className="font-body text-[14.5px] leading-[1.6]"
+        style={{ color: "var(--pulse-text)" }}
+      >
+        {body}
+      </p>
     </div>
   );
 }

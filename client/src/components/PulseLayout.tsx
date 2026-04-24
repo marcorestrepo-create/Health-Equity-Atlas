@@ -118,18 +118,43 @@ export function PulseNav() {
 
 /** Footer */
 export function PulseFooter() {
+  const year = new Date().getFullYear();
+  const citation = `Pulse Atlas. (${year}). Pulse: U.S. Health Equity Atlas. Retrieved from https://www.thepulseatlas.com. Licensed under CC BY 4.0.`;
+
   return (
     <footer
       className="py-10 mt-12"
       style={{ borderTop: "1px solid var(--pulse-border)" }}
     >
-      <div className="max-w-[1100px] mx-auto px-6 space-y-4">
+      <div className="max-w-[1100px] mx-auto px-6 space-y-6">
         <div className="flex items-baseline gap-2.5">
           <span className="font-serif italic text-lg" style={{ color: "var(--pulse-navy)" }}>
             Pulse
           </span>
           <PulseLineSmall width={60} />
         </div>
+
+        {/* Cite this atlas */}
+        <div
+          className="border p-4 md:p-5 max-w-[780px]"
+          style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}
+          data-testid="block-citation"
+        >
+          <p className="eyebrow mb-2">Cite this atlas</p>
+          <p
+            className="font-body text-[13px] leading-[1.6] normal-case tracking-normal"
+            style={{ color: "var(--pulse-text)" }}
+          >
+            {citation}
+          </p>
+          <p
+            className="mt-3 font-data text-[10px] uppercase tracking-[0.14em]"
+            style={{ color: "var(--pulse-text-muted)" }}
+          >
+            Free for any use with attribution. Last updated {year}.
+          </p>
+        </div>
+
         <div className="font-data text-[10px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] space-y-1.5">
           <p>U.S. Health Equity Atlas · National Minority Health Month 2026</p>
           <p>
@@ -142,6 +167,10 @@ export function PulseFooter() {
             primary data sources directly.
           </p>
           <p>
+            <Link href="/about" className="hover:opacity-70 transition-opacity">About</Link>
+            {" · "}
+            <Link href="/methods" className="hover:opacity-70 transition-opacity">Methods</Link>
+            {" · "}
             <Link href="/contact" className="hover:opacity-70 transition-opacity">Contact</Link>
             {" · "}
             <a href="mailto:contact@thepulseatlas.com" className="hover:opacity-70 transition-opacity normal-case tracking-normal">contact@thepulseatlas.com</a>
