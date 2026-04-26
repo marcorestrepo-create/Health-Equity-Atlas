@@ -22,6 +22,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { generateCounties, type CountyMetrics } from "../shared/county-metrics";
 
 // Inline county type — intentionally kept tiny so we don't pull in server/schema
 type Row = {
@@ -97,8 +98,82 @@ function buildRedirectScript(hashTarget: string): string {
   return `<script>(function(){var h=${JSON.stringify(hashTarget)};if(location.hash!=="#"+h){history.replaceState(null,"","/#"+h);}})();</script>`;
 }
 
-function buildCountyJSONLD(c: Row, pathUrl: string): object {
-  return {
+/**
+ * Build a `variableMeasured` array for the county Dataset JSON-LD.
+ *
+ * Each entry is a schema.org PropertyValue exposing one health-equity metric
+ * with a numeric value and (where applicable) a unit. This lets Google read the
+ * county's actual Gap Score, uninsured rate, etc. as structured data — eligible
+ * for richer search-result treatment than a description string alone.
+ *
+ * Metrics are sourced from the same deterministic generator the runtime DB
+ * uses (shared/county-metrics.ts, seed=42), so JSON-LD values match the live UI.
+ */
+function buildVariableMeasured(m: CountyMetrics): object[] {
+  return [
+    {
+      "@type": "PropertyValue",
+      name: "Health Equity Gap Score",
+      description: "Composite 0–100 score combining insurance, maternal, chronic disease, access, social vulnerability, environmental, and infrastructure gaps. Higher = wider gap.",
+      value: m.healthEquityGapScore,
+      minValue: 0,
+      maxValue: 100,
+    },
+    {
+      "@type": "PropertyValue",
+      name: "Uninsured rate",
+      value: m.uninsuredRate,
+      unitText: "percent",
+    },
+    {
+      "@type": "PropertyValue",
+      name: "Maternal mortality rate",
+      value: m.maternalMortalityRate,
+      unitText: "deaths per 100,000 live births",
+    },
+    {
+      "@type": "PropertyValue",
+      name: "Diabetes prevalence",
+      value: m.diabetesRate,
+      unitText: "percent",
+    },
+    {
+      "@type": "PropertyValue",
+      name: "Hypertension prevalence",
+      value: m.hypertensionRate,
+      unitText: "percent",
+    },
+    {
+      "@type": "PropertyValue",
+      name: "Life expectancy at birth",
+      value: m.lifeExpectancy,
+      unitText: "years",
+    },
+    {
+      "@type": "PropertyValue",
+      name: "Primary care providers per 100,000",
+      value: m.pcpPer100k,
+      unitText: "providers per 100,000 residents",
+    },
+    {
+      "@type": "PropertyValue",
+      name: "Social Vulnerability Index (overall)",
+      description: "CDC/ATSDR SVI overall percentile, 0–1 (higher = more vulnerable).",
+      value: m.sviOverall,
+      minValue: 0,
+      maxValue: 1,
+    },
+    {
+      "@type": "PropertyValue",
+      name: "Households without broadband",
+      value: m.noBroadbandRate,
+      unitText: "percent",
+    },
+  ];
+}
+
+function buildCountyJSONLD(c: Row, pathUrl: string, metrics?: CountyMetrics): object {
+  const base: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Dataset",
     name: `${c.name}, ${c.stateAbbr} — Health Equity Profile`,
@@ -126,6 +201,10 @@ function buildCountyJSONLD(c: Row, pathUrl: string): object {
       url: BASE_URL,
     },
   };
+  if (metrics) {
+    base.variableMeasured = buildVariableMeasured(metrics);
+  }
+  return base;
 }
 
 function buildInterventionJSONLD(i: { slug: string; name: string; description: string }, pathUrl: string): object {
@@ -326,10 +405,23 @@ async function main() {
   console.log(`[prerender] ${INTERVENTIONS.length} intervention routes written`);
 
   // ─── County routes ───
+  // Build a fips→metrics lookup using the same deterministic generator the
+  // server uses to seed SQLite. This guarantees the JSON-LD values baked into
+  // pre-rendered HTML match what users see in the live app.
+  console.log("[prerender] generating county metrics for JSON-LD...");
+  const metricsByFips = new Map<string, CountyMetrics>();
+  for (const m of generateCounties()) {
+    metricsByFips.set(m.fips, m);
+  }
+  console.log(`[prerender] metrics ready for ${metricsByFips.size} counties`);
+
   let countyCount = 0;
+  let metricsHits = 0;
   for (const c of counties) {
     const pathUrl = `/county/${c.fips}`;
     const popText = c.population ? ` Population ${c.population.toLocaleString()}.` : "";
+    const metrics = metricsByFips.get(c.fips);
+    if (metrics) metricsHits++;
     await writeRoute(shell, {
       pathUrl,
       hashUrl: pathUrl,
@@ -337,14 +429,14 @@ async function main() {
       description: `Health equity data for ${c.name}, ${c.stateAbbr} (FIPS ${c.fips}): uninsured rate, maternal mortality, chronic disease, provider shortages, hospital closures, social vulnerability, and ranked interventions.`,
       h1: `${c.name}, ${c.state} — Health Equity Profile`,
       shellBody: `${c.name} is a county in ${c.state} (FIPS code ${c.fips}).${popText} Pulse Atlas tracks its Health Equity Gap Score along with insurance coverage, maternal mortality, chronic disease prevalence (diabetes, hypertension, obesity, heart disease), primary care provider supply, hospital access, social vulnerability, and environmental exposure — then ranks evidence-based interventions most likely to close the local gap.`,
-      extraJsonLd: buildCountyJSONLD(c, pathUrl),
+      extraJsonLd: buildCountyJSONLD(c, pathUrl, metrics),
     });
     countyCount++;
     if (countyCount % 500 === 0) {
       console.log(`[prerender]   ${countyCount}/${counties.length} counties...`);
     }
   }
-  console.log(`[prerender] ${countyCount} county routes written`);
+  console.log(`[prerender] ${countyCount} county routes written (${metricsHits} with variableMeasured)`);
 
   const total = staticRoutes.length + INTERVENTIONS.length + countyCount;
   console.log(`[prerender] ✅ done — ${total} static HTML files written to dist/public/`);
