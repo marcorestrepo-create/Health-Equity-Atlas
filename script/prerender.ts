@@ -23,6 +23,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateCounties, type CountyMetrics } from "../shared/county-metrics";
+import { STATES, stateSlugFromAbbr, haversineMiles } from "../shared/state-meta";
 
 // Inline county type — intentionally kept tiny so we don't pull in server/schema
 type Row = {
@@ -231,6 +232,12 @@ type RouteSpec = {
   h1: string;
   /** Paragraph of real content crawlers can see without running JS */
   shellBody: string;
+  /**
+   * Optional pre-escaped HTML appended after shellBody inside the SEO shell.
+   * Use for crawlable internal-link blocks (state index, neighbors). Caller
+   * is responsible for escaping content — only use trusted strings here.
+   */
+  shellLinksHtml?: string;
   /** Optional extra JSON-LD to inject (will be wrapped in a <script type="application/ld+json"> tag) */
   extraJsonLd?: object;
 };
@@ -305,11 +312,13 @@ function renderShell(shell: string, route: RouteSpec): string {
     `<noscript><div style="max-width:780px;margin:40px auto;padding:0 20px;font-family:Georgia,serif;line-height:1.6;color:#28251D;">`,
     `<h1 style="font-size:32px;margin:0 0 16px;color:#1A2744;">${esc(route.h1)}</h1>`,
     `<p style="font-size:16px;margin:0 0 14px;">${esc(route.shellBody)}</p>`,
+    route.shellLinksHtml ?? "",
     `<p><a href="${esc(canonical)}" style="color:#C0392B;">${esc(canonical)}</a></p>`,
     `</div></noscript>`,
     `<div data-prerender-seo style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">`,
     `<h1>${esc(route.h1)}</h1>`,
     `<p>${esc(route.shellBody)}</p>`,
+    route.shellLinksHtml ?? "",
     `</div>`,
   ].join("");
 
@@ -415,6 +424,67 @@ async function main() {
   }
   console.log(`[prerender] metrics ready for ${metricsByFips.size} counties`);
 
+  // Group counties by state abbreviation for the state index pages and for
+  // the "Counties in {state}" crawlable link block on each county page.
+  const countiesByState = new Map<string, Row[]>();
+  for (const c of counties) {
+    if (!c.stateAbbr) continue;
+    const arr = countiesByState.get(c.stateAbbr) ?? [];
+    arr.push(c);
+    countiesByState.set(c.stateAbbr, arr);
+  }
+  // Sort each state's counties alphabetically by name (stable, deterministic)
+  for (const arr of countiesByState.values()) {
+    arr.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // ─── /states index page ───
+  // Crawlable list of all 50 states + DC. This gives Google a single page from
+  // which it can discover every state hub (and from there, every county).
+  {
+    const stateLinks = STATES.map((s) => {
+      const cs = countiesByState.get(s.abbr) ?? [];
+      return `<li><a href="/states/${s.slug}">${esc(s.name)}</a> — ${cs.length} ${cs.length === 1 ? "county" : "counties"}</li>`;
+    }).join("");
+    await writeRoute(shell, {
+      pathUrl: "/states",
+      hashUrl: "/states",
+      title: "All U.S. States — Pulse Health Equity Atlas",
+      description:
+        "Browse health equity data for all 3,144 counties across 50 U.S. states and the District of Columbia. County counts, average Gap Scores, and direct links to every county profile.",
+      h1: "All U.S. States",
+      shellBody:
+        "Pulse Atlas covers every county in all 50 states and the District of Columbia — 3,144 counties in total. Each state hub lists every county with its Health Equity Gap Score and a direct link to the full profile.",
+      shellLinksHtml: `<ul style="font-size:14px;line-height:1.8;list-style:none;padding:0;margin:16px 0;">${stateLinks}</ul>`,
+    });
+    console.log("[prerender] /states index written");
+  }
+
+  // ─── /states/:slug pages (51) ───
+  // Each state hub lists every county in that state as crawlable <a> tags so
+  // Google can discover all 3,144 counties through this layer.
+  for (const s of STATES) {
+    const inState = countiesByState.get(s.abbr) ?? [];
+    const pathUrl = `/states/${s.slug}`;
+    const countyLinks = inState
+      .map(
+        (c) =>
+          `<li><a href="/county/${c.fips}">${esc(c.name)}</a></li>`,
+      )
+      .join("");
+    const totalPop = inState.reduce((acc, c) => acc + (c.population ?? 0), 0);
+    await writeRoute(shell, {
+      pathUrl,
+      hashUrl: pathUrl,
+      title: `${s.name} — All ${s.abbr} Counties Health Equity Profile | Pulse Atlas`,
+      description: `Health equity data for every county in ${s.name}. Gap scores, uninsured rates, maternal health, chronic disease, and provider access. Direct links to all ${inState.length} ${s.abbr} county profiles.`,
+      h1: `${s.name} — All Counties`,
+      shellBody: `Pulse Atlas tracks every county in ${s.name} on a composite Health Equity Gap Score combining insurance coverage, maternal mortality, chronic disease prevalence, provider supply, hospital access, social vulnerability, and environmental exposure. ${inState.length} counties · total population ${totalPop.toLocaleString()}.`,
+      shellLinksHtml: `<ul style="font-size:14px;line-height:1.8;list-style:none;padding:0;margin:16px 0;column-count:2;">${countyLinks}</ul>`,
+    });
+  }
+  console.log(`[prerender] ${STATES.length} state hub pages written`);
+
   let countyCount = 0;
   let metricsHits = 0;
   for (const c of counties) {
@@ -422,6 +492,61 @@ async function main() {
     const popText = c.population ? ` Population ${c.population.toLocaleString()}.` : "";
     const metrics = metricsByFips.get(c.fips);
     if (metrics) metricsHits++;
+
+    // Build crawlable internal-link block for this county:
+    //  — Up to 12 same-state siblings (top by population)
+    //  — 5 nearest counties by haversine (regardless of state line)
+    // These appear inside the SEO shell so Googlebot can follow them without JS.
+    const stateSlug = stateSlugFromAbbr(c.stateAbbr);
+    const inState = (countiesByState.get(c.stateAbbr) ?? [])
+      .filter((other) => other.fips !== c.fips)
+      .slice()
+      .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
+      .slice(0, 12);
+    const inStateLinks = inState
+      .map(
+        (other) =>
+          `<li><a href="/county/${other.fips}">${esc(other.name)}, ${esc(other.stateAbbr)}</a></li>`,
+      )
+      .join("");
+
+    const nearby =
+      typeof c.lat === "number" && typeof c.lng === "number"
+        ? counties
+            .filter(
+              (other) =>
+                other.fips !== c.fips &&
+                typeof other.lat === "number" &&
+                typeof other.lng === "number",
+            )
+            .map((other) => ({
+              other,
+              d: haversineMiles(c.lat, c.lng, other.lat, other.lng),
+            }))
+            .sort((a, b) => a.d - b.d)
+            .slice(0, 5)
+            .map((x) => x.other)
+        : [];
+    const nearbyLinks = nearby
+      .map(
+        (other) =>
+          `<li><a href="/county/${other.fips}">${esc(other.name)}, ${esc(other.stateAbbr)}</a></li>`,
+      )
+      .join("");
+
+    const stateLink = stateSlug
+      ? `<p style="margin:12px 0;"><a href="/states/${stateSlug}">All ${esc(c.stateAbbr)} counties →</a></p>`
+      : "";
+    const shellLinksHtml = [
+      stateLink,
+      inStateLinks
+        ? `<h2 style="font-size:16px;margin:18px 0 8px;">Counties in ${esc(c.state)}</h2><ul style="list-style:none;padding:0;margin:0;">${inStateLinks}</ul>`
+        : "",
+      nearbyLinks
+        ? `<h2 style="font-size:16px;margin:18px 0 8px;">Nearby counties</h2><ul style="list-style:none;padding:0;margin:0;">${nearbyLinks}</ul>`
+        : "",
+    ].join("");
+
     await writeRoute(shell, {
       pathUrl,
       hashUrl: pathUrl,
@@ -429,6 +554,7 @@ async function main() {
       description: `Health equity data for ${c.name}, ${c.stateAbbr} (FIPS ${c.fips}): uninsured rate, maternal mortality, chronic disease, provider shortages, hospital closures, social vulnerability, and ranked interventions.`,
       h1: `${c.name}, ${c.state} — Health Equity Profile`,
       shellBody: `${c.name} is a county in ${c.state} (FIPS code ${c.fips}).${popText} Pulse Atlas tracks its Health Equity Gap Score along with insurance coverage, maternal mortality, chronic disease prevalence (diabetes, hypertension, obesity, heart disease), primary care provider supply, hospital access, social vulnerability, and environmental exposure — then ranks evidence-based interventions most likely to close the local gap.`,
+      shellLinksHtml,
       extraJsonLd: buildCountyJSONLD(c, pathUrl, metrics),
     });
     countyCount++;
@@ -438,7 +564,7 @@ async function main() {
   }
   console.log(`[prerender] ${countyCount} county routes written (${metricsHits} with variableMeasured)`);
 
-  const total = staticRoutes.length + INTERVENTIONS.length + countyCount;
+  const total = staticRoutes.length + 1 + STATES.length + INTERVENTIONS.length + countyCount;
   console.log(`[prerender] ✅ done — ${total} static HTML files written to dist/public/`);
 }
 

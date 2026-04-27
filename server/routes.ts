@@ -2,6 +2,7 @@ import type { Express } from "express";
 import type { Server } from "http";
 import { storage } from "./storage";
 import { seedDatabase } from "./seed";
+import { STATES } from "../shared/state-meta";
 
 export async function registerRoutes(server: Server, app: Express) {
   // Seed database on startup
@@ -28,7 +29,14 @@ export async function registerRoutes(server: Server, app: Express) {
       `  <url>\n    <loc>${baseUrl}/methods</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
       `  <url>\n    <loc>${baseUrl}/contact</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>yearly</changefreq>\n    <priority>0.4</priority>\n  </url>`,
       `  <url>\n    <loc>${baseUrl}/about</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
+      `  <url>\n    <loc>${baseUrl}/states</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`,
     ];
+
+    // State index pages (51 — 50 states + DC)
+    const stateUrls = STATES.map(
+      (s) =>
+        `  <url>\n    <loc>${baseUrl}/states/${s.slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
+    );
 
     const countyUrls = counties.map(
       (c) =>
@@ -44,6 +52,7 @@ export async function registerRoutes(server: Server, app: Express) {
       `<?xml version="1.0" encoding="UTF-8"?>`,
       `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
       ...staticUrls,
+      ...stateUrls,
       ...interventionUrls,
       ...countyUrls,
       `</urlset>`,
@@ -51,6 +60,101 @@ export async function registerRoutes(server: Server, app: Express) {
 
     res.setHeader("Content-Type", "application/xml");
     res.send(xml);
+  });
+
+  // GET /api/counties/:fips/related - sibling counties (same state) + nearest 5
+  // Used by the County Detail page to render internal cross-links. Lightweight
+  // payload — just enough to render the links + their gap scores.
+  app.get("/api/counties/:fips/related", (req, res) => {
+    const target = storage.getCountyByFips(req.params.fips);
+    if (!target) return res.status(404).json({ error: "County not found" });
+    const all = storage.getFilteredCounties({});
+    const inState = all
+      .filter((c) => c.stateAbbr === target.stateAbbr && c.fips !== target.fips)
+      .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
+      .slice(0, 12)
+      .map((c) => ({
+        fips: c.fips,
+        name: c.name,
+        stateAbbr: c.stateAbbr,
+        healthEquityGapScore: c.healthEquityGapScore,
+        population: c.population,
+      }));
+
+    // Nearest 5 by haversine, regardless of state line
+    const R = 3958.7613;
+    const toRad = (d: number) => (d * Math.PI) / 180;
+    const tLat = target.lat ?? 0;
+    const tLng = target.lng ?? 0;
+    const withDist = all
+      .filter(
+        (c) =>
+          c.fips !== target.fips &&
+          typeof c.lat === "number" &&
+          typeof c.lng === "number",
+      )
+      .map((c) => {
+        const dLat = toRad((c.lat as number) - tLat);
+        const dLng = toRad((c.lng as number) - tLng);
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(toRad(tLat)) *
+            Math.cos(toRad(c.lat as number)) *
+            Math.sin(dLng / 2) ** 2;
+        const d = 2 * R * Math.asin(Math.sqrt(a));
+        return { c, d };
+      })
+      .sort((a, b) => a.d - b.d)
+      .slice(0, 5);
+    const nearby = withDist.map(({ c, d }) => ({
+      fips: c.fips,
+      name: c.name,
+      stateAbbr: c.stateAbbr,
+      healthEquityGapScore: c.healthEquityGapScore,
+      distanceMiles: Math.round(d * 10) / 10,
+    }));
+
+    res.json({
+      state: target.stateAbbr,
+      stateName: target.state,
+      inState,
+      nearby,
+    });
+  });
+
+  // GET /api/states - aggregate metrics per state for the /states index page
+  app.get("/api/states", (_req, res) => {
+    const counties = storage.getFilteredCounties({});
+    const byAbbr = new Map<
+      string,
+      { gapSum: number; gapCount: number; pop: number; n: number }
+    >();
+    for (const c of counties) {
+      const a = c.stateAbbr;
+      if (!a) continue;
+      const cur =
+        byAbbr.get(a) ?? { gapSum: 0, gapCount: 0, pop: 0, n: 0 };
+      cur.n += 1;
+      cur.pop += c.population ?? 0;
+      if (c.healthEquityGapScore != null) {
+        cur.gapSum += c.healthEquityGapScore;
+        cur.gapCount += 1;
+      }
+      byAbbr.set(a, cur);
+    }
+    const out = STATES.map((s) => {
+      const agg = byAbbr.get(s.abbr);
+      return {
+        abbr: s.abbr,
+        name: s.name,
+        slug: s.slug,
+        countyCount: agg?.n ?? 0,
+        avgGapScore:
+          agg && agg.gapCount > 0 ? agg.gapSum / agg.gapCount : null,
+        population: agg?.pop ?? 0,
+      };
+    });
+    res.json(out);
   });
 
   // GET /api/counties - all counties (lightweight)

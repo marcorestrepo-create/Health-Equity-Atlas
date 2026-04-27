@@ -13,6 +13,7 @@ import { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useStructuredData, buildCountyStructuredData } from "@/hooks/useStructuredData";
 import { buildCountySummary } from "@shared/narratives";
+import { stateSlugFromAbbr } from "@shared/state-meta";
 
 const iconMap: Record<string, any> = {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
@@ -908,7 +909,97 @@ export default function CountyDetail() {
             </div>
           </div>
         )}
+
+        {/* Internal cross-links — helps Google discover counties + keeps users browsing */}
+        {data?.county && <RelatedCounties fips={data.county.fips} stateAbbr={data.county.stateAbbr} stateName={data.county.state} />}
       </section>
+    </div>
+  );
+}
+
+interface RelatedCounty {
+  fips: string;
+  name: string;
+  stateAbbr: string;
+  healthEquityGapScore: number;
+  distanceMiles?: number;
+}
+
+interface RelatedPayload {
+  state: string;
+  stateName: string;
+  inState: RelatedCounty[];
+  nearby: RelatedCounty[];
+}
+
+function RelatedCounties({ fips, stateAbbr, stateName }: { fips: string; stateAbbr: string; stateName: string }) {
+  const { data } = useQuery<RelatedPayload>({
+    queryKey: [`/api/counties/${fips}/related`],
+    enabled: !!fips,
+  });
+  if (!data) return null;
+  const stateSlug = stateSlugFromAbbr(stateAbbr);
+  return (
+    <div className="mt-12 grid md:grid-cols-2 gap-8">
+      {data.inState.length > 0 && (
+        <div>
+          <div className="flex items-baseline justify-between mb-4">
+            <span className="label-mono">Counties in {stateName}</span>
+            {stateSlug && (
+              <Link href={`/states/${stateSlug}`}>
+                <a
+                  className="font-data text-[11px] hover:underline"
+                  style={{ color: "var(--pulse-alarm)" }}
+                  data-testid="link-all-state-counties"
+                >
+                  All {stateAbbr} counties →
+                </a>
+              </Link>
+            )}
+          </div>
+          <div className="grid grid-cols-1 gap-1.5">
+            {data.inState.map((c) => (
+              <Link key={c.fips} href={`/county/${c.fips}`}>
+                <a
+                  data-testid={`link-related-instate-${c.fips}`}
+                  className="flex items-baseline justify-between gap-3 px-3 py-2 hover:bg-white"
+                  style={{ background: "var(--pulse-cream)", border: "1px solid var(--pulse-border-faint)" }}
+                >
+                  <span className="font-display text-[13px] truncate" style={{ color: "var(--pulse-navy)" }}>
+                    {c.name}
+                  </span>
+                  <span className="font-data text-[11px]" style={{ color: "var(--pulse-text-muted)" }}>
+                    gap {c.healthEquityGapScore?.toFixed(1)}
+                  </span>
+                </a>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+      {data.nearby.length > 0 && (
+        <div>
+          <div className="label-mono mb-4">Nearby counties</div>
+          <div className="grid grid-cols-1 gap-1.5">
+            {data.nearby.map((c) => (
+              <Link key={c.fips} href={`/county/${c.fips}`}>
+                <a
+                  data-testid={`link-related-nearby-${c.fips}`}
+                  className="flex items-baseline justify-between gap-3 px-3 py-2 hover:bg-white"
+                  style={{ background: "var(--pulse-cream)", border: "1px solid var(--pulse-border-faint)" }}
+                >
+                  <span className="font-display text-[13px] truncate" style={{ color: "var(--pulse-navy)" }}>
+                    {c.name}, {c.stateAbbr}
+                  </span>
+                  <span className="font-data text-[11px]" style={{ color: "var(--pulse-text-muted)" }}>
+                    {c.distanceMiles} mi · gap {c.healthEquityGapScore?.toFixed(1)}
+                  </span>
+                </a>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
