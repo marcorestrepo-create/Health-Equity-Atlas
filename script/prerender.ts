@@ -391,6 +391,15 @@ async function main() {
       h1: "A county-level atlas of American health equity",
       shellBody: `Pulse Atlas is a free, open atlas mapping structural health inequities across all 3,144 U.S. counties. It combines more than a dozen federal datasets — CDC PLACES, Census SAHIE and ACS, HRSA HPSA, FCC Broadband, EPA EJScreen, CDC/ATSDR SVI, March of Dimes — into a single Health Equity Gap Score (0–100) and surfaces ranked, evidence-based interventions. Built for policymakers, health systems, and nonprofit coalitions who need defensible, comparable numbers. All data is licensed CC BY 4.0 — reuse it, cite it, build on it.`,
     },
+    {
+      pathUrl: "/map",
+      hashUrl: "/map",
+      title: "Map — National View of U.S. Health Equity Gaps | Pulse Atlas",
+      description:
+        "National choropleth view of the Pulse Atlas Health Equity Gap Score across 3,144 U.S. counties. Hover any state to preview its highest-need county and drill into ranked interventions.",
+      h1: "The map of health equity gaps",
+      shellBody: `Pulse Atlas's national map shades every U.S. county by its composite Health Equity Gap Score (0–100), combining insurance coverage, maternal mortality, chronic disease prevalence, provider supply, hospital access, transportation, broadband, and environmental exposure. Hover any state to preview its highest-need county; click to open the state hub with every county ranked and matched to evidence-based interventions. National median gap score is 44.6 across 3,144 counties.`,
+    },
   ];
 
   for (const r of staticRoutes) {

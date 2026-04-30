@@ -1,20 +1,24 @@
-import { useState, useMemo, useEffect, type ReactNode } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { apiRequest } from "@/lib/queryClient";
+import { Search, MapPin, ArrowRight, X } from "lucide-react";
+import { PulseDivider } from "@/components/PulseLayout";
+import { SearchOverlay, useSearchShortcut } from "@/components/SearchOverlay";
+import { STATE_ABBRS } from "@/lib/constants";
 import {
-  Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users,
-  Search, Filter, MapPin, ChevronRight, AlertTriangle, Activity,
-  TrendingDown, Building2, Wifi, Shield, Layers, X, ArrowLeft
-} from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { PulseDivider, PulseLineSmall } from "@/components/PulseLayout";
-import { DATA_LAYERS, STATE_ABBRS, getGapColor, formatMetricValue, INTERVENTION_COLORS } from "@/lib/constants";
-import type { DataLayerKey } from "@/lib/constants";
-import { buildHomepageTagline } from "@shared/narratives";
+  GAP_RAMP,
+  GAP_LABELS,
+  DIMENSIONS,
+  NATIONAL,
+  computeDimensionSeverity,
+  type DimensionKey,
+} from "@/lib/pulse-design";
 
-/** Format a population number compactly: 940,123 → "940K"; 2,940,123 → "2.9M". */
+// ──────────────────────────────────────────────────────────────────────────
+// Helpers
+// ──────────────────────────────────────────────────────────────────────────
+
 function formatPopulation(pop: number | null | undefined): string {
   if (pop == null || !isFinite(pop)) return "—";
   if (pop >= 1_000_000) {
@@ -27,34 +31,211 @@ function formatPopulation(pop: number | null | undefined): string {
   return pop.toLocaleString();
 }
 
-const iconMap: Record<string, any> = {
-  Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
+const STATE_NAMES: Record<string, string> = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+  CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "District of Columbia",
+  FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois",
+  IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana",
+  ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan", MN: "Minnesota",
+  MS: "Mississippi", MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada",
+  NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York",
+  NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma",
+  OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
+  SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont",
+  VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// Sub-components
+// ──────────────────────────────────────────────────────────────────────────
+
+function GapDots({ dims }: { dims: Record<DimensionKey, number> }) {
+  return (
+    <div className="flex gap-1" title="Insurance · Maternal · Chronic · Access · Environment">
+      {DIMENSIONS.map((d) => {
+        const v = dims[d.key] ?? 0;
+        const color = GAP_RAMP[Math.max(0, Math.min(4, v))];
+        return (
+          <span
+            key={d.key}
+            aria-label={`${d.label}: ${GAP_LABELS[v].toLowerCase()}`}
+            title={`${d.label} · ${d.desc}`}
+            className="inline-block"
+            style={{ width: 9, height: 9, background: color, border: "1px solid rgba(0,0,0,0.05)" }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function StatCard({
+  value,
+  label,
+  sub,
+  alarm = false,
+}: {
+  value: string;
+  label: string;
+  sub?: string;
+  alarm?: boolean;
+}) {
+  return (
+    <div
+      className="flex-1 px-5 py-5"
+      style={{ background: "var(--pulse-cream)", border: "1px solid var(--pulse-border)" }}
+    >
+      <div
+        className="kpi-value"
+        style={{
+          fontFamily: "var(--font-serif)",
+          fontSize: 38,
+          lineHeight: 1.05,
+          fontVariantNumeric: "tabular-nums",
+          color: alarm ? "var(--pulse-alarm)" : "var(--pulse-text)",
+        }}
+      >
+        {value}
+      </div>
+      <div className="label-mono mt-2">{label}</div>
+      {sub && (
+        <div
+          className="font-mono mt-0.5"
+          style={{ fontSize: 10, color: "var(--pulse-text-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}
+        >
+          {sub}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface HistBin {
+  x: number;
+  n: number;
+}
+
+function Histogram({ bins, median, hover, setHover }: { bins: HistBin[]; median: number; hover: number | null; setHover: (i: number | null) => void }) {
+  const max = Math.max(1, ...bins.map((h) => h.n));
+  return (
+    <div className="relative px-2">
+      <div className="flex items-end gap-[3px]" style={{ height: 200 }}>
+        {bins.map((h, i) => {
+          const c = GAP_RAMP[Math.min(4, Math.floor(h.x / 20))];
+          const isHover = hover === i;
+          return (
+            <div
+              key={i}
+              onMouseEnter={() => setHover(i)}
+              onMouseLeave={() => setHover(null)}
+              className="flex-1 cursor-pointer transition-opacity relative"
+              style={{
+                height: `${(h.n / max) * 100}%`,
+                background: c,
+                opacity: hover == null || isHover ? 1 : 0.55,
+              }}
+            >
+              {isHover && (
+                <div
+                  className="absolute z-10 whitespace-nowrap"
+                  style={{
+                    bottom: "calc(100% + 6px)",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: "var(--pulse-navy)",
+                    color: "white",
+                    padding: "6px 10px",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  Score {h.x}–{h.x + 5} · {h.n} counties
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div
+        className="absolute top-0 pointer-events-none"
+        style={{ left: `${(median / 100) * 100}%`, height: 218, width: 1, background: "var(--pulse-navy)", opacity: 0.5 }}
+      />
+      <div
+        className="flex justify-between mt-2.5"
+        style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--pulse-text-muted)" }}
+      >
+        <span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span>
+      </div>
+      <div className="relative mt-1.5" style={{ height: 16 }}>
+        <span
+          className="absolute whitespace-nowrap"
+          style={{
+            left: `${(median / 100) * 100}%`,
+            transform: "translateX(-50%)",
+            fontFamily: "var(--font-mono)",
+            fontSize: 9,
+            color: "var(--pulse-navy)",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+          }}
+        >
+          Median {median.toFixed(1)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function selectStyle(): React.CSSProperties {
+  return {
+    fontFamily: "var(--font-mono)",
+    fontSize: 11,
+    padding: "8px 12px",
+    border: "1px solid var(--pulse-border)",
+    background: "var(--pulse-cream)",
+    color: "var(--pulse-text)",
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    cursor: "pointer",
+    appearance: "none",
+    backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1l4 4 4-4' stroke='%237A6F5F' stroke-width='1.2'/></svg>\")",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "right 12px center",
+    paddingRight: 30,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Dashboard
+// ──────────────────────────────────────────────────────────────────────────
+
+type MetricKey = "healthEquityGapScore" | "uninsuredRate" | "maternalMortalityRate" | "diabetesRate";
+
+const METRIC_LABELS: Record<MetricKey, string> = {
+  healthEquityGapScore: "Health Equity Gap (Composite)",
+  uninsuredRate: "Insurance Coverage",
+  maternalMortalityRate: "Maternal Health",
+  diabetesRate: "Chronic Disease",
 };
 
 export default function Dashboard() {
   usePageTitle(
     "Pulse — U.S. Health Equity Atlas | 3,144 Counties Mapped",
-    "See where America's health equity gaps are widest — and what to do about them. County-level atlas for policymakers, health systems, and nonprofits. 3,144 counties, 8 structural factors, ranked evidence-based interventions. Free under CC BY 4.0."
+    "See where America's health equity gaps are widest — and what to do about them. County-level atlas for policymakers, health systems, and nonprofits. 3,144 counties, 8 structural factors, ranked evidence-based interventions. Free under CC BY 4.0.",
   );
 
   const [, navigate] = useLocation();
-  const [activeLayer, setActiveLayer] = useState<DataLayerKey>("healthEquityGapScore");
+  const [searchOpen, setSearchOpen] = useState(false);
+  useSearchShortcut(searchOpen, setSearchOpen);
+
+  const [activeMetric, setActiveMetric] = useState<MetricKey>("healthEquityGapScore");
   const [stateFilter, setStateFilter] = useState<string>("all");
   const [ruralFilter, setRuralFilter] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState<"overview" | "map" | "interventions" | "states">("overview");
+  const [hoverBin, setHoverBin] = useState<number | null>(null);
 
-  // Helper to drill into a state
-  const drillIntoState = (abbr: string) => {
-    setStateFilter(abbr);
-    setActiveTab("overview");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const clearStateFilter = () => {
-    setStateFilter("all");
-  };
-
-  // Pick up state drill-down from county detail page
+  // Pick up state drill-down from county detail page (existing behavior)
   useEffect(() => {
     const drill = sessionStorage.getItem("pulse_state_drill");
     if (drill) {
@@ -62,20 +243,6 @@ export default function Dashboard() {
       setStateFilter(drill);
     }
   }, []);
-
-  const STATE_NAMES: Record<string, string> = {
-    AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
-    CO: "Colorado", CT: "Connecticut", DE: "Delaware", DC: "District of Columbia",
-    FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois",
-    IN: "Indiana", IA: "Iowa", KS: "Kansas", KY: "Kentucky", LA: "Louisiana",
-    ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan", MN: "Minnesota",
-    MS: "Mississippi", MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada",
-    NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NY: "New York",
-    NC: "North Carolina", ND: "North Dakota", OH: "Ohio", OK: "Oklahoma",
-    OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
-    SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont",
-    VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
-  };
 
   const countyApiUrl = useMemo(() => {
     const params = new URLSearchParams();
@@ -85,802 +252,497 @@ export default function Dashboard() {
     return qs ? `/api/counties?${qs}` : "/api/counties";
   }, [stateFilter, ruralFilter]);
 
-  const { data: countyData } = useQuery<any[]>({
-    queryKey: [countyApiUrl],
-  });
+  const { data: countyData } = useQuery<any[]>({ queryKey: [countyApiUrl] });
+  const { data: summary } = useQuery<any>({ queryKey: ["/api/summary"] });
 
-  const { data: summary, isLoading: summaryLoading } = useQuery<any>({
-    queryKey: ["/api/summary"],
-  });
-
-  const { data: interventionsData } = useQuery<any[]>({
-    queryKey: ["/api/interventions"],
-  });
-
-  const currentLayer = DATA_LAYERS.find(l => l.key === activeLayer) || DATA_LAYERS[0];
-
-  const sortedCounties = useMemo(() => {
+  // Sort by chosen metric (descending — higher = worse for these picks)
+  const sorted = useMemo(() => {
     if (!countyData) return [];
-    return [...countyData].sort((a: any, b: any) => {
-      const aVal = a[activeLayer] ?? 0;
-      const bVal = b[activeLayer] ?? 0;
-      if (activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k") {
-        return aVal - bVal;
-      }
-      return bVal - aVal;
-    });
-  }, [countyData, activeLayer]);
+    return [...countyData].sort((a, b) => (b[activeMetric] ?? 0) - (a[activeMetric] ?? 0));
+  }, [countyData, activeMetric]);
 
-  // Homepage tagline — short, single-paragraph framing. Long-form content lives on /about.
-  const homepageTagline = useMemo(() => {
-    return buildHomepageTagline({
-      totalCounties: summary?.totalCounties ?? 3144,
-    });
-  }, [summary]);
+  const top10 = sorted.slice(0, 10);
 
-  return (
-    <TooltipProvider>
-      <div className="bg-background min-h-screen">
-        {/* Hero */}
-        <section className="relative py-16 md:py-20 overflow-hidden">
-          {/* Background EKG motif */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none">
-            <svg width="140%" height="auto" viewBox="0 0 1400 100" preserveAspectRatio="none">
-              <path d="M0,50 L400,50 L440,10 L460,90 L480,20 L500,80 L520,40 L560,50 L900,50 L940,15 L960,85 L980,25 L1000,75 L1020,45 L1060,50 L1400,50" stroke="var(--pulse-navy)" strokeWidth="2" fill="none" />
-            </svg>
-          </div>
+  // Histogram bins: 5-point buckets from 0..100
+  const histBins = useMemo<HistBin[]>(() => {
+    if (!countyData) return [];
+    const bins: HistBin[] = [];
+    for (let x = 0; x < 100; x += 5) bins.push({ x, n: 0 });
+    for (const c of countyData) {
+      const v = c.healthEquityGapScore ?? 0;
+      const idx = Math.min(bins.length - 1, Math.floor(v / 5));
+      bins[idx].n++;
+    }
+    return bins;
+  }, [countyData]);
 
-          <div className="relative z-10 max-w-[1100px] mx-auto px-6">
-            <p className="eyebrow mb-6">National Minority Health Month · April 2026</p>
-            <h1
-              className="font-serif font-normal leading-[1.02] tracking-[-0.012em] mb-6"
-              style={{ fontSize: "clamp(36px, 5vw, 64px)", color: "var(--pulse-navy)" }}
-            >
-              See where America's<br />
-              <em className="italic" style={{ color: "var(--pulse-alarm)" }}>health equity gaps</em> are widest —<br />
-              and what to do about them.
-            </h1>
-            <p
-              className="font-body text-lg leading-relaxed max-w-[720px]"
-              style={{ color: "var(--pulse-text-muted)", fontSize: "18px", lineHeight: 1.55 }}
-            >
-              A county-level atlas for <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>policymakers, health systems, and nonprofit coalitions</strong> —
-              one comparable Health Equity Gap Score across <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>3,144 U.S. counties</strong>,
-              with ranked, evidence-based interventions for each.
-            </p>
+  // Substats — average by metric across the (filtered) county set
+  const substats = useMemo(() => {
+    if (!countyData || countyData.length === 0) {
+      return { uninsured: 0, life: 0, matMort: 0, diabetes: 0 };
+    }
+    const n = countyData.length;
+    let uninsured = 0, life = 0, matMort = 0, diabetes = 0;
+    for (const c of countyData) {
+      uninsured += c.uninsuredRate ?? 0;
+      life += c.lifeExpectancy ?? 0;
+      matMort += c.maternalMortalityRate ?? 0;
+      diabetes += c.diabetesRate ?? 0;
+    }
+    return {
+      uninsured: uninsured / n,
+      life: life / n,
+      matMort: matMort / n,
+      diabetes: diabetes / n,
+    };
+  }, [countyData]);
 
-            {/* Proof strip */}
-            <div
-              className="mt-8 flex flex-wrap gap-x-6 gap-y-2 font-data text-[11px] uppercase tracking-[0.14em]"
-              style={{ color: "var(--pulse-text-muted)" }}
-              data-testid="proof-strip"
-            >
-              <span><strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>3,144</strong> counties</span>
-              <span className="opacity-40">·</span>
-              <span><strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>8</strong> structural factors</span>
-              <span className="opacity-40">·</span>
-              <span><strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>12+</strong> federal data sources</span>
-              <span className="opacity-40">·</span>
-              <span>
-                <Link href="/about" className="hover:opacity-70 transition-opacity" data-testid="link-license">
-                  CC BY 4.0 · free to use
-                </Link>
-              </span>
-            </div>
-          </div>
-        </section>
+  // Pick a "high-need" county for the hero try-buttons
+  const heroTryCounties = useMemo(() => {
+    if (!sorted.length) return [];
+    return sorted.slice(0, 3);
+  }, [sorted]);
 
-        <PulseDivider />
-
-        {/* Homepage tagline — short orientation paragraph. Full story on /about. */}
-        <section className="max-w-[820px] mx-auto px-6 py-8" data-testid="section-homepage-tagline">
-          <p
-            className="font-body text-[16px] md:text-[17px] leading-[1.6]"
-            style={{ color: "var(--pulse-text)" }}
-          >
-            {homepageTagline}{" "}
-            <Link
-              href="/about"
-              className="font-data text-[11px] uppercase tracking-[0.14em] hover:opacity-70 transition-opacity whitespace-nowrap"
-              style={{ color: "var(--pulse-alarm)", marginLeft: 4 }}
-              data-testid="link-about-from-home"
-            >
-              About the project →
-            </Link>
-          </p>
-        </section>
-
-        <PulseDivider />
-
-        {/* KPI Row */}
-        {summaryLoading || !summary ? (
-          <section className="max-w-[1100px] mx-auto px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="p-8 animate-pulse" style={{ borderRight: i < 3 ? "1px solid var(--pulse-border)" : "none" }}>
-                  <div className="h-3 w-20 bg-[var(--pulse-border)] mb-4" />
-                  <div className="h-10 w-24 bg-[var(--pulse-border)]" />
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : (
-          <section className="max-w-[1100px] mx-auto px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
-              <KPIStat label="Counties Analyzed" value={summary.totalCounties.toLocaleString()} colorClass="neutral" />
-              <KPIStat label="Avg Gap Score" value={summary.avgGapScore.toFixed(1)} unit="/100" colorClass="caution" />
-              <KPIStat label="Maternity Care Deserts" value={summary.maternityCareDeserts.toString()} unit={`${((summary.maternityCareDeserts / summary.totalCounties) * 100).toFixed(0)}% of counties`} colorClass="alarm" />
-              <KPIStat label="Hospital Closures" value={summary.hospitalClosures.toString()} unit="since 2010" colorClass="alarm" last />
-            </div>
-            {/* How to read this */}
-            <p
-              className="mt-3 font-body text-[13px] leading-[1.55]"
-              style={{ color: "var(--pulse-text-muted)" }}
-              data-testid="text-how-to-read"
-            >
-              How to read this: the <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>Gap Score</strong> ranges 0–100 — higher means wider health equity gaps. Click any county below to see its profile and ranked interventions, or open the <Link href="/methods" className="underline underline-offset-2 hover:opacity-70" style={{ color: "var(--pulse-alarm)" }}>methodology</Link> for how it's calculated.
-            </p>
-          </section>
-        )}
-
-        <PulseDivider />
-
-        {/* State drill-down banner */}
-        {stateFilter !== "all" && (
-          <section className="max-w-[1100px] mx-auto px-6 mb-6">
-            <div
-              className="flex items-center justify-between px-5 py-3 border"
-              style={{ borderColor: "var(--pulse-navy)", background: "var(--pulse-navy)" }}
-            >
-              <div className="flex items-center gap-3">
-                <MapPin className="w-4 h-4 text-white/60" />
-                <span className="font-serif text-lg text-white">
-                  {STATE_NAMES[stateFilter] || stateFilter}
-                </span>
-                <span className="font-data text-[11px] uppercase tracking-[0.12em] text-white/50">
-                  {sortedCounties.length} {sortedCounties.length === 1 ? "county" : "counties"}
-                </span>
-              </div>
-              <button
-                onClick={clearStateFilter}
-                className="flex items-center gap-1.5 font-data text-[11px] uppercase tracking-[0.1em] text-white/70 hover:text-white transition-colors"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                All States
-              </button>
-            </div>
-          </section>
-        )}
-
-        {/* Tab navigation */}
-        <section className="max-w-[1100px] mx-auto px-6">
-          {/* Tabs — horizontally scrollable on mobile */}
-          <div className="flex flex-col gap-4 mb-8">
-            <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-1 -mx-6 px-6 scrollbar-hide">
-              {(["overview", "map", "interventions", "states"] as const).map((tab) => {
-                const labels = { overview: "Overview", map: "Map", interventions: "Interventions", states: "States" };
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`font-data text-[11px] uppercase tracking-[0.14em] pb-1 transition-colors whitespace-nowrap shrink-0 ${
-                      activeTab === tab
-                        ? "text-[var(--pulse-navy)] border-b-2 border-[var(--pulse-navy)]"
-                        : "text-[var(--pulse-text-muted)] hover:text-[var(--pulse-navy)]"
-                    }`}
-                    data-testid={`tab-${tab}`}
-                  >
-                    {labels[tab]}
-                  </button>
-                );
-              })}
-            </div>
-            
-            {/* Filters — visible on all sizes */}
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                value={activeLayer}
-                onChange={(e) => setActiveLayer(e.target.value as DataLayerKey)}
-                className="font-data text-[11px] h-7 px-1.5 sm:px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)] max-w-[140px] sm:max-w-none"
-                style={{ borderColor: "var(--pulse-border)" }}
-                data-testid="select-layer"
-              >
-                {DATA_LAYERS.map(l => (
-                  <option key={l.key} value={l.key}>{l.label}</option>
-                ))}
-              </select>
-              <select
-                value={stateFilter}
-                onChange={(e) => setStateFilter(e.target.value)}
-                className="font-data text-[11px] h-7 px-1.5 sm:px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
-                style={{ borderColor: "var(--pulse-border)" }}
-                data-testid="select-state"
-              >
-                <option value="all">All States</option>
-                {STATE_ABBRS.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <select
-                value={ruralFilter}
-                onChange={(e) => setRuralFilter(e.target.value)}
-                className="font-data text-[11px] h-7 px-1.5 sm:px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
-                style={{ borderColor: "var(--pulse-border)" }}
-                data-testid="select-rural"
-              >
-                <option value="all">All Areas</option>
-                <option value="rural">Rural</option>
-                <option value="micro">Micropolitan</option>
-                <option value="metro">Metropolitan</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Legend */}
-          <div className="flex items-center gap-1.5 mb-6">
-            <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">
-              {activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k" ? "WORST" : "BEST"}
-            </span>
-            {currentLayer.colors.map((c, i) => (
-              <div key={i} className="h-2.5 flex-1" style={{ backgroundColor: c }} />
-            ))}
-            <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">
-              {activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k" ? "BEST" : "WORST"}
-            </span>
-          </div>
-
-          {/* Tab content */}
-          {activeTab === "overview" && (
-            <OverviewContent
-              summary={summary}
-              summaryLoading={summaryLoading}
-              countyData={sortedCounties}
-              currentLayer={currentLayer}
-              activeLayer={activeLayer}
-              navigate={navigate}
-              drillIntoState={drillIntoState}
-            />
-          )}
-          {activeTab === "map" && (
-            <BubbleMap counties={sortedCounties} activeLayer={activeLayer} currentLayer={currentLayer} navigate={navigate} />
-          )}
-          {activeTab === "interventions" && (
-            <InterventionsContent interventions={interventionsData} navigate={navigate} />
-          )}
-          {activeTab === "states" && (
-            <StateRankingsContent summary={summary} drillIntoState={drillIntoState} />
-          )}
-
-        </section>
-      </div>
-    </TooltipProvider>
-  );
-}
-
-/* ================================================================
-   KPI Stat — editorial style
-   ================================================================ */
-function KPIStat({ label, value, unit, colorClass = "neutral", last = false }: {
-  label: string; value: string; unit?: string; colorClass?: "alarm" | "caution" | "good" | "neutral"; last?: boolean;
-}) {
-  const colorMap = {
-    alarm: "var(--pulse-alarm)",
-    caution: "var(--pulse-caution)",
-    good: "var(--pulse-good)",
-    neutral: "var(--pulse-navy)",
-  };
+  const total = summary?.totalCounties ?? 3144;
+  const avgGap = summary?.avgGapScore ?? NATIONAL.avgScore;
+  const matDeserts = summary?.maternityCareDeserts ?? 532;
+  const hospClosures = summary?.hospitalClosures ?? 190;
 
   return (
-    <div
-      className="p-6 md:p-8 relative"
-      style={{ borderRight: last ? "none" : "1px solid var(--pulse-border)" }}
-    >
-      <span className="label-mono block mb-4">{label}</span>
-      <span
-        className="font-data text-3xl md:text-[44px] font-medium tracking-[-0.015em] leading-none kpi-value"
-        style={{ color: colorMap[colorClass] }}
-      >
-        {value}
-      </span>
-      {unit && (
-        <span className="font-data text-sm font-normal text-[var(--pulse-text-muted)] ml-1">
-          {unit}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/* ================================================================
-   Overview Content
-   ================================================================ */
-function OverviewContent({ summary, summaryLoading, countyData, currentLayer, activeLayer, navigate, drillIntoState }: any) {
-  if (summaryLoading || !summary) {
-    return (
-      <div className="space-y-6">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-32 animate-pulse" style={{ background: "var(--pulse-border)" }} />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-10">
-      {/* Secondary KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-px border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-border)" }}>
-        <MiniKPI label="Avg Uninsured" value={`${summary.avgUninsuredRate.toFixed(1)}%`} />
-        <MiniKPI label="Avg Life Expectancy" value={`${summary.avgLifeExpectancy.toFixed(1)} yrs`} />
-        <MiniKPI label="Avg Maternal Mortality" value={`${summary.avgMaternalMortalityRate.toFixed(1)}/100k`} />
-        <MiniKPI label="Avg Diabetes Rate" value={`${summary.avgDiabetesRate.toFixed(1)}%`} />
-      </div>
-
-      {/* Distribution chart */}
-      <div>
-        <div className="flex items-end justify-between gap-8 mb-3">
-          <h2 className="font-serif text-3xl font-normal" style={{ color: "var(--pulse-navy)" }}>
-            Distribution
-          </h2>
-          <span className="font-data text-[11px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] pb-1">
-            {currentLayer.label}
-          </span>
-        </div>
-        <p className="font-body text-[13.5px] leading-[1.55] text-[var(--pulse-text-muted)] max-w-[720px] mb-5">
-          Each bar is a value range; bar height shows how many counties fall in it. Hover for details. Tall bars on the right mean many counties with <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>worse</strong> outcomes — the gap to close.
+    <div style={{ background: "var(--pulse-parchment)", color: "var(--pulse-text)" }}>
+      {/* HERO */}
+      <section className="max-w-[1100px] mx-auto px-6" style={{ padding: "56px 24px 32px" }}>
+        <div className="eyebrow mb-4">National Health Equity Brief · April 2026</div>
+        <h1
+          className="m-0"
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: "clamp(36px, 5vw, 56px)",
+            lineHeight: 1.05,
+            color: "var(--pulse-text)",
+            fontWeight: 400,
+            maxWidth: 880,
+          }}
+        >
+          See where America's{" "}
+          <em className="italic" style={{ color: "var(--pulse-alarm)" }}>health equity gaps</em>{" "}
+          are widest — and what to do about them.
+        </h1>
+        <p
+          className="mt-5"
+          style={{ fontFamily: "var(--font-sans)", fontSize: 17, lineHeight: 1.55, color: "var(--pulse-text)", maxWidth: 720 }}
+        >
+          A county-level atlas for{" "}
+          <strong style={{ color: "var(--pulse-navy)", fontWeight: 600 }}>policymakers</strong>,{" "}
+          <strong style={{ color: "var(--pulse-navy)", fontWeight: 600 }}>health systems</strong>, and{" "}
+          <strong style={{ color: "var(--pulse-navy)", fontWeight: 600 }}>nonprofit coalitions</strong>{" "}
+          — one comparable Health Equity Gap Score across {total.toLocaleString()} U.S. counties, with ranked, evidence-based interventions for each.
         </p>
-        <div className="border p-6" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
-          <DistributionChart counties={countyData} activeLayer={activeLayer} currentLayer={currentLayer} />
-        </div>
-      </div>
 
-      {/* Highest need counties */}
-      <div>
-        <div className="flex items-end justify-between gap-8 mb-6">
-          <h2 className="font-serif text-3xl font-normal" style={{ color: "var(--pulse-navy)" }}>
-            Highest-Need <em className="italic" style={{ color: "var(--pulse-alarm)" }}>Counties</em>
-          </h2>
-          <span className="font-data text-[11px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] pb-1">
-            Top 10 by gap score
-          </span>
-        </div>
-        <div className="border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
-          {summary.highestNeedCounties?.slice(0, 10).map((c: any, i: number) => (
-            <button
-              key={c.fips}
-              onClick={() => navigate(`/county/${c.fips}`)}
-              className="w-full text-left px-5 py-3.5 flex items-center gap-4 hover:bg-[var(--pulse-parchment)] transition-colors"
-              style={{ borderBottom: "1px solid var(--pulse-border-faint)" }}
-              data-testid={`highest-need-${c.fips}`}
+        {/* HERO SEARCH */}
+        <div className="mt-8" style={{ maxWidth: 720 }}>
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center gap-3.5 w-full text-left transition-colors hover:border-[var(--pulse-navy)]"
+            style={{
+              padding: "18px 22px",
+              background: "var(--pulse-cream)",
+              border: "1px solid var(--pulse-border)",
+              cursor: "pointer",
+            }}
+            data-testid="btn-hero-search"
+          >
+            <Search className="w-5 h-5" style={{ color: "var(--pulse-navy)" }} />
+            <span
+              className="flex-1"
+              style={{ fontFamily: "var(--font-serif)", fontSize: 19, color: "var(--pulse-text-muted)", fontStyle: "italic" }}
             >
-              <span className="font-data text-sm text-[var(--pulse-text-muted)] w-6 text-right">
-                {i + 1}
-              </span>
-              <div className="w-3 h-3" style={{ backgroundColor: "var(--pulse-alarm)" }} />
-              <div className="flex-1">
-                <span className="font-body text-sm font-semibold" style={{ color: "var(--pulse-navy)" }}>
-                  {c.name},{" "}
-                  <span
-                    className="hover:underline cursor-pointer"
-                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); drillIntoState(c.stateAbbr); }}
-                    title={`View all ${c.stateAbbr} counties`}
-                  >
-                    {c.stateAbbr}
-                  </span>
-                </span>
-                <span className="font-data text-[11px] text-[var(--pulse-text-muted)] ml-3">
-                  Pop: {formatPopulation(c.population)}
-                </span>
-              </div>
-              <span
-                className="font-data text-sm font-semibold"
-                style={{ color: "var(--pulse-alarm)" }}
+              Find your county — name, state, or ZIP
+            </span>
+            <span
+              className="flex items-center gap-2"
+              style={{ fontFamily: "var(--font-mono)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--pulse-text-muted)" }}
+            >
+              Open atlas <ArrowRight className="w-3.5 h-3.5" />
+            </span>
+          </button>
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <span className="label-mono">Try:</span>
+            {heroTryCounties.map((c) => (
+              <button
+                key={c.fips}
+                onClick={() => navigate(`/county/${c.fips}`)}
+                className="hover:border-[var(--pulse-navy)] transition-colors"
+                style={{
+                  background: "transparent",
+                  border: "1px solid var(--pulse-border)",
+                  padding: "4px 10px",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 10.5,
+                  color: "var(--pulse-text)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                }}
+                data-testid={`btn-hero-try-${c.fips}`}
               >
-                {c.gapScore?.toFixed(1)}
-              </span>
-              <ChevronRight className="w-4 h-4 text-[var(--pulse-text-muted)]" />
+                {c.name}, {c.stateAbbr}
+              </button>
+            ))}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="hover:border-[var(--pulse-navy)] transition-colors"
+              style={{
+                background: "transparent",
+                border: "1px solid var(--pulse-border)",
+                padding: "4px 10px",
+                cursor: "pointer",
+                fontFamily: "var(--font-mono)",
+                fontSize: 10.5,
+                color: "var(--pulse-navy)",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+              data-testid="btn-hero-location"
+            >
+              <MapPin className="w-3 h-3" /> Use my location
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <PulseDivider />
+
+      {/* PROJECT SUMMARY */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        <div
+          className="px-7 py-6"
+          style={{ background: "var(--pulse-cream)", border: "1px solid var(--pulse-border-faint)", maxWidth: 760 }}
+        >
+          <div className="eyebrow mb-3">About the project</div>
+          <p
+            className="m-0"
+            style={{ fontFamily: "var(--font-sans)", fontSize: 15, lineHeight: 1.65, color: "var(--pulse-text)" }}
+          >
+            Pulse Atlas scores all {total.toLocaleString()} U.S. counties on a composite Health Equity Gap — combining insurance coverage, maternal mortality, chronic disease, provider supply, hospital access, transportation, broadband, and environmental exposure — so you can see where the gaps are concentrated, what's driving them, and which evidence-based interventions are most likely to close them.
+          </p>
+        </div>
+      </section>
+
+      {/* KPI strip */}
+      <section className="max-w-[1100px] mx-auto px-6 mt-8">
+        <div className="flex gap-4">
+          <StatCard value={total.toLocaleString()} label="Counties analyzed" />
+          <StatCard value={avgGap.toFixed(1)} label="Avg gap score" sub="0–100 composite" />
+          <StatCard
+            value={matDeserts.toString()}
+            label="Maternity care deserts"
+            sub={`${((matDeserts / total) * 100).toFixed(0)}% of counties`}
+            alarm
+          />
+          <StatCard value={hospClosures.toString()} label="Hospital closures" sub="since 2010" alarm />
+        </div>
+        <p
+          className="mt-3"
+          style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--pulse-text-muted)", textTransform: "uppercase", letterSpacing: "0.12em" }}
+        >
+          Higher scores indicate wider health-equity gaps. Click any county below to see profile and ranked interventions, or open the methods to see how scores are calculated.
+        </p>
+      </section>
+
+      <PulseDivider />
+
+      {/* DATA EXPLORER */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        {/* Sub-tabs — Map and States navigate; others stay in-place */}
+        <div className="flex gap-6 mb-6" style={{ borderBottom: "1px solid var(--pulse-border)" }}>
+          {[
+            { id: "dashboard", label: "Dashboard", active: true },
+            { id: "map", label: "Map", onClick: () => navigate("/map") },
+            { id: "interventions", label: "Interventions", onClick: () => navigate("/methods") },
+            { id: "states", label: "States", onClick: () => navigate("/states") },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={t.onClick}
+              className="bg-transparent cursor-pointer"
+              style={{
+                border: "none",
+                padding: "10px 0",
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: "0.14em",
+                color: t.active ? "var(--pulse-text)" : "var(--pulse-text-muted)",
+                borderBottom: t.active ? "2px solid var(--pulse-alarm)" : "2px solid transparent",
+              }}
+              data-testid={`tab-${t.id}`}
+            >
+              {t.label}
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Who uses Pulse */}
-      <div data-testid="section-audiences">
-        <div className="flex items-end justify-between gap-8 mb-6">
-          <h2 className="font-serif text-3xl font-normal" style={{ color: "var(--pulse-navy)" }}>
-            Who uses <em className="italic" style={{ color: "var(--pulse-alarm)" }}>Pulse</em>
-          </h2>
-          <Link
-            href="/about"
-            className="font-data text-[11px] uppercase tracking-[0.14em] pb-1 hover:opacity-70 transition-opacity whitespace-nowrap"
-            style={{ color: "var(--pulse-alarm)" }}
+        {/* Filter row */}
+        <div className="flex gap-3 mb-6 flex-wrap">
+          <select
+            value={activeMetric}
+            onChange={(e) => setActiveMetric(e.target.value as MetricKey)}
+            style={selectStyle()}
+            data-testid="select-metric"
           >
-            About the project →
-          </Link>
+            {Object.entries(METRIC_LABELS).map(([k, lbl]) => (
+              <option key={k} value={k}>{lbl}</option>
+            ))}
+          </select>
+          <select
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            style={selectStyle()}
+            data-testid="select-state"
+          >
+            <option value="all">All states</option>
+            {STATE_ABBRS.map((abbr) => (
+              <option key={abbr} value={abbr}>{STATE_NAMES[abbr] ?? abbr}</option>
+            ))}
+          </select>
+          <select
+            value={ruralFilter}
+            onChange={(e) => setRuralFilter(e.target.value)}
+            style={selectStyle()}
+            data-testid="select-rural"
+          >
+            <option value="all">All areas</option>
+            <option value="rural">Rural</option>
+            <option value="suburban">Suburban</option>
+            <option value="metro">Metro</option>
+          </select>
+          {stateFilter !== "all" && (
+            <button
+              onClick={() => setStateFilter("all")}
+              className="flex items-center gap-1.5"
+              style={{
+                background: "var(--pulse-navy)",
+                color: "white",
+                padding: "8px 12px",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-mono)",
+                fontSize: 10.5,
+                textTransform: "uppercase",
+                letterSpacing: "0.14em",
+              }}
+              data-testid="btn-clear-state"
+            >
+              <X className="w-3 h-3" /> Clear: {stateFilter}
+            </button>
+          )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-border)" }}>
-          <AudienceCard
-            eyebrow="Policymakers"
-            title="Target interventions where gaps are widest"
-            body="Compare counties inside your state, benchmark against national averages, and pull evidence-ranked interventions for legislative briefings and state-health-department planning."
-          />
-          <AudienceCard
-            eyebrow="Health Systems"
-            title="Prioritize service-area expansion and CHNAs"
-            body="Identify underserved counties in your catchment, quantify community need for the next Community Health Needs Assessment, and build a defensible case for new services or partnerships."
-          />
-          <AudienceCard
-            eyebrow="Nonprofits & Funders"
-            title="Direct grants by county-level need"
-            body="Allocate philanthropic capital where it can close the biggest gaps. Export county profiles for grant applications, RFPs, and program evaluations."
-          />
-        </div>
-      </div>
 
-      {/* How it's used — concrete scenarios */}
-      <div data-testid="section-use-cases">
-        <div className="flex items-end justify-between gap-8 mb-6">
-          <h2 className="font-serif text-3xl font-normal" style={{ color: "var(--pulse-navy)" }}>
-            How it's used
-          </h2>
-          <span className="font-data text-[11px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] pb-1">
-            Three scenarios
-          </span>
+        {/* Substats — 4-col grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <SubstatTile label="Avg uninsured" value={`${substats.uninsured.toFixed(1)}%`} />
+          <SubstatTile label="Avg life expectancy" value={`${substats.life.toFixed(1)}`} unit="years" />
+          <SubstatTile label="Avg maternal mortality" value={substats.matMort.toFixed(1)} unit="/100k" />
+          <SubstatTile label="Avg diabetes" value={`${substats.diabetes.toFixed(1)}%`} />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <UseCaseScenario
-            number="01"
-            body={<>A <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>state health department</strong> prioritizing maternal-health funding across its 75 rural counties identifies the 12 counties that are both maternity-care deserts and score in the top quartile for gap.</>}
-          />
-          <UseCaseScenario
-            number="02"
-            body={<>A <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>regional hospital system</strong> evaluating expansion into three adjacent counties compares uninsured rates, provider supply, and hospital-closure history to build the investment case.</>}
-          />
-          <UseCaseScenario
-            number="03"
-            body={<>A <strong className="font-semibold" style={{ color: "var(--pulse-navy)" }}>community foundation</strong> allocating a $10M health-equity grant ranks counties in its region by gap score, then uses matched interventions to structure the RFP.</>}
-          />
+
+        {/* Histogram */}
+        <div className="mt-9">
+          <div className="flex items-baseline justify-between mb-3.5">
+            <h2 className="m-0" style={{ fontFamily: "var(--font-serif)", fontSize: 26, color: "var(--pulse-text)", fontWeight: 400 }}>
+              Distribution
+            </h2>
+            <span className="label-mono">Health equity gap composite</span>
+          </div>
+          <p
+            className="mb-4"
+            style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--pulse-text-muted)" }}
+          >
+            Each bar is a 5-point score range; bar height shows how many counties fall in it. Hover for detail.
+          </p>
+          <Histogram bins={histBins} median={avgGap} hover={hoverBin} setHover={setHoverBin} />
         </div>
-      </div>
+
+        {/* HIGHEST-NEED COUNTIES TABLE */}
+        <div className="mt-14">
+          <div className="flex items-baseline justify-between mb-3.5">
+            <h2 className="m-0" style={{ fontFamily: "var(--font-serif)", fontSize: 26, color: "var(--pulse-text)", fontWeight: 400 }}>
+              Highest-Need <em className="italic">Counties</em>
+            </h2>
+            <span className="label-mono">Top 10 by gap score</span>
+          </div>
+          <HighestNeedTable counties={top10} onPick={(c) => navigate(`/county/${c.fips}`)} />
+          <p
+            className="mt-4"
+            style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--pulse-text-muted)", textTransform: "uppercase", letterSpacing: "0.12em" }}
+          >
+            Gap profile dots: Insurance · Maternal · Chronic disease · Access · Environment. Darker = wider gap.
+          </p>
+        </div>
+      </section>
+
+      <PulseDivider className="!py-12" />
+
+      {/* WHO USES PULSE */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        <h2
+          className="mb-5"
+          style={{ fontFamily: "var(--font-serif)", fontSize: 28, color: "var(--pulse-text)", fontWeight: 400, margin: "0 0 18px" }}
+        >
+          Who uses <em className="italic">Pulse</em>
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { eyebrow: "Policymakers", body: "Target interventions where gaps are widest. Compare counties inside your state, benchmark against national averages, and pull evidence-ranked interventions for legislative findings and state health-department planning." },
+            { eyebrow: "Health systems", body: "Prioritize service-area expansion and CHNAs. Identify underserved counties in your catchment, quantify community need for the next Community Health Needs Assessment, and build referrable networks via partnerships." },
+            { eyebrow: "Nonprofits & funders", body: "Direct grants by county-level need. Allocate philanthropic capital where it can close the biggest gaps. Export county profiles for grant applications, RFPs, and program evaluations." },
+          ].map((c, i) => (
+            <div key={i} className="px-6 py-5" style={{ background: "var(--pulse-cream)", border: "1px solid var(--pulse-border-faint)" }}>
+              <div className="label-mono mb-2">{c.eyebrow}</div>
+              <p
+                className="m-0"
+                style={{ fontFamily: "var(--font-sans)", fontSize: 14, lineHeight: 1.6, color: "var(--pulse-text)" }}
+              >
+                {c.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <PulseDivider className="!py-12" />
+
+      {/* HOW IT'S USED */}
+      <section className="max-w-[1100px] mx-auto px-6 mb-12">
+        <h2
+          className="mb-5"
+          style={{ fontFamily: "var(--font-serif)", fontSize: 28, color: "var(--pulse-text)", fontWeight: 400, margin: "0 0 18px" }}
+        >
+          How it's used
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { n: "01", body: "A state health department, prioritizing maternal-health funding across its 71 rural counties, identifies the 11 counties that are both maternity care deserts and score in the top quartile for gap." },
+            { n: "02", body: "A regional health system, evaluating expansion into five adjacent counties, compares uninsured rates, provider shortages, and hospital closures history to build the investment case." },
+            { n: "03", body: "A community foundation, allocating a $20M health-equity grant cycle, ranks counties in its region by gap score, then matches funded interventions to structure the RFP." },
+          ].map((c, i) => (
+            <div key={i} className="pt-4" style={{ borderTop: "2px solid var(--pulse-alarm)" }}>
+              <div className="label-mono mb-2.5">Scenario {c.n}</div>
+              <p
+                className="m-0"
+                style={{ fontFamily: "var(--font-sans)", fontSize: 14, lineHeight: 1.6, color: "var(--pulse-text)" }}
+              >
+                {c.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }
 
-function AudienceCard({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
-  return (
-    <div className="p-6 md:p-7" style={{ background: "var(--pulse-cream)" }}>
-      <p className="eyebrow mb-3">{eyebrow}</p>
-      <h3
-        className="font-serif text-[19px] leading-[1.25] mb-3"
-        style={{ color: "var(--pulse-navy)" }}
-      >
-        {title}
-      </h3>
-      <p className="font-body text-[13.5px] leading-[1.6]" style={{ color: "var(--pulse-text-muted)" }}>
-        {body}
-      </p>
-    </div>
-  );
-}
-
-function UseCaseScenario({ number, body }: { number: string; body: ReactNode }) {
+function SubstatTile({ label, value, unit }: { label: string; value: string; unit?: string }) {
   return (
     <div
-      className="border-t pt-5"
-      style={{ borderColor: "var(--pulse-border)" }}
+      className="px-5 py-4"
+      style={{ background: "var(--pulse-cream)", border: "1px solid var(--pulse-border-faint)" }}
     >
-      <p
-        className="font-data text-[10px] uppercase tracking-[0.18em] mb-3"
-        style={{ color: "var(--pulse-alarm)" }}
-      >
-        Scenario {number}
-      </p>
-      <p
-        className="font-body text-[14.5px] leading-[1.6]"
-        style={{ color: "var(--pulse-text)" }}
-      >
-        {body}
-      </p>
+      <div className="label-mono mb-2">{label}</div>
+      <div className="flex items-baseline gap-1.5">
+        <span style={{ fontFamily: "var(--font-serif)", fontSize: 26, color: "var(--pulse-text)", lineHeight: 1 }}>{value}</span>
+        {unit && (
+          <span
+            style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--pulse-text-muted)", textTransform: "uppercase", letterSpacing: "0.12em" }}
+          >
+            {unit}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
 
-function MiniKPI({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="p-4 md:p-5" style={{ background: "var(--pulse-cream)" }}>
-      <span className="label-mono block mb-2 text-[10px]">{label}</span>
-      <span className="font-data text-lg font-medium" style={{ color: "var(--pulse-navy)" }}>
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function DistributionChart({ counties, activeLayer, currentLayer }: any) {
-  if (!counties || counties.length === 0) return null;
-
-  const values = counties.map((c: any) => c[activeLayer]).filter((v: any) => v != null);
-  if (values.length === 0) return null;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  if (min === max) return null;
-  const bucketCount = 24;
-  const bucketSize = (max - min) / bucketCount;
-  const total = values.length;
-  const buckets = Array.from({ length: bucketCount }, (_, i) => {
-    const lo = min + i * bucketSize;
-    const hi = lo + bucketSize;
-    return {
-      lo, hi,
-      count: values.filter((v: number) => v >= lo && (i === bucketCount - 1 ? v <= hi : v < hi)).length,
-      color: getGapColor((lo + hi) / 2, currentLayer),
-    };
-  });
-  const maxCount = Math.max(...buckets.map(b => b.count));
-
-  // For metrics where higher = better (life expectancy, pcp supply), flip the left/right axis language
-  const higherIsBetter = activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k";
-  const leftLabel = higherIsBetter ? "Worse outcomes" : "Better outcomes";
-  const rightLabel = higherIsBetter ? "Better outcomes" : "Worse outcomes";
-
+function HighestNeedTable({ counties, onPick }: { counties: any[]; onPick: (c: any) => void }) {
+  const cols = "32px 1fr 80px 110px 80px";
   return (
     <div>
-      {/* Y-axis hint (subtle) */}
-      <div className="flex items-end gap-4">
-        <div className="font-data text-[9px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] rotate-180 [writing-mode:vertical-rl] pb-2 shrink-0">
-          County count →
-        </div>
-        <div className="flex-1">
-          <div className="flex items-end gap-px h-32">
-            {buckets.map((b, i) => {
-              const pct = total > 0 ? (b.count / total) * 100 : 0;
-              return (
-                <Tooltip key={i}>
-                  <TooltipTrigger asChild>
-                    <div
-                      className="flex-1 transition-opacity hover:opacity-80 cursor-default"
-                      style={{
-                        height: `${(b.count / maxCount) * 100}%`,
-                        backgroundColor: b.color,
-                        minHeight: b.count > 0 ? 3 : 0,
-                      }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[240px]">
-                    <div className="font-data text-[10px] uppercase tracking-[0.12em] text-[var(--pulse-text-muted)] mb-1">
-                      {currentLayer.label}
-                    </div>
-                    <div className="font-data text-xs font-semibold" style={{ color: "var(--pulse-navy)" }}>
-                      {formatMetricValue(b.lo, activeLayer)} – {formatMetricValue(b.hi, activeLayer)}
-                    </div>
-                    <div className="font-body text-xs mt-1" style={{ color: "var(--pulse-text)" }}>
-                      {b.count.toLocaleString()} {b.count === 1 ? "county" : "counties"}{" "}
-                      <span className="text-[var(--pulse-text-muted)]">· {pct.toFixed(1)}% of total</span>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
-          </div>
-          {/* X-axis: min/max values */}
-          <div className="flex justify-between mt-2">
-            <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">
-              {formatMetricValue(min, activeLayer)}
+      <div
+        className="grid items-center"
+        style={{
+          gridTemplateColumns: cols,
+          gap: 16,
+          padding: "10px 0",
+          borderBottom: "1px solid var(--pulse-border)",
+          fontFamily: "var(--font-mono)",
+          fontSize: 10,
+          color: "var(--pulse-text-muted)",
+          textTransform: "uppercase",
+          letterSpacing: "0.14em",
+        }}
+      >
+        <span>#</span>
+        <span>County</span>
+        <span>Pop.</span>
+        <span title="Per-dimension severity">Gap profile</span>
+        <span style={{ textAlign: "right" }}>Score</span>
+      </div>
+      {counties.map((c, i) => {
+        const dims = computeDimensionSeverity(c);
+        return (
+          <button
+            key={c.fips}
+            onClick={() => onPick(c)}
+            className="grid w-full items-center text-left bg-transparent hover:bg-[rgba(192,57,43,0.03)]"
+            style={{
+              gridTemplateColumns: cols,
+              gap: 16,
+              padding: "14px 0",
+              borderBottom: "1px solid var(--pulse-border-faint)",
+              border: "none",
+              borderTop: 0,
+              cursor: "pointer",
+            }}
+            data-testid={`row-county-${c.fips}`}
+          >
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--pulse-text-muted)" }}>
+              {(i + 1).toString().padStart(2, "0")}
             </span>
-            <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">
-              {formatMetricValue(max, activeLayer)}
-            </span>
-          </div>
-          {/* X-axis directional labels */}
-          <div className="flex justify-between mt-1">
-            <span className="font-data text-[9px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)]">
-              ← {leftLabel}
-            </span>
-            <span className="font-data text-[9px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)]">
-              {rightLabel} →
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ================================================================
-   Bubble Map
-   ================================================================ */
-function BubbleMap({ counties, activeLayer, currentLayer, navigate }: any) {
-  if (!counties || counties.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-96 text-[var(--pulse-text-muted)] font-body text-sm">
-        Loading map data...
-      </div>
-    );
-  }
-
-  const width = 960;
-  const height = 600;
-  const lonMin = -125, lonMax = -66, latMin = 24, latMax = 50;
-  const projectX = (lng: number) => ((lng - lonMin) / (lonMax - lonMin)) * width;
-  const projectY = (lat: number) => ((latMax - lat) / (latMax - latMin)) * height;
-
-  return (
-    <div className="space-y-4">
-      <p className="font-body text-sm text-[var(--pulse-text-muted)]">
-        Bubble size reflects population. Color reflects {currentLayer.label}. Click any county for details.
-      </p>
-      <div className="border overflow-hidden" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ maxHeight: "65vh" }}>
-          <rect x="0" y="0" width={width} height={height} fill="var(--pulse-parchment)" />
-          {[...counties]
-            .filter((c: any) => c.lat && c.lng && c.lng >= lonMin && c.lng <= lonMax && c.lat >= latMin && c.lat <= latMax)
-            .sort((a: any, b: any) => b.population - a.population)
-            .map((c: any) => {
-              const val = c[activeLayer];
-              const color = getGapColor(val, currentLayer);
-              const r = Math.max(2.5, Math.min(14, Math.sqrt(c.population / 4000)));
-              return (
-                <circle
-                  key={c.fips}
-                  cx={projectX(c.lng)}
-                  cy={projectY(c.lat)}
-                  r={r}
-                  fill={color}
-                  fillOpacity={0.7}
-                  stroke={color}
-                  strokeWidth={0.8}
-                  strokeOpacity={0.9}
-                  className="cursor-pointer hover:stroke-2 transition-all"
-                  style={{ "--hover-stroke": "var(--pulse-navy)" } as any}
-                  onClick={() => navigate(`/county/${c.fips}`)}
-                >
-                  <title>{`${c.name}, ${c.stateAbbr}\n${currentLayer.label}: ${formatMetricValue(val, activeLayer)}\nPop: ${c.population.toLocaleString()}`}</title>
-                </circle>
-              );
-            })}
-        </svg>
-      </div>
-      <div className="flex items-center justify-between font-data text-[10px] text-[var(--pulse-text-muted)] px-1">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3" style={{ backgroundColor: currentLayer.colors[0] }} />
-            <span>{activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k" ? "Worst" : "Best"}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3" style={{ backgroundColor: currentLayer.colors[4] }} />
-            <span>{activeLayer === "lifeExpectancy" || activeLayer === "pcpPer100k" ? "Best" : "Worst"}</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--pulse-text-muted)" }} />
-            <span>Small pop.</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "var(--pulse-text-muted)" }} />
-            <span>Large pop.</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ================================================================
-   Interventions
-   ================================================================ */
-function InterventionsContent({ interventions, navigate }: any) {
-  if (!interventions) {
-    return <div className="h-96 animate-pulse" style={{ background: "var(--pulse-border)" }} />;
-  }
-
-  return (
-    <div className="space-y-4">
-      <p className="font-body text-sm text-[var(--pulse-text-muted)]">
-        Evidence-based interventions ranked by potential impact. Each is matched to counties where it would close the biggest gap.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-px border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-border)" }}>
-        {interventions.map((intervention: any) => {
-          const IconComp = iconMap[intervention.icon] || Activity;
-          const color = INTERVENTION_COLORS[intervention.slug] || "#888";
-          return (
-            <div
-              key={intervention.slug}
-              className="p-5 cursor-pointer hover:bg-[var(--pulse-parchment)] transition-colors"
-              style={{ background: "var(--pulse-cream)" }}
-              onClick={() => navigate(`/intervention/${intervention.slug}`)}
-              data-testid={`intervention-card-${intervention.slug}`}
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 flex items-center justify-center shrink-0" style={{ backgroundColor: color + "18" }}>
-                  <IconComp className="w-5 h-5" style={{ color }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-body text-sm font-semibold flex items-center gap-2" style={{ color: "var(--pulse-navy)" }}>
-                    {intervention.name}
-                    <span
-                      className="font-data text-[9px] uppercase tracking-[0.1em] px-1.5 py-0.5 border"
-                      style={{
-                        borderColor: intervention.evidenceStrength === "Strong" ? "var(--pulse-good)" : "var(--pulse-border)",
-                        color: intervention.evidenceStrength === "Strong" ? "var(--pulse-good)" : "var(--pulse-text-muted)",
-                      }}
-                    >
-                      {intervention.evidenceStrength}
-                    </span>
-                  </h3>
-                  <p className="font-body text-[12px] text-[var(--pulse-text-muted)] mt-1 line-clamp-2">
-                    {intervention.description}
-                  </p>
-                  <div className="mt-3 px-3 py-2 font-data text-[11px]" style={{ background: "var(--pulse-parchment)" }}>
-                    <span className="font-semibold" style={{ color: "var(--pulse-navy)" }}>Key metric:</span>{" "}
-                    <span className="text-[var(--pulse-text-muted)]">{intervention.keyMetric}</span>
-                  </div>
-                  <div className="mt-2 flex items-center gap-1 font-data text-[11px] font-medium" style={{ color: "var(--pulse-navy)" }}>
-                    View evidence & top counties <ChevronRight className="w-3 h-3" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* ================================================================
-   State Rankings
-   ================================================================ */
-function StateRankingsContent({ summary, drillIntoState }: any) {
-  if (!summary?.stateAverages) {
-    return <div className="h-96 animate-pulse" style={{ background: "var(--pulse-border)" }} />;
-  }
-
-  return (
-    <div className="space-y-4">
-      <p className="font-body text-sm text-[var(--pulse-text-muted)]">
-        State-level averages across all counties. Sorted by average health equity gap score (highest need first).
-      </p>
-      <div className="border overflow-hidden" style={{ borderColor: "var(--pulse-border)" }}>
-        <table className="w-full font-data text-[12px]">
-          <thead>
-            <tr style={{ background: "var(--pulse-parchment)" }}>
-              <th className="px-4 py-3 text-left font-medium label-mono text-[10px]">#</th>
-              <th className="px-4 py-3 text-left font-medium label-mono text-[10px]">State</th>
-              <th className="px-4 py-3 text-right font-medium label-mono text-[10px]">Avg Gap</th>
-              <th className="px-4 py-3 text-right font-medium label-mono text-[10px]">Uninsured</th>
-              <th className="px-4 py-3 text-right font-medium label-mono text-[10px] hidden md:table-cell">Life Exp.</th>
-              <th className="px-4 py-3 text-right font-medium label-mono text-[10px] hidden md:table-cell">Counties</th>
-              <th className="px-4 py-3 text-right font-medium label-mono text-[10px] hidden lg:table-cell">Population</th>
-            </tr>
-          </thead>
-          <tbody>
-            {summary.stateAverages.map((s: any, i: number) => (
-              <tr
-                key={s.stateAbbr}
-                className="hover:bg-[var(--pulse-parchment)] transition-colors cursor-pointer"
-                style={{ borderTop: "1px solid var(--pulse-border-faint)", background: "var(--pulse-cream)" }}
-                onClick={() => drillIntoState(s.stateAbbr)}
-                title={`View all ${s.state} counties`}
+            <span>
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: 14.5, color: "var(--pulse-text)", fontWeight: 500 }}>
+                {c.name}
+              </span>
+              <span
+                className="ml-2"
+                style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--pulse-text-muted)", textTransform: "uppercase", letterSpacing: "0.12em" }}
               >
-                <td className="px-4 py-2 text-[var(--pulse-text-muted)]">{i + 1}</td>
-                <td className="px-4 py-2 font-body font-medium" style={{ color: "var(--pulse-navy)" }}>
-                  {s.state} <span className="text-[var(--pulse-text-muted)]">({s.stateAbbr})</span>
-                  <ChevronRight className="w-3 h-3 inline ml-1 text-[var(--pulse-text-muted)]" />
-                </td>
-                <td className="px-4 py-2 text-right font-semibold" style={{
-                  color: s.avgGapScore > 50 ? "var(--pulse-alarm)" : s.avgGapScore > 40 ? "var(--pulse-caution)" : "var(--pulse-good)"
-                }}>
-                  {s.avgGapScore}
-                </td>
-                <td className="px-4 py-2 text-right">{s.avgUninsured}%</td>
-                <td className="px-4 py-2 text-right hidden md:table-cell">{s.avgLifeExp} yrs</td>
-                <td className="px-4 py-2 text-right hidden md:table-cell">{s.countyCount}</td>
-                <td className="px-4 py-2 text-right hidden lg:table-cell">{formatPopulation(s.totalPop)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                {c.stateAbbr}
+              </span>
+            </span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11.5, color: "var(--pulse-text-muted)" }}>
+              {formatPopulation(c.population)}
+            </span>
+            <GapDots dims={dims} />
+            <span
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: 22,
+                color: "var(--pulse-alarm)",
+                textAlign: "right",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {(c.healthEquityGapScore ?? 0).toFixed(1)}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

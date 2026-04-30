@@ -7,13 +7,20 @@ import {
   TrendingUp, TrendingDown, ExternalLink, Shield, Wind, Car, Stethoscope,
   Brain, ChevronRight
 } from "lucide-react";
-import { PulseDivider, PulseLineSmall } from "@/components/PulseLayout";
+import { PulseDivider } from "@/components/PulseLayout";
 import { INTERVENTION_COLORS } from "@/lib/constants";
 import { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useStructuredData, buildCountyStructuredData } from "@/hooks/useStructuredData";
 import { buildCountySummary } from "@shared/narratives";
 import { stateSlugFromAbbr } from "@shared/state-meta";
+import {
+  GAP_RAMP,
+  GAP_LABELS,
+  DIMENSIONS,
+  NATIONAL,
+  computeDimensionSeverity,
+} from "@/lib/pulse-design";
 
 const iconMap: Record<string, any> = {
   Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users
@@ -35,7 +42,6 @@ export default function CountyDetail() {
   const [, navigate] = useLocation();
   const [audience, setAudience] = useState("policymaker");
   const [generating, setGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState<"metrics" | "interventions" | "social">("metrics");
 
   const { data, isLoading } = useQuery<any>({
     queryKey: [`/api/counties/${fips}`],
@@ -71,7 +77,7 @@ export default function CountyDetail() {
 
   if (isLoading || !data) {
     return (
-      <div className="min-h-screen bg-background p-6 max-w-[1100px] mx-auto">
+      <div className="min-h-screen p-6 max-w-[1100px] mx-auto" style={{ background: "var(--pulse-parchment)" }}>
         <div className="h-8 w-48 mb-8 animate-pulse" style={{ background: "var(--pulse-border)" }} />
         <div className="grid grid-cols-3 gap-4">
           {Array.from({ length: 9 }).map((_, i) => (
@@ -586,132 +592,305 @@ export default function CountyDetail() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Hero header */}
-      <section className="py-10" style={{ borderBottom: "1px solid var(--pulse-border)" }}>
-        <div className="max-w-[1100px] mx-auto px-6">
-          <Link href="/">
-            <a className="inline-flex items-center gap-1 font-data text-[11px] uppercase tracking-[0.14em] text-[var(--pulse-text-muted)] hover:text-[var(--pulse-navy)] transition-colors mb-6" data-testid="button-back">
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to Atlas
-            </a>
-          </Link>
+  // ══════════════════════════════════════════════════════════════
+  // EDITORIAL RENDER
+  // ══════════════════════════════════════════════════════════════
 
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-            <div>
-              <p className="eyebrow mb-3">County Profile · FIPS {county.fips}</p>
-              <h1 className="font-serif text-4xl md:text-5xl font-normal" style={{ color: "var(--pulse-navy)" }}>
-                {county.name}, <em className="italic">{county.state}</em>
-              </h1>
-              <div className="flex items-center gap-3 mt-3 font-data text-[11px] text-[var(--pulse-text-muted)] uppercase tracking-[0.12em]">
-                <Link href="/" onClick={() => {
-                  // Set state filter via sessionStorage so Dashboard picks it up
-                  sessionStorage.setItem("pulse_state_drill", county.stateAbbr);
-                }}>
-                  <span className="hover:text-[var(--pulse-navy)] hover:underline cursor-pointer transition-colors">
-                    {county.state}
+  const dims = computeDimensionSeverity(county);
+
+  // Score band label
+  const band =
+    gapScore >= NATIONAL.scoreP90 ? "Top decile gap"
+    : gapScore >= NATIONAL.scoreP50 ? "Above-median gap"
+    : gapScore >= NATIONAL.scoreP10 ? "Below-median gap"
+    : "Lowest decile gap";
+
+  const delta = gapScore - NATIONAL.avgScore;
+  const aboveBelow = delta >= 0 ? "above" : "below";
+  const sign = delta >= 0 ? "+" : "";
+
+  const ruralLabel =
+    county.ruralUrban === "rural" ? "Rural"
+    : county.ruralUrban === "metro" ? "Metro"
+    : county.ruralUrban === "suburban" ? "Suburban"
+    : county.ruralUrban === "micro" ? "Micropolitan"
+    : county.ruralUrban;
+
+  // Underlying indicator grid (8 cells, 4 columns × 2 rows)
+  const indicators = [
+    { label: "Uninsured rate",       value: county.uninsuredRate != null ? `${county.uninsuredRate.toFixed(1)}%` : "—",          natl: `${NATIONAL.avgUninsured}%` },
+    { label: "Maternal mortality",   value: county.maternalMortalityRate != null ? `${county.maternalMortalityRate.toFixed(1)}` : "—", natl: `${NATIONAL.avgMatMort}/100k` },
+    { label: "Maternity care desert", value: county.maternityCareDesert === 1 ? "Yes" : "No",                                   natl: `${NATIONAL.maternityCarePct}% of counties` },
+    { label: "Diabetes prevalence",  value: county.diabetesRate != null ? `${county.diabetesRate.toFixed(1)}%` : "—",            natl: `${NATIONAL.avgDiabetes}%` },
+    { label: "Hypertension prev.",   value: county.hypertensionRate != null ? `${county.hypertensionRate.toFixed(1)}%` : "—",    natl: `${NATIONAL.avgHypertension}%` },
+    { label: "PCPs per 100k",        value: county.pcpPer100k != null ? `${county.pcpPer100k.toFixed(0)}` : "—",                 natl: `${NATIONAL.avgPcp}` },
+    { label: "No broadband",         value: county.noBroadbandRate != null ? `${county.noBroadbandRate.toFixed(1)}%` : "—",      natl: `${NATIONAL.avgBroadband}%` },
+    { label: "Life expectancy",      value: county.lifeExpectancy != null ? `${county.lifeExpectancy.toFixed(1)} yrs` : "—",     natl: `${NATIONAL.avgLife} yrs` },
+  ];
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+
+  return (
+    <div className="min-h-screen" style={{ background: "var(--pulse-parchment)", color: "var(--pulse-text)" }}>
+      {/* ── Hero ── */}
+      <section className="max-w-[1100px] mx-auto px-6" style={{ padding: "40px 24px 24px" }}>
+        <Link href="/">
+          <a
+            className="inline-flex items-center gap-1.5 transition-colors mb-6"
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10.5,
+              textTransform: "uppercase",
+              letterSpacing: "0.14em",
+              color: "var(--pulse-text-muted)",
+            }}
+            data-testid="button-back"
+          >
+            <ArrowLeft className="w-3 h-3" /> Back to Atlas
+          </a>
+        </Link>
+
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <div className="eyebrow mb-3.5">County Profile · FIPS {county.fips}</div>
+            <h1
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "clamp(40px, 6vw, 56px)",
+                lineHeight: 1.05,
+                color: "var(--pulse-navy)",
+                fontWeight: 400,
+                margin: 0,
+              }}
+              data-testid="text-county-title"
+            >
+              {county.name},{" "}
+              <em style={{ color: "var(--pulse-alarm)", fontStyle: "italic" }}>{county.stateAbbr}</em>
+            </h1>
+            <div
+              className="flex items-baseline gap-x-4 gap-y-2 mt-4 flex-wrap"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 11.5,
+                color: "var(--pulse-text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+              }}
+            >
+              <span>Population {county.population?.toLocaleString()}</span>
+              <span style={{ width: 4, height: 4, background: "var(--pulse-border)", borderRadius: 2 }} />
+              <span>{band}</span>
+              {ruralLabel && (
+                <>
+                  <span style={{ width: 4, height: 4, background: "var(--pulse-border)", borderRadius: 2 }} />
+                  <span>{ruralLabel}</span>
+                </>
+              )}
+              <Link href="/">
+                <span
+                  className="hover:underline cursor-pointer transition-colors"
+                  style={{ color: "var(--pulse-text-muted)" }}
+                  onClick={() => {
+                    // Existing cross-page state filter — already in place; do not introduce new sessionStorage
+                    sessionStorage.setItem("pulse_state_drill", county.stateAbbr);
+                  }}
+                >
+                  · {county.state}
+                </span>
+              </Link>
+              {county.maternityCareDesert === 1 && (
+                <>
+                  <span style={{ width: 4, height: 4, background: "var(--pulse-border)", borderRadius: 2 }} />
+                  <span className="flex items-center gap-1" style={{ color: "var(--pulse-alarm)" }}>
+                    <AlertTriangle className="w-3 h-3" /> Maternity Care Desert
                   </span>
-                </Link>
-                <span>·</span>
-                <span className="capitalize">{county.ruralUrban}</span>
-                <span>·</span>
-                <span>Pop: {county.population?.toLocaleString()}</span>
-                {county.maternityCareDesert === 1 && (
-                  <>
-                    <span>·</span>
-                    <span className="flex items-center gap-1" style={{ color: "var(--pulse-alarm)" }}>
-                      <AlertTriangle className="w-3 h-3" /> Maternity Care Desert
-                    </span>
-                  </>
-                )}
-                {county.hospitalClosureSince2010 === 1 && (
-                  <>
-                    <span>·</span>
-                    <span className="flex items-center gap-1" style={{ color: "var(--pulse-alarm)" }}>
-                      <Building2 className="w-3 h-3" /> Hospital Closed
-                    </span>
-                  </>
-                )}
+                </>
+              )}
+              {county.hospitalClosureSince2010 === 1 && (
+                <>
+                  <span style={{ width: 4, height: 4, background: "var(--pulse-border)", borderRadius: 2 }} />
+                  <span className="flex items-center gap-1" style={{ color: "var(--pulse-alarm)" }}>
+                    <Building2 className="w-3 h-3" /> Hospital Closed
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* PDF download — preserved from old version */}
+          <div className="flex items-center gap-2 shrink-0">
+            <select
+              value={audience}
+              onChange={(e) => setAudience(e.target.value)}
+              className="font-data text-[11px] h-8 px-2 border"
+              style={{
+                background: "var(--pulse-cream)",
+                color: "var(--pulse-navy)",
+                borderColor: "var(--pulse-border)",
+              }}
+              data-testid="select-audience"
+            >
+              <option value="policymaker">Policymaker</option>
+              <option value="health-system">Health System</option>
+              <option value="nonprofit">Nonprofit</option>
+            </select>
+            <button
+              onClick={generatePDF}
+              disabled={generating}
+              className="flex items-center gap-1.5 h-8 px-4 transition-colors"
+              style={{
+                background: "var(--pulse-navy)",
+                color: "var(--pulse-cream)",
+                opacity: generating ? 0.6 : 1,
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+              }}
+              data-testid="button-download-pdf"
+            >
+              <Download className="w-3.5 h-3.5" />
+              {generating ? "Generating..." : "Download Briefing"}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <PulseDivider />
+
+      {/* ── Score + Gap Profile ── */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 32 }}>
+          {/* Score */}
+          <div>
+            <div className="label-mono mb-3">Health Equity Gap Score</div>
+            <div className="flex items-baseline gap-3">
+              <span
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontSize: 96,
+                  color: gapColor,
+                  lineHeight: 1,
+                  fontWeight: 400,
+                }}
+                data-testid="text-gap-score"
+              >
+                {gapScore.toFixed(1)}
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 13,
+                  color: "var(--pulse-text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                }}
+              >
+                / 100
+              </span>
+            </div>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 14,
+                color: "var(--pulse-text)",
+                marginTop: 12,
+                lineHeight: 1.6,
+              }}
+            >
+              {sign}{Math.round(delta)} points {aboveBelow} the national median ({NATIONAL.avgScore}).
+            </p>
+
+            {/* Gap scale bar */}
+            <div className="mt-6">
+              <div className="relative h-2.5" style={{ background: "var(--pulse-border-faint)" }}>
+                <div
+                  className="absolute inset-y-0"
+                  style={{
+                    left: 0,
+                    width: `${Math.min(gapScore, 100)}%`,
+                    background: `linear-gradient(to right, var(--pulse-good), var(--pulse-caution), var(--pulse-alarm))`,
+                  }}
+                />
+              </div>
+              <div
+                className="flex justify-between mt-1.5"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 9.5,
+                  color: "var(--pulse-text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                }}
+              >
+                <span>Low disparity</span>
+                <span>High disparity</span>
               </div>
             </div>
+          </div>
 
-            {/* PDF download */}
-            <div className="flex items-center gap-2 shrink-0">
-              <select
-                value={audience}
-                onChange={(e) => setAudience(e.target.value)}
-                className="font-data text-[11px] h-8 px-2 border bg-[var(--pulse-cream)] text-[var(--pulse-navy)]"
-                style={{ borderColor: "var(--pulse-border)" }}
-                data-testid="select-audience"
-              >
-                <option value="policymaker">Policymaker</option>
-                <option value="health-system">Health System</option>
-                <option value="nonprofit">Nonprofit</option>
-              </select>
-              <button
-                onClick={generatePDF}
-                disabled={generating}
-                className="flex items-center gap-1.5 h-8 px-4 font-data text-[11px] uppercase tracking-[0.1em] transition-colors"
-                style={{
-                  background: "var(--pulse-navy)",
-                  color: "var(--pulse-cream)",
-                  opacity: generating ? 0.6 : 1,
-                }}
-                data-testid="button-download-pdf"
-              >
-                <Download className="w-3.5 h-3.5" />
-                {generating ? "Generating..." : "Download Briefing"}
-              </button>
+          {/* Gap profile (per-dimension) */}
+          <div>
+            <div className="label-mono mb-3">Gap profile</div>
+            <div className="flex flex-col gap-2">
+              {DIMENSIONS.map((d) => {
+                const v = dims[d.key];
+                const c = GAP_RAMP[v];
+                return (
+                  <div
+                    key={d.key}
+                    className="grid items-center"
+                    style={{ gridTemplateColumns: "120px 1fr 80px", gap: 12 }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 13,
+                        color: "var(--pulse-text)",
+                      }}
+                    >
+                      {d.label}
+                    </span>
+                    <div
+                      className="relative"
+                      style={{ height: 10, background: "var(--pulse-border-faint)" }}
+                    >
+                      <div
+                        className="absolute inset-y-0 left-0"
+                        style={{ width: `${(v / 4) * 100}%`, background: c }}
+                      />
+                    </div>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 10.5,
+                        color: "var(--pulse-text-muted)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.12em",
+                      }}
+                    >
+                      {GAP_LABELS[v]}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Gap Score Feature */}
-      <section className="max-w-[1100px] mx-auto px-6 py-8">
-        <div className="border p-6 md:p-8" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-cream)" }}>
-          <p className="eyebrow mb-2">Health Equity Gap Score</p>
-          <div className="flex items-end gap-6 mb-4">
-            <span
-              className="font-data text-5xl md:text-6xl font-medium tracking-[-0.02em] leading-none kpi-value"
-              style={{ color: gapColor }}
-            >
-              {gapScore.toFixed(1)}
-            </span>
-            <span className="font-data text-lg text-[var(--pulse-text-muted)] pb-1">/100</span>
-            <PulseLineSmall color={gapColor as string} width={100} />
-          </div>
-
-          {/* Pulse bar visualization */}
-          <div className="relative h-6">
-            <div className="absolute inset-x-0 top-1/2 h-px" style={{ background: "var(--pulse-border)" }} />
-            <div
-              className="absolute top-0 h-full"
-              style={{
-                left: 0,
-                width: `${Math.min(gapScore, 100)}%`,
-                background: `linear-gradient(to right, var(--pulse-good), var(--pulse-caution), var(--pulse-alarm))`,
-                opacity: 0.2,
-              }}
-            />
-            <div
-              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full"
-              style={{ left: `${Math.min(gapScore, 100)}%`, background: gapColor, boxShadow: `0 0 0 3px var(--pulse-cream), 0 0 0 4px ${gapColor}33` }}
-            />
-          </div>
-          <div className="flex justify-between mt-1.5 font-data text-[10px] text-[var(--pulse-text-muted)]">
-            <span>LOW DISPARITY</span>
-            <span>HIGH DISPARITY</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Narrative — tight single-paragraph summary, aligned full-width with graphics above/below */}
-      <section className="max-w-[1100px] mx-auto px-6 pt-2 pb-8">
-        <p className="eyebrow mb-4">County Overview</p>
+      {/* ── Narrative — preserve buildCountySummary call ── */}
+      <section className="max-w-[1100px] mx-auto px-6 mt-12">
+        <div className="eyebrow mb-4">County overview</div>
         <p
-          className="font-body text-[16px] leading-[1.7]"
-          style={{ color: "var(--pulse-text)" }}
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: 16,
+            lineHeight: 1.7,
+            color: "var(--pulse-text)",
+            margin: 0,
+            maxWidth: 760,
+          }}
           data-testid="text-county-narrative"
         >
           {buildCountySummary({
@@ -743,175 +922,402 @@ export default function CountyDetail() {
         </p>
       </section>
 
-      <PulseDivider className="max-w-[1100px] mx-auto px-6" />
+      <PulseDivider />
 
-      {/* Tab navigation */}
-      <section className="max-w-[1100px] mx-auto px-6 pb-16">
-        <div className="flex gap-6 mb-8">
-          {(["metrics", "interventions", "social"] as const).map((tab) => {
-            const labels = { metrics: "Health Metrics", interventions: "Interventions", social: "Social & Infrastructure" };
-            return (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`font-data text-[11px] uppercase tracking-[0.14em] pb-1 transition-colors ${
-                  activeTab === tab
-                    ? "text-[var(--pulse-navy)] border-b-2 border-[var(--pulse-navy)]"
-                    : "text-[var(--pulse-text-muted)] hover:text-[var(--pulse-navy)]"
-                }`}
-                data-testid={`tab-${tab}`}
+      {/* ── Underlying Indicators (4-col grid) ── */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        <div className="label-mono mb-4">Underlying indicators</div>
+        <div
+          className="grid grid-cols-2 md:grid-cols-4"
+          style={{
+            border: "1px solid var(--pulse-border)",
+            background: "var(--pulse-cream)",
+          }}
+        >
+          {indicators.map((m, i) => (
+            <div
+              key={m.label}
+              style={{
+                padding: "16px 18px",
+                borderRight: ((i + 1) % 4 === 0) ? "none" : "1px solid var(--pulse-border-faint)",
+                borderBottom: i < 4 ? "1px solid var(--pulse-border-faint)" : "none",
+              }}
+            >
+              <div className="label-mono mb-2" style={{ fontSize: 9.5 }}>{m.label}</div>
+              <div
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontSize: 26,
+                  color: "var(--pulse-text)",
+                  lineHeight: 1,
+                  marginBottom: 6,
+                }}
               >
-                {labels[tab]}
-              </button>
+                {m.value}
+              </div>
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 9.5,
+                  color: "var(--pulse-text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                Natl. {m.natl}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <PulseDivider />
+
+      {/* ── Where to start: top interventions ── */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        <div className="label-mono mb-4">Top-ranked interventions</div>
+        <h2
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: 26,
+            color: "var(--pulse-navy)",
+            margin: "0 0 18px",
+            fontWeight: 400,
+          }}
+        >
+          Where to start in <em style={{ fontStyle: "italic" }}>{county.name}</em>
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {(rankedInterventions || []).slice(0, 3).map((ri: any) => {
+            if (!ri.intervention) return null;
+            const dimTag =
+              ri.intervention.gapAddressed?.toLowerCase().includes("matern") ? "Maternal"
+              : ri.intervention.gapAddressed?.toLowerCase().includes("insur") ? "Insurance"
+              : ri.intervention.gapAddressed?.toLowerCase().includes("access") ? "Access"
+              : ri.intervention.gapAddressed?.toLowerCase().includes("chronic") || ri.intervention.gapAddressed?.toLowerCase().includes("disease") ? "Chronic"
+              : ri.intervention.gapAddressed?.toLowerCase().includes("environ") || ri.intervention.gapAddressed?.toLowerCase().includes("broadband") ? "Environment"
+              : "Priority";
+            return (
+              <Link key={ri.id} href={`/intervention/${ri.interventionSlug}`}>
+                <a
+                  className="block transition-all hover:-translate-y-0.5"
+                  style={{
+                    background: "var(--pulse-cream)",
+                    border: "1px solid var(--pulse-border-faint)",
+                    padding: "20px 22px",
+                  }}
+                  data-testid={`card-intervention-${ri.rank}`}
+                >
+                  <div className="flex justify-between items-baseline mb-2.5">
+                    <span className="label-mono" style={{ color: "var(--pulse-alarm)" }}>{dimTag}</span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 9.5,
+                        padding: "2px 8px",
+                        border: "1px solid var(--pulse-border)",
+                        color: "var(--pulse-text-muted)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.12em",
+                      }}
+                    >
+                      Evidence: {ri.intervention.evidenceStrength}
+                    </span>
+                  </div>
+                  <h3
+                    style={{
+                      fontFamily: "var(--font-serif)",
+                      fontSize: 19,
+                      color: "var(--pulse-navy)",
+                      margin: "0 0 8px",
+                      fontWeight: 500,
+                      lineHeight: 1.25,
+                    }}
+                  >
+                    {ri.intervention.name}
+                  </h3>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: 13.5,
+                      lineHeight: 1.6,
+                      color: "var(--pulse-text)",
+                      margin: 0,
+                    }}
+                  >
+                    {ri.rationale}
+                  </p>
+                  {ri.intervention.keyMetric && (
+                    <p
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 10.5,
+                        lineHeight: 1.55,
+                        color: "var(--pulse-text-muted)",
+                        marginTop: 10,
+                        textTransform: "none",
+                        letterSpacing: "0.01em",
+                      }}
+                    >
+                      {ri.intervention.keyMetric}
+                    </p>
+                  )}
+                </a>
+              </Link>
             );
           })}
         </div>
 
-        {activeTab === "metrics" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-border)" }}>
-            <MetricCell icon={<Shield className="w-4 h-4" />} label="Uninsured Rate" value={county.uninsuredRate} unit="%" benchmark={NATIONAL_BENCHMARKS.uninsuredRate} worse="higher" />
-            <MetricCell icon={<Baby className="w-4 h-4" />} label="Maternal Mortality" value={county.maternalMortalityRate} unit="/100k" benchmark={NATIONAL_BENCHMARKS.maternalMortalityRate} worse="higher" />
-            <MetricCell icon={<Activity className="w-4 h-4" />} label="Diabetes" value={county.diabetesRate} unit="%" benchmark={NATIONAL_BENCHMARKS.diabetesRate} worse="higher" />
-            <MetricCell icon={<HeartPulse className="w-4 h-4" />} label="Hypertension" value={county.hypertensionRate} unit="%" benchmark={NATIONAL_BENCHMARKS.hypertensionRate} worse="higher" />
-            <MetricCell icon={<TrendingUp className="w-4 h-4" />} label="Obesity Rate" value={county.obesityRate} unit="%" benchmark={NATIONAL_BENCHMARKS.obesityRate} worse="higher" />
-            <MetricCell icon={<HeartPulse className="w-4 h-4" />} label="Heart Disease" value={county.heartDiseaseRate} unit="%" benchmark={NATIONAL_BENCHMARKS.heartDiseaseRate} worse="higher" />
-            <MetricCell icon={<TrendingDown className="w-4 h-4" />} label="Life Expectancy" value={county.lifeExpectancy} unit=" yrs" benchmark={NATIONAL_BENCHMARKS.lifeExpectancy} worse="lower" />
-            <MetricCell icon={<Stethoscope className="w-4 h-4" />} label="PCP per 100k" value={county.pcpPer100k} unit="" benchmark={NATIONAL_BENCHMARKS.pcpPer100k} worse="lower" />
-            <MetricCell icon={<Brain className="w-4 h-4" />} label="Mental Health/100k" value={county.mentalHealthPer100k} unit="" />
-            <MetricCell icon={<Baby className="w-4 h-4" />} label="OB Providers/10k" value={county.obProvidersPer10k} unit="" />
-            <MetricCell icon={<AlertTriangle className="w-4 h-4" />} label="HPSA Score" value={county.hpsaScore} unit="/26" />
-            <MetricCell icon={<Wind className="w-4 h-4" />} label="PM2.5 (µg/m³)" value={county.pm25} unit="" />
-          </div>
-        )}
-
-        {activeTab === "interventions" && (
-          <div className="space-y-0">
-            <p className="font-body text-sm text-[var(--pulse-text-muted)] mb-6">
-              Interventions ranked by estimated impact for this county, based on local gap analysis.
-            </p>
-            {rankedInterventions?.map((ri: any) => {
-              if (!ri.intervention) return null;
-              const IconComp = iconMap[ri.intervention.icon] || Activity;
-              const color = INTERVENTION_COLORS[ri.interventionSlug] || "#888";
-              return (
-                <div
-                  key={ri.id}
-                  className="border-b p-5 hover:bg-[var(--pulse-parchment)] transition-colors"
-                  style={{ borderColor: "var(--pulse-border-faint)", background: "var(--pulse-cream)" }}
-                  data-testid={`intervention-rank-${ri.rank}`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="font-data text-xl font-bold text-[var(--pulse-text-muted)]">#{ri.rank}</span>
-                      <div className="w-9 h-9 flex items-center justify-center" style={{ backgroundColor: color + "18" }}>
-                        <IconComp className="w-5 h-5" style={{ color }} />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Link href={`/intervention/${ri.interventionSlug}`}>
-                          <span className="font-body text-sm font-semibold hover:underline cursor-pointer" style={{ color: "var(--pulse-navy)" }}>
-                            {ri.intervention.name}
-                          </span>
-                        </Link>
+        {/* All interventions — full ranked list, condensed */}
+        {rankedInterventions && rankedInterventions.length > 3 && (
+          <div className="mt-8">
+            <div className="label-mono mb-3">All ranked interventions</div>
+            <div style={{ border: "1px solid var(--pulse-border)", background: "var(--pulse-cream)" }}>
+              {rankedInterventions.map((ri: any, i: number) => {
+                if (!ri.intervention) return null;
+                return (
+                  <Link key={ri.id} href={`/intervention/${ri.interventionSlug}`}>
+                    <a
+                      className="grid items-center px-4 py-3 hover:bg-white transition-colors"
+                      style={{
+                        gridTemplateColumns: "32px 1fr 80px 100px 24px",
+                        gap: 12,
+                        borderBottom: i < rankedInterventions.length - 1 ? "1px solid var(--pulse-border-faint)" : "none",
+                      }}
+                      data-testid={`row-intervention-${ri.rank}`}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 11,
+                          color: "var(--pulse-text-muted)",
+                        }}
+                      >
+                        #{ri.rank}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-sans)",
+                          fontSize: 14,
+                          color: "var(--pulse-navy)",
+                        }}
+                      >
+                        {ri.intervention.name}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-16" style={{ background: "var(--pulse-border)" }}>
+                          <div
+                            className="h-full"
+                            style={{
+                              width: `${ri.gapScore}%`,
+                              background: gapColor,
+                            }}
+                          />
+                        </div>
                         <span
-                          className="font-data text-[9px] uppercase tracking-[0.1em] px-1.5 py-0.5 border"
                           style={{
-                            borderColor: ri.intervention.evidenceStrength === "Strong" ? "var(--pulse-good)" : "var(--pulse-border)",
-                            color: ri.intervention.evidenceStrength === "Strong" ? "var(--pulse-good)" : "var(--pulse-text-muted)",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 10.5,
+                            color: "var(--pulse-text-muted)",
                           }}
                         >
-                          {ri.intervention.evidenceStrength}
+                          {ri.gapScore?.toFixed(0)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 mt-1.5 mb-2">
-                        <span className="font-data text-[10px] text-[var(--pulse-text-muted)]">Gap score:</span>
-                        <div className="h-1.5 w-24 bg-[var(--pulse-border)]">
-                          <div className="h-full" style={{ width: `${ri.gapScore}%`, background: color }} />
-                        </div>
-                        <span className="font-data text-[11px] font-medium">{ri.gapScore?.toFixed(1)}</span>
-                      </div>
-                      <p className="font-body text-[12px] text-[var(--pulse-text-muted)]">{ri.rationale}</p>
-                      <div className="mt-2 px-3 py-2 font-data text-[11px]" style={{ background: "var(--pulse-parchment)" }}>
-                        <span className="font-semibold" style={{ color: "var(--pulse-navy)" }}>Key evidence:</span>{" "}
-                        <span className="text-[var(--pulse-text-muted)]">{ri.intervention.keyMetric}</span>
-                      </div>
-                      {ri.intervention.costEffectiveness && (
-                        <p className="mt-1.5 font-body text-[12px] text-[var(--pulse-text-muted)]">
-                          <span className="font-semibold">Cost-effectiveness:</span> {ri.intervention.costEffectiveness}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {activeTab === "social" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-px border" style={{ borderColor: "var(--pulse-border)", background: "var(--pulse-border)" }}>
-            {/* SVI Card */}
-            <div className="p-5" style={{ background: "var(--pulse-cream)" }}>
-              <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-4 h-4 text-[var(--pulse-text-muted)]" />
-                <span className="label-mono">Social Vulnerability Index</span>
-              </div>
-              <div className="space-y-3">
-                <SVIBar label="Overall" value={county.sviOverall} />
-                <SVIBar label="Socioeconomic" value={county.sviSocioeconomic} />
-                <SVIBar label="Minority Status" value={county.sviMinority} />
-                <SVIBar label="Housing & Transport" value={county.sviHousingTransport} />
-              </div>
-            </div>
-
-            {/* Infrastructure */}
-            <div className="p-5" style={{ background: "var(--pulse-cream)" }}>
-              <div className="flex items-center gap-2 mb-4">
-                <Building2 className="w-4 h-4 text-[var(--pulse-text-muted)]" />
-                <span className="label-mono">Infrastructure</span>
-              </div>
-              <div className="space-y-2.5 font-data text-[12px]">
-                <DataRow label="No Broadband Access" value={`${county.noBroadbandRate}%`} />
-                <DataRow label="No Vehicle" value={`${county.noVehicleRate}%`} />
-                <DataRow label="Distance to Hospital" value={`${county.distanceToHospital} mi`} />
-                <DataRow label="Food Insecurity" value={`${county.foodInsecurityRate}%`} />
-                <DataRow label="Limited English" value={`${county.lepRate}%`} />
-              </div>
-            </div>
-
-            {/* Environmental */}
-            <div className="p-5" style={{ background: "var(--pulse-cream)" }}>
-              <div className="flex items-center gap-2 mb-4">
-                <Wind className="w-4 h-4 text-[var(--pulse-text-muted)]" />
-                <span className="label-mono">Environmental Exposure</span>
-              </div>
-              <div className="space-y-2.5 font-data text-[12px]">
-                <DataRow label="EJ Screen Index" value={`${county.ejScreenIndex} percentile`} />
-                <DataRow label="PM2.5" value={`${county.pm25} µg/m³`} />
-                <DataRow label="Lead Exposure Risk" value={`${county.leadExposureRisk} percentile`} />
-              </div>
-            </div>
-
-            {/* Data sources */}
-            <div className="p-5" style={{ background: "var(--pulse-cream)" }}>
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-4 h-4 text-[var(--pulse-text-muted)]" />
-                <span className="label-mono">Data Sources</span>
-              </div>
-              <div className="space-y-1 font-body text-[11px] text-[var(--pulse-text-muted)]">
-                <p>County Health Rankings (UW/RWJF)</p>
-                <p>CDC PLACES · HRSA HPSA</p>
-                <p>Census SAHIE/ACS · FCC BDC</p>
-                <p>EPA EJScreen · CDC/ATSDR SVI</p>
-                <p>March of Dimes · IHME</p>
-              </div>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 9.5,
+                          color: ri.intervention.evidenceStrength === "Strong" ? "var(--pulse-good)" : "var(--pulse-text-muted)",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.1em",
+                        }}
+                      >
+                        {ri.intervention.evidenceStrength}
+                      </span>
+                      <ChevronRight className="w-3.5 h-3.5" style={{ color: "var(--pulse-text-muted)" }} />
+                    </a>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
+      </section>
 
-        {/* Internal cross-links — helps Google discover counties + keeps users browsing */}
-        {data?.county && <RelatedCounties fips={data.county.fips} stateAbbr={data.county.stateAbbr} stateName={data.county.state} />}
+      <PulseDivider />
+
+      {/* ── Social & Infrastructure ── */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        <div className="label-mono mb-4">Social vulnerability & infrastructure</div>
+        <div
+          className="grid grid-cols-1 md:grid-cols-2"
+          style={{
+            border: "1px solid var(--pulse-border)",
+            background: "var(--pulse-border)",
+            gap: 1,
+          }}
+        >
+          {/* SVI */}
+          <div className="p-5" style={{ background: "var(--pulse-cream)" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <Shield className="w-3.5 h-3.5" style={{ color: "var(--pulse-text-muted)" }} />
+              <span className="label-mono">Social Vulnerability Index</span>
+            </div>
+            <div className="space-y-3">
+              <SVIBar label="Overall" value={county.sviOverall} />
+              <SVIBar label="Socioeconomic" value={county.sviSocioeconomic} />
+              <SVIBar label="Minority status" value={county.sviMinority} />
+              <SVIBar label="Housing & transport" value={county.sviHousingTransport} />
+            </div>
+          </div>
+
+          {/* Infrastructure */}
+          <div className="p-5" style={{ background: "var(--pulse-cream)" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <Building2 className="w-3.5 h-3.5" style={{ color: "var(--pulse-text-muted)" }} />
+              <span className="label-mono">Infrastructure</span>
+            </div>
+            <div className="space-y-2.5">
+              <DataRow label="No broadband access" value={county.noBroadbandRate != null ? `${county.noBroadbandRate.toFixed(1)}%` : "—"} />
+              <DataRow label="No vehicle" value={county.noVehicleRate != null ? `${county.noVehicleRate.toFixed(1)}%` : "—"} />
+              <DataRow label="Distance to hospital" value={county.distanceToHospital != null ? `${county.distanceToHospital.toFixed(1)} mi` : "—"} />
+              <DataRow label="Food insecurity" value={county.foodInsecurityRate != null ? `${county.foodInsecurityRate.toFixed(1)}%` : "—"} />
+              <DataRow label="Limited English" value={county.lepRate != null ? `${county.lepRate.toFixed(1)}%` : "—"} />
+            </div>
+          </div>
+
+          {/* Environmental */}
+          <div className="p-5" style={{ background: "var(--pulse-cream)" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <Wind className="w-3.5 h-3.5" style={{ color: "var(--pulse-text-muted)" }} />
+              <span className="label-mono">Environmental exposure</span>
+            </div>
+            <div className="space-y-2.5">
+              <DataRow label="EJScreen index" value={county.ejScreenIndex != null ? `${county.ejScreenIndex.toFixed(1)} pctile` : "—"} />
+              <DataRow label="PM2.5" value={county.pm25 != null ? `${county.pm25.toFixed(1)} µg/m³` : "—"} />
+              <DataRow label="Lead exposure risk" value={county.leadExposureRisk != null ? `${county.leadExposureRisk.toFixed(1)} pctile` : "—"} />
+            </div>
+          </div>
+
+          {/* Data sources */}
+          <div className="p-5" style={{ background: "var(--pulse-cream)" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <FileText className="w-3.5 h-3.5" style={{ color: "var(--pulse-text-muted)" }} />
+              <span className="label-mono">Data sources</span>
+            </div>
+            <div
+              className="space-y-1.5"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 12,
+                color: "var(--pulse-text-muted)",
+                lineHeight: 1.6,
+              }}
+            >
+              <p>County Health Rankings (UW/RWJF)</p>
+              <p>CDC PLACES · HRSA HPSA</p>
+              <p>Census SAHIE/ACS · FCC BDC</p>
+              <p>EPA EJScreen · CDC/ATSDR SVI</p>
+              <p>March of Dimes · IHME</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <PulseDivider />
+
+      {/* ── Citation block ── */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            style={{
+              background: "var(--pulse-cream)",
+              border: "1px solid var(--pulse-border)",
+              padding: "20px 22px",
+            }}
+          >
+            <div className="label-mono mb-2.5">Cite this county page</div>
+            <p
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 11.5,
+                lineHeight: 1.65,
+                color: "var(--pulse-text)",
+                margin: 0,
+                textTransform: "none",
+                letterSpacing: "0.01em",
+              }}
+            >
+              Pulse Atlas. ({new Date().getFullYear()}). {county.name}, {county.state} — Health Equity Gap profile (FIPS {county.fips}). Retrieved {todayIso} from https://thepulseatlas.com/#/county/{county.fips}. Licensed under CC BY 4.0.
+            </p>
+          </div>
+
+          <div
+            style={{
+              background: "transparent",
+              border: "1px solid var(--pulse-border)",
+              padding: "20px 22px",
+            }}
+            className="flex flex-col justify-between"
+          >
+            <div>
+              <div className="label-mono mb-2.5">Download briefing</div>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 13.5,
+                  lineHeight: 1.6,
+                  color: "var(--pulse-text)",
+                  margin: "0 0 16px",
+                }}
+              >
+                Auto-generated PDF with gap profile, intervention shortlist, and source notes. Tailored versions for policymaker, health-system, and nonprofit audiences.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { val: "policymaker", label: "Policymaker" },
+                { val: "health-system", label: "Health system" },
+                { val: "nonprofit", label: "Nonprofit" },
+              ].map((a) => (
+                <button
+                  key={a.val}
+                  onClick={() => {
+                    setAudience(a.val);
+                    setTimeout(() => generatePDF(), 0);
+                  }}
+                  className="flex items-center gap-1.5 transition-colors hover:bg-[var(--pulse-cream)]"
+                  style={{
+                    background: "transparent",
+                    border: "1px solid var(--pulse-navy)",
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    color: "var(--pulse-navy)",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.12em",
+                  }}
+                  data-testid={`button-briefing-${a.val}`}
+                >
+                  <Download className="w-2.5 h-2.5" /> {a.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Cross-links: in-state and nearby counties ── */}
+      <section className="max-w-[1100px] mx-auto px-6 pb-16 pt-12">
+        {data?.county && (
+          <RelatedCounties
+            fips={data.county.fips}
+            stateAbbr={data.county.stateAbbr}
+            stateName={data.county.state}
+          />
+        )}
       </section>
     </div>
   );
@@ -940,7 +1346,7 @@ function RelatedCounties({ fips, stateAbbr, stateName }: { fips: string; stateAb
   if (!data) return null;
   const stateSlug = stateSlugFromAbbr(stateAbbr);
   return (
-    <div className="mt-12 grid md:grid-cols-2 gap-8">
+    <div className="grid md:grid-cols-2 gap-8">
       {data.inState.length > 0 && (
         <div>
           <div className="flex items-baseline justify-between mb-4">
@@ -948,8 +1354,14 @@ function RelatedCounties({ fips, stateAbbr, stateName }: { fips: string; stateAb
             {stateSlug && (
               <Link href={`/states/${stateSlug}`}>
                 <a
-                  className="font-data text-[11px] hover:underline"
-                  style={{ color: "var(--pulse-alarm)" }}
+                  className="hover:underline"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--pulse-alarm)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                  }}
                   data-testid="link-all-state-counties"
                 >
                   All {stateAbbr} counties →
@@ -962,13 +1374,29 @@ function RelatedCounties({ fips, stateAbbr, stateName }: { fips: string; stateAb
               <Link key={c.fips} href={`/county/${c.fips}`}>
                 <a
                   data-testid={`link-related-instate-${c.fips}`}
-                  className="flex items-baseline justify-between gap-3 px-3 py-2 hover:bg-white"
-                  style={{ background: "var(--pulse-cream)", border: "1px solid var(--pulse-border-faint)" }}
+                  className="flex items-baseline justify-between gap-3 px-3 py-2 hover:bg-white transition-colors"
+                  style={{
+                    background: "var(--pulse-cream)",
+                    border: "1px solid var(--pulse-border-faint)",
+                  }}
                 >
-                  <span className="font-display text-[13px] truncate" style={{ color: "var(--pulse-navy)" }}>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: 13,
+                      color: "var(--pulse-navy)",
+                    }}
+                    className="truncate"
+                  >
                     {c.name}
                   </span>
-                  <span className="font-data text-[11px]" style={{ color: "var(--pulse-text-muted)" }}>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 11,
+                      color: "var(--pulse-text-muted)",
+                    }}
+                  >
                     gap {c.healthEquityGapScore?.toFixed(1)}
                   </span>
                 </a>
@@ -985,13 +1413,29 @@ function RelatedCounties({ fips, stateAbbr, stateName }: { fips: string; stateAb
               <Link key={c.fips} href={`/county/${c.fips}`}>
                 <a
                   data-testid={`link-related-nearby-${c.fips}`}
-                  className="flex items-baseline justify-between gap-3 px-3 py-2 hover:bg-white"
-                  style={{ background: "var(--pulse-cream)", border: "1px solid var(--pulse-border-faint)" }}
+                  className="flex items-baseline justify-between gap-3 px-3 py-2 hover:bg-white transition-colors"
+                  style={{
+                    background: "var(--pulse-cream)",
+                    border: "1px solid var(--pulse-border-faint)",
+                  }}
                 >
-                  <span className="font-display text-[13px] truncate" style={{ color: "var(--pulse-navy)" }}>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: 13,
+                      color: "var(--pulse-navy)",
+                    }}
+                    className="truncate"
+                  >
                     {c.name}, {c.stateAbbr}
                   </span>
-                  <span className="font-data text-[11px]" style={{ color: "var(--pulse-text-muted)" }}>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 11,
+                      color: "var(--pulse-text-muted)",
+                    }}
+                  >
                     {c.distanceMiles} mi · gap {c.healthEquityGapScore?.toFixed(1)}
                   </span>
                 </a>
@@ -1004,46 +1448,15 @@ function RelatedCounties({ fips, stateAbbr, stateName }: { fips: string; stateAb
   );
 }
 
-function MetricCell({ icon, label, value, unit, benchmark, worse }: any) {
-  const val = value != null ? value : null;
-  let comparison = null;
-  if (val !== null && benchmark) {
-    const diff = val - benchmark.value;
-    const isWorse = worse === "higher" ? diff > 0 : diff < 0;
-    comparison = { diff, isWorse, label: benchmark.label };
-  }
-
-  return (
-    <div className="p-4" style={{ background: "var(--pulse-cream)" }}>
-      <div className="flex items-center gap-2 text-[var(--pulse-text-muted)] mb-2">
-        {icon}
-        <span className="label-mono text-[10px]">{label}</span>
-      </div>
-      <div className="font-data text-xl font-medium" style={{ color: "var(--pulse-navy)" }}>
-        {val !== null ? val.toFixed(1) : "N/A"}
-        <span className="text-[12px] font-normal text-[var(--pulse-text-muted)] ml-0.5">{unit}</span>
-      </div>
-      {comparison && (
-        <div
-          className="font-data text-[10px] flex items-center gap-1 mt-1"
-          style={{ color: comparison.isWorse ? "var(--pulse-alarm)" : "var(--pulse-good)" }}
-        >
-          {comparison.diff > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-          {Math.abs(comparison.diff).toFixed(1)} {comparison.diff > 0 ? "above" : "below"} {comparison.label}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SVIBar({ label, value }: { label: string; value: number }) {
-  const pct = value * 100;
+function SVIBar({ label, value }: { label: string; value: number | null | undefined }) {
+  const v = value ?? 0;
+  const pct = v * 100;
   const color = pct > 70 ? "var(--pulse-alarm)" : pct > 50 ? "var(--pulse-caution)" : pct > 30 ? "#D4854A" : "var(--pulse-good)";
   return (
     <div className="space-y-1">
-      <div className="flex justify-between font-data text-[11px]">
-        <span className="text-[var(--pulse-text-muted)]">{label}</span>
-        <span style={{ color: "var(--pulse-navy)" }}>{value?.toFixed(2)}</span>
+      <div className="flex justify-between" style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>
+        <span style={{ color: "var(--pulse-text-muted)" }}>{label}</span>
+        <span style={{ color: "var(--pulse-navy)" }}>{(value ?? 0).toFixed(2)}</span>
       </div>
       <div className="h-1.5" style={{ background: "var(--pulse-border)" }}>
         <div className="h-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
@@ -1054,8 +1467,16 @@ function SVIBar({ label, value }: { label: string; value: number }) {
 
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between" style={{ borderBottom: "1px solid var(--pulse-border-faint)", paddingBottom: "6px" }}>
-      <span className="text-[var(--pulse-text-muted)]">{label}</span>
+    <div
+      className="flex justify-between"
+      style={{
+        borderBottom: "1px solid var(--pulse-border-faint)",
+        paddingBottom: 6,
+        fontFamily: "var(--font-mono)",
+        fontSize: 12,
+      }}
+    >
+      <span style={{ color: "var(--pulse-text-muted)" }}>{label}</span>
       <span style={{ color: "var(--pulse-navy)" }}>{value}</span>
     </div>
   );
