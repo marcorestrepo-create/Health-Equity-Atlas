@@ -89,16 +89,20 @@ export default function Contact() {
           </div>
           <div>
             <div className="label-mono mb-1.5">Email</div>
-            <div
+            <a
+              href="mailto:contact@thepulseatlas.com"
+              className="block hover:opacity-80 transition-opacity break-all sm:break-normal"
               style={{
                 fontFamily: "var(--font-serif)",
-                fontSize: 26,
+                fontSize: "clamp(18px, 5.2vw, 26px)",
                 color: "var(--pulse-navy)",
+                lineHeight: 1.15,
+                wordBreak: "break-word",
               }}
               data-testid="text-contact-email"
             >
               contact@thepulseatlas.com
-            </div>
+            </a>
             <p
               style={{
                 fontFamily: "var(--font-sans)",

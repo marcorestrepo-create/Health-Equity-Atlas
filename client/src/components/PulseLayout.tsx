@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { Search } from "lucide-react";
-import { useState } from "react";
+import { Search, Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
 import { SearchOverlay, useSearchShortcut } from "@/components/SearchOverlay";
 
 /** EKG/Pulse SVG line — used as a section divider */
@@ -137,7 +137,23 @@ export function PulseLogo({
 export function PulseNav() {
   const [location] = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   useSearchShortcut(searchOpen, setSearchOpen);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [menuOpen]);
 
   const navLinks = [
     { href: "/", label: "Dashboard" },
@@ -152,20 +168,20 @@ export function PulseNav() {
       className="sticky top-0 z-50 h-12 flex items-center"
       style={{ background: "var(--pulse-nav-bg)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
     >
-      <div className="w-full max-w-[1100px] mx-auto px-6 flex items-center h-full">
-        {/* Wordmark */}
-        <Link href="/" className="flex items-center gap-3 shrink-0" data-testid="link-home">
-          <PulseLogo size={26} surface="dark" />
+      <div className="w-full max-w-[1100px] mx-auto px-4 sm:px-6 flex items-center h-full gap-2">
+        {/* Wordmark — submark + divider hide on small screens */}
+        <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0" data-testid="link-home">
+          <PulseLogo size={24} surface="dark" showSubmark={false} />
           <span
-            className="font-data text-[10px] uppercase tracking-[0.18em] opacity-55 text-white pl-3 hidden md:inline"
+            className="font-data text-[10px] uppercase tracking-[0.18em] opacity-55 text-white pl-3 hidden lg:inline whitespace-nowrap"
             style={{ borderLeft: "1px solid rgba(255,255,255,0.18)", lineHeight: 1 }}
           >
             U.S. Health Equity Atlas
           </span>
         </Link>
 
-        {/* Nav links */}
-        <div className="flex gap-4 sm:gap-6 ml-4 sm:ml-10 flex-1">
+        {/* Nav links — desktop only */}
+        <div className="hidden sm:flex gap-4 sm:gap-6 ml-4 sm:ml-8 flex-1 min-w-0">
           {navLinks.map((link) => {
             const isActive =
               link.href === "/" ? location === "/" : location.startsWith(link.href);
@@ -173,7 +189,7 @@ export function PulseNav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`font-data text-[11px] uppercase tracking-[0.14em] py-0.5 transition-colors ${
+                className={`font-data text-[11px] uppercase tracking-[0.14em] py-0.5 transition-colors whitespace-nowrap ${
                   isActive
                     ? "text-white border-b border-white"
                     : "text-white/70 hover:text-white border-b border-transparent"
@@ -185,10 +201,14 @@ export function PulseNav() {
           })}
         </div>
 
+        {/* Spacer on mobile so search/menu hug the right edge */}
+        <div className="flex-1 sm:hidden" />
+
         {/* Search trigger */}
         <button
           onClick={() => setSearchOpen(true)}
-          className="flex items-center justify-center gap-2 h-8 sm:h-7 px-2.5 sm:px-3 text-[11px] font-data bg-white/10 sm:bg-white/8 border border-white/20 sm:border-white/12 text-white/80 sm:text-white/60 hover:text-white/90 hover:border-white/25 transition-colors shrink-0"
+          className="flex items-center justify-center gap-2 h-8 sm:h-7 w-8 sm:w-auto sm:px-3 text-[11px] font-data bg-white/10 sm:bg-white/8 border border-white/20 sm:border-white/12 text-white/80 sm:text-white/60 hover:text-white/90 hover:border-white/25 transition-colors shrink-0"
+          aria-label="Search counties"
           data-testid="btn-search"
         >
           <Search className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
@@ -198,13 +218,65 @@ export function PulseNav() {
           </kbd>
         </button>
 
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMenuOpen(true)}
+          className="sm:hidden flex items-center justify-center h-8 w-8 text-white/85 hover:text-white border border-white/20 hover:border-white/30 transition-colors shrink-0"
+          aria-label="Open menu"
+          data-testid="btn-mobile-menu"
+        >
+          <Menu className="w-4 h-4" />
+        </button>
+
         <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
         {/* Meta */}
-        <span className="font-data text-[10.5px] uppercase tracking-[0.14em] text-white/50 ml-4 hidden lg:inline whitespace-nowrap">
+        <span className="font-data text-[10.5px] uppercase tracking-[0.14em] text-white/50 ml-2 hidden xl:inline whitespace-nowrap">
           3,144 Counties
         </span>
       </div>
+
+      {/* Mobile menu drawer */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-[60] sm:hidden"
+          style={{ background: "var(--pulse-nav-bg)" }}
+          data-testid="mobile-menu"
+        >
+          <div className="h-12 flex items-center justify-between px-4 border-b border-white/10">
+            <PulseLogo size={24} surface="dark" showSubmark={false} />
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center justify-center h-8 w-8 text-white/85 hover:text-white border border-white/20"
+              aria-label="Close menu"
+              data-testid="btn-mobile-menu-close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex flex-col px-6 pt-8 gap-1">
+            {navLinks.map((link) => {
+              const isActive =
+                link.href === "/" ? location === "/" : location.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`font-data text-[15px] uppercase tracking-[0.18em] py-4 border-b border-white/10 transition-colors ${
+                    isActive ? "text-white" : "text-white/75 hover:text-white"
+                  }`}
+                  data-testid={`link-mobile-${link.label.toLowerCase()}`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+            <div className="font-data text-[10.5px] uppercase tracking-[0.14em] text-white/45 mt-8">
+              3,144 Counties · thepulseatlas.com
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

@@ -141,6 +141,11 @@
   * {
     @apply border-border;
   }
+  html, body {
+    /* Safety net: nothing should ever push horizontal scroll on the page. */
+    overflow-x: clip;
+    max-width: 100vw;
+  }
   body {
     @apply bg-background text-foreground;
     font-variant-numeric: tabular-nums lining-nums;
