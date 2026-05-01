@@ -91,13 +91,14 @@ export default function Contact() {
             <div className="label-mono mb-1.5">Email</div>
             <a
               href="mailto:contact@thepulseatlas.com"
-              className="block hover:opacity-80 transition-opacity break-all sm:break-normal"
+              className="block hover:opacity-80 transition-opacity"
               style={{
                 fontFamily: "var(--font-serif)",
-                fontSize: "clamp(18px, 5.2vw, 26px)",
+                fontSize: "clamp(15px, 4vw, 26px)",
                 color: "var(--pulse-navy)",
                 lineHeight: 1.15,
-                wordBreak: "break-word",
+                whiteSpace: "nowrap",
+                letterSpacing: "-0.01em",
               }}
               data-testid="text-contact-email"
             >
