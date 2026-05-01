@@ -81,22 +81,33 @@ export function PulseMark({
 }
 
 /**
- * Full Pulse Atlas wordmark — mark + "Pulse" (Playfair) + "ATLAS" (Barlow tracked).
+ * Full Pulse Atlas wordmark — mark + "Pulse" (Playfair) + tagline (Barlow tracked).
  * surface="dark" for use on Atlas Navy nav; surface="light" for footer/light bg.
+ * submark prop controls the small caps line: "tagline" (default) shows
+ * "U.S. HEALTH EQUITY ATLAS", "atlas" shows the short "ATLAS", or "none" hides it.
  */
 export function PulseLogo({
   size = 28,
   surface = "dark",
-  showSubmark = true,
+  submark = "tagline",
 }: {
   size?: number;
   surface?: "dark" | "light";
-  showSubmark?: boolean;
+  submark?: "tagline" | "atlas" | "none";
 }) {
   const wordColor = surface === "dark" ? "#F5F2EE" : "#1C2B35";
-  const subColor = surface === "dark" ? "rgba(245,242,238,0.65)" : "rgba(28,43,53,0.55)";
+  // Bumped from 0.65 to 0.78 so the tagline stays legible at small sizes.
+  const subColor = surface === "dark" ? "rgba(245,242,238,0.78)" : "rgba(28,43,53,0.62)";
   // On dark nav, pill is Linen (light) so it pops; on light surface, pill is Navy.
   const markTone: "dark" | "light" = surface === "dark" ? "light" : "dark";
+  const submarkText = submark === "tagline" ? "U.S. Health Equity Atlas" : "Atlas";
+  // The longer tagline needs slightly tighter tracking and smaller size to read
+  // cleanly next to the Playfair word.
+  const subFontSize =
+    submark === "tagline"
+      ? Math.max(9, Math.round(size * 0.30))
+      : Math.max(9, Math.round(size * 0.32));
+  const subTracking = submark === "tagline" ? "0.16em" : "0.22em";
   return (
     <span className="flex items-center gap-2.5 shrink-0" style={{ lineHeight: 1 }}>
       <PulseMark size={size} tone={markTone} />
@@ -113,19 +124,20 @@ export function PulseLogo({
         >
           Pulse
         </span>
-        {showSubmark && (
+        {submark !== "none" && (
           <span
             style={{
               fontFamily: "var(--font-data)",
               fontWeight: 500,
-              fontSize: `${Math.max(9, Math.round(size * 0.32))}px`,
+              fontSize: `${subFontSize}px`,
               color: subColor,
-              letterSpacing: "0.22em",
+              letterSpacing: subTracking,
               textTransform: "uppercase",
               marginTop: `${Math.max(2, Math.round(size * 0.1))}px`,
+              whiteSpace: "nowrap",
             }}
           >
-            Atlas
+            {submarkText}
           </span>
         )}
       </span>
@@ -165,18 +177,25 @@ export function PulseNav() {
 
   return (
     <nav
-      className="sticky top-0 z-50 h-12 flex items-center"
+      className="sticky top-0 z-50 flex flex-col"
       style={{ background: "var(--pulse-nav-bg)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
     >
+      {/* Gap Ember accent stripe — page chrome that ties nav to brand */}
+      <div
+        aria-hidden="true"
+        style={{ height: 3, background: "var(--pulse-ember)" }}
+      />
+      <div className="h-14 flex items-center">
       <div className="w-full max-w-[1100px] mx-auto px-4 sm:px-6 flex items-center h-full gap-2">
-        {/* Wordmark — submark + divider hide on small screens */}
-        <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0" data-testid="link-home">
-          <PulseLogo size={24} surface="dark" showSubmark={false} />
-          <span
-            className="font-data text-[10px] uppercase tracking-[0.18em] opacity-55 text-white pl-3 hidden lg:inline whitespace-nowrap"
-            style={{ borderLeft: "1px solid rgba(255,255,255,0.18)", lineHeight: 1 }}
-          >
-            U.S. Health Equity Atlas
+        {/* Wordmark — mark + Pulse + tagline submark on sm+, mark+Pulse only on xs */}
+        <Link href="/" className="flex items-center shrink-0 min-w-0" data-testid="link-home">
+          {/* Compact lockup on mobile (no submark) */}
+          <span className="sm:hidden">
+            <PulseLogo size={24} surface="dark" submark="none" />
+          </span>
+          {/* Full lockup with tagline on sm+ */}
+          <span className="hidden sm:inline-flex">
+            <PulseLogo size={26} surface="dark" submark="tagline" />
           </span>
         </Link>
 
@@ -235,16 +254,18 @@ export function PulseNav() {
           3,144 Counties
         </span>
       </div>
+      </div>
 
       {/* Mobile menu drawer */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-[60] sm:hidden"
+          className="fixed inset-0 z-[60] sm:hidden flex flex-col"
           style={{ background: "var(--pulse-nav-bg)" }}
           data-testid="mobile-menu"
         >
-          <div className="h-12 flex items-center justify-between px-4 border-b border-white/10">
-            <PulseLogo size={24} surface="dark" showSubmark={false} />
+          <div aria-hidden="true" style={{ height: 3, background: "var(--pulse-ember)" }} />
+          <div className="h-14 flex items-center justify-between px-4 border-b border-white/10">
+            <PulseLogo size={24} surface="dark" submark="tagline" />
             <button
               onClick={() => setMenuOpen(false)}
               className="flex items-center justify-center h-8 w-8 text-white/85 hover:text-white border border-white/20"
@@ -292,8 +313,8 @@ export function PulseFooter() {
       style={{ borderTop: "1px solid var(--pulse-border)" }}
     >
       <div className="max-w-[1100px] mx-auto px-6 space-y-6">
-        <div className="flex items-center gap-3">
-          <PulseLogo size={24} surface="light" />
+        <div className="flex items-center gap-4">
+          <PulseLogo size={24} surface="light" submark="tagline" />
           <PulseLineSmall width={60} color="var(--pulse-ember)" />
         </div>
 
