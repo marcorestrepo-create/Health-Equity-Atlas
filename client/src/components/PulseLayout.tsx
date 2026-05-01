@@ -37,57 +37,84 @@ export function PulseLineSmall({ color = "var(--pulse-alarm)", width = 80 }: { c
 }
 
 /**
- * Pulse Atlas brand mark — ECG waveform in a navy pill.
- * Used as icon-only logo (favicon, small contexts).
+ * Pulse Atlas brand mark — ECG waveform in a rounded-rectangle pill.
+ * Used as icon-only logo (favicon, small contexts) and inside PulseLogo.
  * tone="dark" → pill is Atlas Navy, line is Gap Ember (for use on light backgrounds).
- * tone="light" → pill is Linen, line is Gap Ember (for use on dark backgrounds, optional).
+ * tone="light" → pill is Linen, line is Gap Ember (for use on dark backgrounds).
+ * shape="square" matches the favicon (1:1). shape="wide" is a 1.35:1 pill for
+ * use inside the wordmark lockup so the ECG line has horizontal room to breathe.
  */
 export function PulseMark({
   size = 32,
   tone = "dark",
+  shape = "square",
   className = "",
 }: {
   size?: number;
   tone?: "dark" | "light";
+  shape?: "square" | "wide";
   className?: string;
 }) {
   const pillFill = tone === "dark" ? "#1C2B35" : "#F5F2EE";
   const baseline = tone === "dark" ? "rgba(212,207,201,0.35)" : "rgba(28,43,53,0.25)";
   const ember = "#C5522A";
+  // viewBox dimensions — "wide" is 1.35:1 so the waveform reads as a heartbeat
+  // strip rather than a tight icon.
+  const vbW = shape === "wide" ? 54 : 40;
+  const vbH = 40;
+  const pxW = shape === "wide" ? Math.round(size * 1.35) : size;
+  const pxH = size;
   return (
     <svg
-      width={size}
-      height={size}
-      viewBox="0 0 40 40"
+      width={pxW}
+      height={pxH}
+      viewBox={`0 0 ${vbW} ${vbH}`}
       fill="none"
       className={className}
       role="img"
       aria-label="Pulse Atlas mark"
     >
-      <rect x="0" y="0" width="40" height="40" rx="8" fill={pillFill} />
+      <rect x="0" y="0" width={vbW} height={vbH} rx="8" fill={pillFill} />
       {/* baseline */}
-      <line x1="5" y1="20" x2="35" y2="20" stroke={baseline} strokeWidth="1" />
-      {/* ECG waveform */}
-      <path
-        d="M5,20 L13,20 L16,14 L18.5,26 L21,10 L23.5,28 L26,17 L29,20 L35,20"
-        stroke={ember}
-        strokeWidth="1.75"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <line x1="5" y1="20" x2={vbW - 5} y2="20" stroke={baseline} strokeWidth="1" />
+      {/* ECG waveform — anchored to the wider viewBox when shape=wide */}
+      {shape === "wide" ? (
+        <path
+          d="M5,20 L18,20 L22,14 L25,26 L28,8 L31,30 L34,17 L38,20 L49,20"
+          stroke={ember}
+          strokeWidth="1.75"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ) : (
+        <path
+          d="M5,20 L13,20 L16,14 L18.5,26 L21,10 L23.5,28 L26,17 L29,20 L35,20"
+          stroke={ember}
+          strokeWidth="1.75"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      )}
     </svg>
   );
 }
 
 /**
  * Full Pulse Atlas wordmark — mark + "Pulse" (Playfair) + tagline (Barlow tracked).
- * surface="dark" for use on Atlas Navy nav; surface="light" for footer/light bg.
- * submark prop controls the small caps line: "tagline" (default) shows
- * "U.S. HEALTH EQUITY ATLAS", "atlas" shows the short "ATLAS", or "none" hides it.
+ *
+ * Sizing model: `size` is the TOTAL height of the lockup (mark height = lockup
+ * height). The text column is sized so "Pulse" cap-height aligns with the top
+ * of the mark and the tagline baseline aligns with the bottom of the mark —
+ * everything reads as one rectangular block.
+ *
+ * surface="dark" for Atlas Navy nav; surface="light" for footer/light bg.
+ * submark: "tagline" (default) shows "U.S. HEALTH EQUITY ATLAS", "atlas" shows
+ * the short "ATLAS", "none" hides it (mark + Pulse only, vertically centered).
  */
 export function PulseLogo({
-  size = 28,
+  size = 38,
   surface = "dark",
   submark = "tagline",
 }: {
@@ -96,27 +123,30 @@ export function PulseLogo({
   submark?: "tagline" | "atlas" | "none";
 }) {
   const wordColor = surface === "dark" ? "#F5F2EE" : "#1C2B35";
-  // Bumped from 0.65 to 0.78 so the tagline stays legible at small sizes.
+  // 0.78 alpha keeps the tagline legible at small sizes on dark; 0.62 on light.
   const subColor = surface === "dark" ? "rgba(245,242,238,0.78)" : "rgba(28,43,53,0.62)";
-  // On dark nav, pill is Linen (light) so it pops; on light surface, pill is Navy.
   const markTone: "dark" | "light" = surface === "dark" ? "light" : "dark";
-  const submarkText = submark === "tagline" ? "U.S. Health Equity Atlas" : "Atlas";
-  // The longer tagline needs slightly tighter tracking and smaller size to read
-  // cleanly next to the Playfair word.
-  const subFontSize =
-    submark === "tagline"
-      ? Math.max(9, Math.round(size * 0.30))
-      : Math.max(9, Math.round(size * 0.32));
-  const subTracking = submark === "tagline" ? "0.16em" : "0.22em";
-  return (
-    <span className="flex items-center gap-2.5 shrink-0" style={{ lineHeight: 1 }}>
-      <PulseMark size={size} tone={markTone} />
-      <span className="flex flex-col" style={{ lineHeight: 1 }}>
+
+  // Mark uses the wide pill shape inside the wordmark, square when alone.
+  const markShape: "wide" | "square" = submark === "none" ? "square" : "wide";
+
+  // ── Text-block sizing ─────────────────────────────────────────────────
+  // We want the visible top of "Pulse" to align with the top of the mark, and
+  // the visible bottom of the tagline to align with the mark's bottom.
+  // For Playfair Display, cap-height ≈ 0.72 of font-size; ascender padding
+  // ≈ 0.05. So setting fontSize so capHeight matches the upper portion of the
+  // mark gives clean top alignment, and the tagline fills the lower portion.
+  if (submark === "none") {
+    // Single-line lockup — vertically center the word against the mark.
+    const fontSize = Math.round(size * 0.72);
+    return (
+      <span className="flex items-center gap-2.5 shrink-0" style={{ lineHeight: 1 }}>
+        <PulseMark size={size} tone={markTone} shape="square" />
         <span
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 400,
-            fontSize: `${Math.round(size * 0.78)}px`,
+            fontSize: `${fontSize}px`,
             color: wordColor,
             lineHeight: 1,
             letterSpacing: "-0.005em",
@@ -124,22 +154,113 @@ export function PulseLogo({
         >
           Pulse
         </span>
-        {submark !== "none" && (
-          <span
-            style={{
-              fontFamily: "var(--font-data)",
-              fontWeight: 500,
-              fontSize: `${subFontSize}px`,
-              color: subColor,
-              letterSpacing: subTracking,
-              textTransform: "uppercase",
-              marginTop: `${Math.max(2, Math.round(size * 0.1))}px`,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {submarkText}
-          </span>
-        )}
+      </span>
+    );
+  }
+
+  // Two-line lockup with PRECISE optical alignment to the pill edges.
+  //
+  // Strategy: position both text spans absolutely inside a fixed-height column,
+  // then use negative-margin (top) and translate (bottom) to compensate for
+  // each font's built-in line-box padding so the *visible glyph edges* land
+  // exactly on the pill's top and bottom edges.
+  //
+  // Font metrics used (measured empirically against Playfair Display 400 and
+  // Barlow 500 in this project):
+  //   Playfair Display: cap-height ≈ 0.685 × font-size, ascender pad ≈ 0.13 × fs
+  //   Barlow caps:      cap-height ≈ 0.72  × font-size, ascender pad ≈ 0.14 × fs
+  //
+  // We want cap-height("Pulse") + gap + cap-height(tagline) ≈ `size`.
+  // Pick wordFontSize so that visible cap-height is roughly 60% of `size`,
+  // and subFontSize so its cap-height is roughly 28% of `size`, leaving ~12%
+  // optical gap.
+  //   wordFontSize = round(size * 0.86)  → cap ≈ size * 0.59
+  //   subFontSize  = round(size * 0.40)  → cap ≈ size * 0.29 (tagline)
+  //                  round(size * 0.42)  for short "Atlas" submark
+  const wordFontSize = Math.round(size * 0.86);
+  const submarkText = submark === "tagline" ? "U.S. Health Equity Atlas" : "Atlas";
+  const subFontSize =
+    submark === "tagline"
+      ? Math.max(10, Math.round(size * 0.26))
+      : Math.max(10, Math.round(size * 0.30));
+  const subTracking = submark === "tagline" ? "0.16em" : "0.22em";
+
+  // Negative top margin to drag the visible cap of "Pulse" up to the pill top.
+  // Playfair's ascender pad above the cap is ~0.13 × fontSize.
+  const wordCapPad = wordFontSize * 0.13;
+  // Translate the tagline up so its descender area doesn't push past pill bottom.
+  // Barlow's descender pad below the baseline is ~0.21 × fontSize.
+  const subDescPad = subFontSize * 0.21;
+
+  return (
+    <span className="flex items-stretch gap-3 shrink-0" style={{ height: size }}>
+      <PulseMark size={size} tone={markTone} shape={markShape} />
+      {/* Text column — fixed height matching the mark. "Pulse" sits in normal
+          flow (so it determines the column width), with a negative top margin
+          to pull its visible cap up to the pill's top. The tagline is
+          absolute-positioned to the bottom so its visible baseline aligns
+          with the pill's bottom edge. */}
+      <span
+        className="relative"
+        style={{ height: size, display: "inline-block", verticalAlign: "top" }}
+      >
+        {/* Tagline drives the column width (wider than "Pulse"). It sits in
+            normal flow at the top of the column, but is then translated
+            downward so its visible baseline aligns with the pill's bottom. */}
+        <span
+          style={{
+            display: "block",
+            fontFamily: "var(--font-data)",
+            fontWeight: 500,
+            fontSize: `${subFontSize}px`,
+            color: subColor,
+            letterSpacing: subTracking,
+            textTransform: "uppercase",
+            lineHeight: 1,
+            whiteSpace: "nowrap",
+            position: "absolute",
+            left: 0,
+            bottom: `-${subDescPad}px`,
+          }}
+        >
+          {submarkText}
+        </span>
+        {/* "Pulse" — in normal flow but visually pulled to the pill top via
+            negative margin to compensate for Playfair's ascender padding. */}
+        <span
+          style={{
+            display: "block",
+            fontFamily: "var(--font-display)",
+            fontWeight: 400,
+            fontSize: `${wordFontSize}px`,
+            color: wordColor,
+            lineHeight: 1,
+            letterSpacing: "-0.005em",
+            marginTop: `-${wordCapPad}px`,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Pulse
+        </span>
+        {/* Invisible width sizer — ensures the column is at least as wide as
+            the tagline so the absolute tagline doesn't get clipped. */}
+        <span
+          aria-hidden="true"
+          style={{
+            display: "block",
+            visibility: "hidden",
+            height: 0,
+            overflow: "hidden",
+            fontFamily: "var(--font-data)",
+            fontWeight: 500,
+            fontSize: `${subFontSize}px`,
+            letterSpacing: subTracking,
+            textTransform: "uppercase",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {submarkText}
+        </span>
       </span>
     </span>
   );
@@ -185,17 +306,17 @@ export function PulseNav() {
         aria-hidden="true"
         style={{ height: 3, background: "var(--pulse-ember)" }}
       />
-      <div className="h-14 flex items-center">
+      <div className="h-16 flex items-center">
       <div className="w-full max-w-[1100px] mx-auto px-4 sm:px-6 flex items-center h-full gap-2">
         {/* Wordmark — mark + Pulse + tagline submark on sm+, mark+Pulse only on xs */}
         <Link href="/" className="flex items-center shrink-0 min-w-0" data-testid="link-home">
           {/* Compact lockup on mobile (no submark) */}
           <span className="sm:hidden">
-            <PulseLogo size={24} surface="dark" submark="none" />
+            <PulseLogo size={28} surface="dark" submark="none" />
           </span>
           {/* Full lockup with tagline on sm+ */}
           <span className="hidden sm:inline-flex">
-            <PulseLogo size={26} surface="dark" submark="tagline" />
+            <PulseLogo size={40} surface="dark" submark="tagline" />
           </span>
         </Link>
 
@@ -264,8 +385,8 @@ export function PulseNav() {
           data-testid="mobile-menu"
         >
           <div aria-hidden="true" style={{ height: 3, background: "var(--pulse-ember)" }} />
-          <div className="h-14 flex items-center justify-between px-4 border-b border-white/10">
-            <PulseLogo size={24} surface="dark" submark="tagline" />
+          <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
+            <PulseLogo size={36} surface="dark" submark="tagline" />
             <button
               onClick={() => setMenuOpen(false)}
               className="flex items-center justify-center h-8 w-8 text-white/85 hover:text-white border border-white/20"
@@ -314,7 +435,7 @@ export function PulseFooter() {
     >
       <div className="max-w-[1100px] mx-auto px-6 space-y-6">
         <div className="flex items-center gap-4">
-          <PulseLogo size={24} surface="light" submark="tagline" />
+          <PulseLogo size={36} surface="light" submark="tagline" />
           <PulseLineSmall width={60} color="var(--pulse-ember)" />
         </div>
 
