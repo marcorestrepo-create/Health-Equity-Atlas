@@ -446,7 +446,14 @@ export default function Dashboard() {
           <StatCard value={hospClosures.toString()} label="Hospital closures" sub="since 2010" alarm />
         </div>
         <p
+          data-testid="text-kpi-disclosure"
           className="mt-3"
+          style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--pulse-text-muted)", textTransform: "uppercase", letterSpacing: "0.12em" }}
+        >
+          Score relative to all 3,144 U.S. counties · green ≠ no equity gap
+        </p>
+        <p
+          className="mt-2"
           style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--pulse-text-muted)", textTransform: "uppercase", letterSpacing: "0.12em" }}
         >
           Higher scores indicate wider health-equity gaps. Click any county below to see profile and ranked interventions, or open the methods to see how scores are calculated.

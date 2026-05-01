@@ -381,12 +381,26 @@ export default function CountyEmbed() {
             </ul>
           </div>
 
-          {/* Footer link */}
-          <footer
+          {/* Disclosure + footer link */}
+          <div
+            data-testid="embed-disclosure"
             style={{
               marginTop: "auto",
               paddingTop: 10,
               borderTop: "1px solid var(--pulse-border-faint)",
+              fontFamily: "var(--font-mono)",
+              fontSize: 9,
+              letterSpacing: "0.10em",
+              textTransform: "uppercase",
+              color: "var(--pulse-text-muted)",
+              lineHeight: 1.4,
+            }}
+          >
+            Score relative to all 3,144 U.S. counties
+          </div>
+          <footer
+            style={{
+              marginTop: 4,
               fontFamily: "var(--font-mono)",
               fontSize: 10,
               letterSpacing: "0.10em",

@@ -101,28 +101,43 @@ export default function StateDetail() {
           </p>
 
           {!isLoading && counties.length > 0 && (
-            <div className="mt-5 flex flex-wrap gap-x-8 gap-y-2 font-data text-[12px]" style={{ color: "var(--pulse-text-muted)" }}>
-              <div>
-                <span style={{ color: "var(--pulse-navy)" }} data-testid="text-county-count">
-                  {counties.length}
-                </span>{" "}
-                counties
-              </div>
-              {avgGap !== null && (
+            <>
+              <div className="mt-5 flex flex-wrap gap-x-8 gap-y-2 font-data text-[12px]" style={{ color: "var(--pulse-text-muted)" }}>
                 <div>
-                  Average gap score{" "}
-                  <span style={{ color: "var(--pulse-navy)" }} data-testid="text-avg-gap">
-                    {avgGap.toFixed(1)}
+                  <span style={{ color: "var(--pulse-navy)" }} data-testid="text-county-count">
+                    {counties.length}
+                  </span>{" "}
+                  counties
+                </div>
+                {avgGap !== null && (
+                  <div>
+                    Average gap score{" "}
+                    <span style={{ color: "var(--pulse-navy)" }} data-testid="text-avg-gap">
+                      {avgGap.toFixed(1)}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  Population{" "}
+                  <span style={{ color: "var(--pulse-navy)" }} data-testid="text-state-pop">
+                    {totalPop.toLocaleString()}
                   </span>
                 </div>
-              )}
-              <div>
-                Population{" "}
-                <span style={{ color: "var(--pulse-navy)" }} data-testid="text-state-pop">
-                  {totalPop.toLocaleString()}
-                </span>
               </div>
-            </div>
+              <p
+                data-testid="text-state-kpi-disclosure"
+                className="mt-3"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 10.5,
+                  color: "var(--pulse-text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                }}
+              >
+                Score relative to all 3,144 U.S. counties · green ≠ no equity gap
+              </p>
+            </>
           )}
         </div>
 

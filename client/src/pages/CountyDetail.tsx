@@ -235,6 +235,33 @@ export default function CountyDetail() {
       y = 52;
       doc.setTextColor(26, 39, 68);
 
+      // ── Cover-page disclosure block ──
+      // Sits immediately under the dark header so audiences understand what
+      // the score is and isn't before they read any numbers.
+      doc.setFillColor(245, 242, 234);
+      doc.rect(margin, y, contentWidth, 16, "F");
+      doc.setDrawColor(...config.accent);
+      doc.setLineWidth(0.4);
+      doc.line(margin, y, margin, y + 16);
+      doc.setFontSize(7.5);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(26, 39, 68);
+      doc.text("HOW TO READ THIS SCORE", margin + 4, y + 4.5);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(80, 80, 80);
+      const coverDisclosure = sanitize(
+        "The composite Gap Score ranks this county against all 3,144 U.S. counties on 8 equally-weighted dimensions. A lower (greener) score means a smaller gap relative to peers \u2014 not that no gap exists. Use it to spot patterns, then drill into individual dimensions and the methods."
+      );
+      const coverLines = doc.splitTextToSize(coverDisclosure, contentWidth - 8);
+      let cy = y + 9;
+      for (const line of coverLines) {
+        doc.text(line, margin + 4, cy);
+        cy += 3;
+      }
+      y = cy + 3;
+      doc.setTextColor(26, 39, 68);
+
       // ══════════════════════════════════════════════════════════════
       // POLICYMAKER BRIEFING
       // ══════════════════════════════════════════════════════════════
@@ -577,6 +604,24 @@ export default function CountyDetail() {
       doc.setFontSize(7);
       doc.text("Pulse: U.S. Health Equity Atlas \u00B7 thepulseatlas.com \u00B7 Open-source county-level health equity data", margin, y);
 
+      // ── Per-page disclosure footer ──
+      // Stamp the short disclosure on every page so the pull-quote score in
+      // the body of any page is read with the right framing.
+      const totalPages = doc.getNumberOfPages();
+      for (let p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        doc.setFontSize(6.5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(140, 140, 140);
+        const footerY = pageHeight - 6;
+        doc.text(
+          "Score relative to all 3,144 U.S. counties \u00B7 green = smaller gap, not no gap \u00B7 thepulseatlas.com/methods",
+          margin,
+          footerY
+        );
+        doc.text(`p. ${p} / ${totalPages}`, pageWidth - margin, footerY, { align: "right" });
+      }
+
       // ── Download ──
       const blob = doc.output("blob");
       const url = URL.createObjectURL(blob);
@@ -801,6 +846,20 @@ export default function CountyDetail() {
               }}
             >
               {sign}{Math.round(delta)} points {aboveBelow} the national median ({NATIONAL.avgScore}).
+            </p>
+            <p
+              data-testid="text-score-caveat"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10.5,
+                color: "var(--pulse-text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+                marginTop: 8,
+                lineHeight: 1.5,
+              }}
+            >
+              Score relative to all 3,144 U.S. counties · green ≠ no equity gap
             </p>
 
             {/* Gap scale bar */}

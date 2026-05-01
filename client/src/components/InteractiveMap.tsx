@@ -293,6 +293,8 @@ function Legend({ spec }: { spec: DimSpec }) {
   const bandLabels = spec.bands.map((b) =>
     Number.isInteger(b) ? String(b) : b.toFixed(1),
   );
+  const [showInfo, setShowInfo] = useState(false);
+  const isComposite = spec.key === "composite";
   return (
     <div
       style={{
@@ -303,14 +305,87 @@ function Legend({ spec }: { spec: DimSpec }) {
         padding: "10px 14px",
         border: "1px solid var(--pulse-border-faint)",
         background: "var(--pulse-cream)",
+        position: "relative",
       }}
     >
       <span
         className="label-mono"
-        style={{ color: "var(--pulse-text-muted)" }}
+        style={{ color: "var(--pulse-text-muted)", display: "inline-flex", alignItems: "center", gap: 6 }}
       >
         {spec.label}
+        {isComposite && (
+          <button
+            type="button"
+            aria-label="How to read this score"
+            aria-expanded={showInfo}
+            onClick={() => setShowInfo((v) => !v)}
+            data-testid="button-legend-info"
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: "50%",
+              border: "1px solid var(--pulse-border)",
+              background: "var(--pulse-cream)",
+              color: "var(--pulse-text-muted)",
+              fontFamily: "var(--font-serif)",
+              fontSize: 11,
+              lineHeight: 1,
+              fontStyle: "italic",
+              cursor: "pointer",
+              padding: 0,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            i
+          </button>
+        )}
       </span>
+      {isComposite && showInfo && (
+        <div
+          role="dialog"
+          aria-label="Scores are relative, not absolute"
+          data-testid="popover-legend-info"
+          style={{
+            position: "absolute",
+            top: "calc(100% + 6px)",
+            left: 0,
+            zIndex: 20,
+            width: "min(360px, 90vw)",
+            background: "var(--pulse-navy)",
+            color: "#fff",
+            padding: "14px 16px",
+            border: "1px solid var(--pulse-navy)",
+            boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
+            fontFamily: "var(--font-sans)",
+            fontSize: 12.5,
+            lineHeight: 1.55,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10.5,
+              textTransform: "uppercase",
+              letterSpacing: "0.12em",
+              color: "#FFD89B",
+              marginBottom: 8,
+            }}
+          >
+            Scores are relative, not absolute.
+          </div>
+          <ul style={{ listStyle: "disc", paddingLeft: 18, margin: 0 }}>
+            <li><strong>It's a ranking.</strong> Each county is scored against all 3,144 U.S. counties.</li>
+            <li><strong>Green ≠ healthy.</strong> Green means smaller gap relative to peers, not no gap.</li>
+            <li><strong>The composite is a lens.</strong> Use it to spot patterns, then drill into the 8 dimensions.</li>
+            <li><strong>Equal-weight composite.</strong> All 8 dimensions contribute equally; one bad metric won't dominate.</li>
+          </ul>
+          <div style={{ marginTop: 10, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.10em", textTransform: "uppercase" }}>
+            <a href="#/methods" style={{ color: "#FFD89B", textDecoration: "underline" }}>Read the full methods →</a>
+          </div>
+        </div>
+      )}
       <div style={{ display: "flex", alignItems: "center" }}>
         {GAP_RAMP.map((color, i) => (
           <div
@@ -596,6 +671,21 @@ export default function InteractiveMap() {
       {/* Legend */}
       <div style={{ marginBottom: 16 }}>
         <Legend spec={spec} />
+        {spec.key === "composite" && (
+          <p
+            data-testid="text-legend-caveat"
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "var(--pulse-text-muted)",
+              textTransform: "uppercase",
+              letterSpacing: "0.12em",
+              marginTop: 6,
+            }}
+          >
+            Score relative to all 3,144 U.S. counties · green ≠ no equity gap
+          </p>
+        )}
       </div>
 
       {/* Map surface */}
