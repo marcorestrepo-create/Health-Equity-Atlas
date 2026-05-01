@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@300;400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,72 +11,92 @@
 
 @layer base {
   :root {
-    /* Pulse palette — warm parchment + editorial tones */
-    --background: 38 33% 93%;         /* #F5F0E8 warm parchment */
-    --foreground: 217 43% 18%;        /* #1A2744 deep navy */
-    --card: 42 100% 99%;              /* #FFFDF8 cream */
-    --card-foreground: 217 43% 18%;
-    --popover: 42 100% 99%;
-    --popover-foreground: 217 43% 18%;
+    /* Pulse palette — Brand Guide v1.0 — May 2026 */
+    --background: 35 33% 90%;         /* #F0E8DC Parchment */
+    --foreground: 207 31% 16%;        /* #1C2B35 Atlas Navy */
+    --card: 32 18% 95%;               /* #F5F2EE Linen */
+    --card-foreground: 207 31% 16%;
+    --popover: 32 18% 95%;
+    --popover-foreground: 207 31% 16%;
 
-    /* Primary — deep navy */
-    --primary: 217 43% 18%;
-    --primary-foreground: 42 100% 99%;
+    /* Primary — Atlas Navy */
+    --primary: 207 31% 16%;
+    --primary-foreground: 35 33% 92%;
 
-    /* Secondary — warm tan surface */
-    --secondary: 36 28% 89%;
-    --secondary-foreground: 217 43% 18%;
+    /* Secondary — Linen surface */
+    --secondary: 32 18% 95%;
+    --secondary-foreground: 207 31% 16%;
 
-    /* Muted — warm gray */
-    --muted: 36 20% 91%;
-    --muted-foreground: 33 14% 43%;   /* #7A6F5F */
+    /* Muted — warm Driftwood-tinted gray */
+    --muted: 30 18% 88%;
+    --muted-foreground: 27 11% 49%;   /* #8A7E72 Driftwood */
 
-    /* Accent — terracotta alarm */
-    --accent: 6 62% 47%;              /* #C0392B */
-    --accent-foreground: 0 0% 98%;
+    /* Accent — Gap Ember */
+    --accent: 14 64% 47%;             /* #C5522A */
+    --accent-foreground: 35 33% 92%;
 
-    /* Destructive — same terracotta for critical */
-    --destructive: 6 62% 47%;
-    --destructive-foreground: 0 0% 98%;
+    /* Destructive — same Gap Ember for critical alerts */
+    --destructive: 14 64% 47%;
+    --destructive-foreground: 35 33% 92%;
 
-    --border: 34 22% 77%;             /* #D4CBBA warm tan */
-    --input: 34 22% 77%;
-    --ring: 217 43% 18%;
+    --border: 26 12% 80%;             /* #D4CFC9 Chalk */
+    --input: 26 12% 80%;
+    --ring: 207 31% 16%;
     --radius: 0px;                    /* sharp corners for editorial feel */
 
-    /* Chart colors — Pulse semantic scale */
-    --chart-1: 160 48% 33%;  /* teal/good #2D7D6B */
-    --chart-2: 25 58% 56%;   /* amber/caution #D4854A */
-    --chart-3: 6 62% 47%;    /* terracotta/alarm #C0392B */
-    --chart-4: 217 43% 18%;  /* navy */
-    --chart-5: 33 14% 43%;   /* warm gray */
+    /* Chart colors — brand-aligned for non-severity charts.                */
+    /* For data-severity choropleths/bars we use --gap-color (q1…q5) which  */
+    /* preserves the divergent good→bad ramp from v1 for accessibility.    */
+    --chart-1: 207 31% 16%;  /* Atlas Navy */
+    --chart-2: 14 64% 47%;   /* Gap Ember */
+    --chart-3: 27 11% 49%;   /* Driftwood */
+    --chart-4: 160 48% 33%;  /* Good (severity) */
+    --chart-5: 25 58% 56%;   /* Caution (severity) */
 
-    /* Sidebar — deep navy */
-    --sidebar-background: 218 52% 12%;   /* #0F1B2D */
-    --sidebar-foreground: 0 0% 85%;
-    --sidebar-primary: 160 48% 33%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 217 43% 18%;
-    --sidebar-accent-foreground: 0 0% 85%;
-    --sidebar-border: 217 40% 20%;
-    --sidebar-ring: 217 43% 18%;
+    /* Sidebar — Atlas Navy */
+    --sidebar-background: 207 31% 16%;
+    --sidebar-foreground: 35 33% 90%;
+    --sidebar-primary: 14 64% 47%;
+    --sidebar-primary-foreground: 35 33% 92%;
+    --sidebar-accent: 207 31% 22%;
+    --sidebar-accent-foreground: 35 33% 90%;
+    --sidebar-border: 207 31% 24%;
+    --sidebar-ring: 35 33% 90%;
 
-    /* Pulse semantic colors */
-    --pulse-alarm: #C0392B;
-    --pulse-caution: #D4854A;
+    /* Pulse Brand Guide v1.0 — May 2026 */
+    /* Anchors: Atlas Navy (structure), Gap Ember (alarming callouts only),    */
+    /* Parchment + Linen (warm editorial surfaces), Driftwood (secondary text), */
+    /* Chalk (borders/rules). Severity ramp kept divergent for accessibility. */
+    --pulse-navy: #1C2B35;          /* Atlas Navy — primary structure */
+    --pulse-ember: #C5522A;         /* Gap Ember — reserved for alarming data */
+    --pulse-parchment: #F0E8DC;     /* Parchment — page background */
+    --pulse-cream: #F5F2EE;         /* Linen — surfaces / cards */
+    --pulse-text-muted: #8A7E72;    /* Driftwood — secondary text */
+    --pulse-border: #D4CFC9;        /* Chalk — borders & rules */
+    --pulse-border-faint: #E4DFD8;
+    --pulse-nav-bg: #1C2B35;        /* Nav uses Atlas Navy */
+
+    /* Severity ramp — KEPT divergent for accessibility (good→bad reads     */
+    /* naturally for color-blind users). Brand guide's mint→navy ramp is    */
+    /* intentionally NOT used here for choropleth data encoding.            */
     --pulse-good: #2D7D6B;
-    --pulse-navy: #1A2744;
-    --pulse-parchment: #F5F0E8;
-    --pulse-cream: #FFFDF8;
-    --pulse-border: #D4CBBA;
-    --pulse-border-faint: #E4DCCB;
-    --pulse-text-muted: #7A6F5F;
-    --pulse-nav-bg: #0F1B2D;
+    --pulse-caution: #D4854A;
+    --pulse-alarm: #C0392B;
 
-    /* Font stacks */
+    /* Font stacks per brand guide v1.0:                                   */
+    /*   Playfair Display → display headlines & big stats                  */
+    /*   Source Serif 4   → body prose (editorial gravity, kept from v1)   */
+    /*   Barlow           → navigation, labels, eyebrow caps, badges       */
+    /*   DM Mono          → micro/meta tracked-caps & code-like data       */
+    /* Note: --font-data resolves to Barlow because the codebase uses     */
+    /* font-data extensively for nav/labels/eyebrow caps. Use --font-mono */
+    /* (DM Mono) for true monospace contexts.                             */
     --font-sans: "Source Serif 4", Georgia, serif;
-    --font-serif: "Instrument Serif", "Playfair Display", Georgia, serif;
-    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-serif: "Playfair Display", Georgia, serif;
+    --font-display: "Playfair Display", Georgia, serif;
+    --font-label: "Barlow", system-ui, sans-serif;
+    --font-data: "Barlow", system-ui, sans-serif;
+    --font-mono: "DM Mono", ui-monospace, monospace;
   }
 
   .dark {

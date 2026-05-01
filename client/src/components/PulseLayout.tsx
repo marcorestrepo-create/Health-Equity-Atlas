@@ -36,6 +36,103 @@ export function PulseLineSmall({ color = "var(--pulse-alarm)", width = 80 }: { c
   );
 }
 
+/**
+ * Pulse Atlas brand mark — ECG waveform in a navy pill.
+ * Used as icon-only logo (favicon, small contexts).
+ * tone="dark" → pill is Atlas Navy, line is Gap Ember (for use on light backgrounds).
+ * tone="light" → pill is Linen, line is Gap Ember (for use on dark backgrounds, optional).
+ */
+export function PulseMark({
+  size = 32,
+  tone = "dark",
+  className = "",
+}: {
+  size?: number;
+  tone?: "dark" | "light";
+  className?: string;
+}) {
+  const pillFill = tone === "dark" ? "#1C2B35" : "#F5F2EE";
+  const baseline = tone === "dark" ? "rgba(212,207,201,0.35)" : "rgba(28,43,53,0.25)";
+  const ember = "#C5522A";
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      className={className}
+      role="img"
+      aria-label="Pulse Atlas mark"
+    >
+      <rect x="0" y="0" width="40" height="40" rx="8" fill={pillFill} />
+      {/* baseline */}
+      <line x1="5" y1="20" x2="35" y2="20" stroke={baseline} strokeWidth="1" />
+      {/* ECG waveform */}
+      <path
+        d="M5,20 L13,20 L16,14 L18.5,26 L21,10 L23.5,28 L26,17 L29,20 L35,20"
+        stroke={ember}
+        strokeWidth="1.75"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/**
+ * Full Pulse Atlas wordmark — mark + "Pulse" (Playfair) + "ATLAS" (Barlow tracked).
+ * surface="dark" for use on Atlas Navy nav; surface="light" for footer/light bg.
+ */
+export function PulseLogo({
+  size = 28,
+  surface = "dark",
+  showSubmark = true,
+}: {
+  size?: number;
+  surface?: "dark" | "light";
+  showSubmark?: boolean;
+}) {
+  const wordColor = surface === "dark" ? "#F5F2EE" : "#1C2B35";
+  const subColor = surface === "dark" ? "rgba(245,242,238,0.65)" : "rgba(28,43,53,0.55)";
+  // On dark nav, pill is Linen (light) so it pops; on light surface, pill is Navy.
+  const markTone: "dark" | "light" = surface === "dark" ? "light" : "dark";
+  return (
+    <span className="flex items-center gap-2.5 shrink-0" style={{ lineHeight: 1 }}>
+      <PulseMark size={size} tone={markTone} />
+      <span className="flex flex-col" style={{ lineHeight: 1 }}>
+        <span
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 400,
+            fontSize: `${Math.round(size * 0.78)}px`,
+            color: wordColor,
+            lineHeight: 1,
+            letterSpacing: "-0.005em",
+          }}
+        >
+          Pulse
+        </span>
+        {showSubmark && (
+          <span
+            style={{
+              fontFamily: "var(--font-data)",
+              fontWeight: 500,
+              fontSize: `${Math.max(9, Math.round(size * 0.32))}px`,
+              color: subColor,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              marginTop: `${Math.max(2, Math.round(size * 0.1))}px`,
+            }}
+          >
+            Atlas
+          </span>
+        )}
+      </span>
+    </span>
+  );
+}
+
 /** Navigation bar */
 export function PulseNav() {
   const [location] = useLocation();
@@ -57,15 +154,10 @@ export function PulseNav() {
     >
       <div className="w-full max-w-[1100px] mx-auto px-6 flex items-center h-full">
         {/* Wordmark */}
-        <Link href="/" className="flex items-baseline gap-2.5 shrink-0">
+        <Link href="/" className="flex items-center gap-3 shrink-0" data-testid="link-home">
+          <PulseLogo size={26} surface="dark" />
           <span
-            className="font-serif italic text-white"
-            style={{ fontSize: "22px", letterSpacing: "0.005em", lineHeight: 1 }}
-          >
-            Pulse
-          </span>
-          <span
-            className="font-data text-[10px] uppercase tracking-[0.18em] opacity-55 text-white pl-2.5 hidden sm:inline"
+            className="font-data text-[10px] uppercase tracking-[0.18em] opacity-55 text-white pl-3 hidden md:inline"
             style={{ borderLeft: "1px solid rgba(255,255,255,0.18)", lineHeight: 1 }}
           >
             U.S. Health Equity Atlas
@@ -128,11 +220,9 @@ export function PulseFooter() {
       style={{ borderTop: "1px solid var(--pulse-border)" }}
     >
       <div className="max-w-[1100px] mx-auto px-6 space-y-6">
-        <div className="flex items-baseline gap-2.5">
-          <span className="font-serif italic text-lg" style={{ color: "var(--pulse-navy)" }}>
-            Pulse
-          </span>
-          <PulseLineSmall width={60} />
+        <div className="flex items-center gap-3">
+          <PulseLogo size={24} surface="light" />
+          <PulseLineSmall width={60} color="var(--pulse-ember)" />
         </div>
 
         {/* Cite this atlas */}

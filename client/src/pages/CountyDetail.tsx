@@ -130,13 +130,13 @@ export default function CountyDetail() {
       const sectionTitle = (title: string) => {
         checkPage(14);
         y += 2;
-        doc.setDrawColor(26, 39, 68);
+        doc.setDrawColor(28, 43, 53);
         doc.setLineWidth(0.3);
         doc.line(margin, y, margin + contentWidth, y);
         y += 6;
         doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(26, 39, 68);
+        doc.setTextColor(28, 43, 53);
         doc.text(title, margin, y);
         y += 6;
       };
@@ -166,7 +166,7 @@ export default function CountyDetail() {
         checkPage(5);
         doc.setFontSize(9);
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(26, 39, 68);
+        doc.setTextColor(28, 43, 53);
         doc.text(`${label}: `, margin + indent, y);
         const labelWidth = doc.getTextWidth(`${label}: `);
         doc.setFont("helvetica", "normal");
@@ -191,7 +191,7 @@ export default function CountyDetail() {
         "policymaker": {
           title: "Legislative Health Equity Briefing",
           subtitle: "Data-driven talking points for policy action",
-          accent: [26, 39, 68], // navy
+          accent: [28, 43, 53], // Atlas Navy
         },
         "health-system": {
           title: "Health System Strategic Briefing",
@@ -201,7 +201,7 @@ export default function CountyDetail() {
         "nonprofit": {
           title: "Community Health Needs Assessment",
           subtitle: "Grant-ready data and partnership opportunities",
-          accent: [192, 57, 43], // terracotta
+          accent: [197, 82, 42], // Gap Ember
         },
       };
       const config = audienceConfig[audience] || audienceConfig["policymaker"];
@@ -209,11 +209,41 @@ export default function CountyDetail() {
       // ══════════════════════════════════════════════════════════════
       // HEADER (shared structure, audience-specific color + title)
       // ══════════════════════════════════════════════════════════════
-      doc.setFillColor(15, 27, 45);
+      doc.setFillColor(28, 43, 53);
       doc.rect(0, 0, pageWidth, 42, "F");
       // Accent stripe
       doc.setFillColor(...config.accent);
       doc.rect(0, 42, pageWidth, 2, "F");
+
+      // Brand mark: small ECG pill in the top-right (Linen pill on Navy header)
+      const pillSize = 10;
+      const pillRX = pageWidth - margin - pillSize;
+      const pillRY = 6;
+      doc.setFillColor(245, 242, 238);
+      doc.roundedRect(pillRX, pillRY, pillSize, pillSize, 1.6, 1.6, "F");
+      // Faint baseline
+      doc.setDrawColor(140, 130, 120);
+      doc.setLineWidth(0.15);
+      doc.line(pillRX + 1.4, pillRY + pillSize / 2, pillRX + pillSize - 1.4, pillRY + pillSize / 2);
+      // ECG waveform in Gap Ember
+      doc.setDrawColor(197, 82, 42);
+      doc.setLineWidth(0.55);
+      const ecg: [number, number][] = [
+        [0.00, 0.50], [0.30, 0.50],
+        [0.42, 0.18], [0.52, 0.86],
+        [0.62, 0.32], [0.72, 0.50],
+        [1.00, 0.50],
+      ];
+      for (let i = 0; i < ecg.length - 1; i++) {
+        const [ax, ay] = ecg[i];
+        const [bx, by] = ecg[i + 1];
+        doc.line(
+          pillRX + 1.4 + ax * (pillSize - 2.8),
+          pillRY + 1.4 + ay * (pillSize - 2.8),
+          pillRX + 1.4 + bx * (pillSize - 2.8),
+          pillRY + 1.4 + by * (pillSize - 2.8),
+        );
+      }
 
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(8);
@@ -228,24 +258,24 @@ export default function CountyDetail() {
       doc.text(config.title, margin, 28);
 
       doc.setFontSize(8);
-      doc.setTextColor(180, 190, 210);
+      doc.setTextColor(212, 207, 201);
       doc.text(config.subtitle, margin, 34);
       doc.text(`Generated ${new Date().toLocaleDateString()} \u00B7 FIPS ${c.fips} \u00B7 thepulseatlas.com`, margin, 39);
 
       y = 52;
-      doc.setTextColor(26, 39, 68);
+      doc.setTextColor(28, 43, 53);
 
       // ── Cover-page disclosure block ──
       // Sits immediately under the dark header so audiences understand what
       // the score is and isn't before they read any numbers.
-      doc.setFillColor(245, 242, 234);
+      doc.setFillColor(245, 242, 238);
       doc.rect(margin, y, contentWidth, 16, "F");
       doc.setDrawColor(...config.accent);
       doc.setLineWidth(0.4);
       doc.line(margin, y, margin, y + 16);
       doc.setFontSize(7.5);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(26, 39, 68);
+      doc.setTextColor(28, 43, 53);
       doc.text("HOW TO READ THIS SCORE", margin + 4, y + 4.5);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7.5);
@@ -260,7 +290,7 @@ export default function CountyDetail() {
         cy += 3;
       }
       y = cy + 3;
-      doc.setTextColor(26, 39, 68);
+      doc.setTextColor(28, 43, 53);
 
       // ══════════════════════════════════════════════════════════════
       // POLICYMAKER BRIEFING
@@ -293,11 +323,11 @@ export default function CountyDetail() {
         doc.setTextColor(50, 50, 50);
         // Table header
         checkPage(20);
-        doc.setFillColor(240, 238, 232);
+        doc.setFillColor(245, 242, 238);
         doc.rect(margin, y - 3, contentWidth, 6, "F");
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
-        doc.setTextColor(26, 39, 68);
+        doc.setTextColor(28, 43, 53);
         const cols = [margin, margin + 45, margin + 80, margin + 115, margin + 145];
         doc.text("Metric", cols[0] + 2, y);
         doc.text(c.name.length > 16 ? c.name.substring(0, 16) + "..." : c.name, cols[1], y);
@@ -365,7 +395,7 @@ export default function CountyDetail() {
           checkPage(28);
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
-          doc.setTextColor(26, 39, 68);
+          doc.setTextColor(28, 43, 53);
           doc.text(sanitize(`#${ri.rank}  ${ri.intervention.name}`), margin, y);
           y += 5;
           labelValue("Gap addressed", ri.intervention.gapAddressed);
@@ -407,11 +437,11 @@ export default function CountyDetail() {
         // ── Clinical Metrics Dashboard ──
         sectionTitle("Clinical Metrics vs. Benchmarks");
         checkPage(20);
-        doc.setFillColor(240, 238, 232);
+        doc.setFillColor(245, 242, 238);
         doc.rect(margin, y - 3, contentWidth, 6, "F");
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
-        doc.setTextColor(26, 39, 68);
+        doc.setTextColor(28, 43, 53);
         const hsCols = [margin, margin + 55, margin + 80, margin + 105, margin + 135];
         doc.text("Clinical Indicator", hsCols[0] + 2, y);
         doc.text("County", hsCols[1], y);
@@ -476,7 +506,7 @@ export default function CountyDetail() {
           checkPage(30);
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
-          doc.setTextColor(26, 39, 68);
+          doc.setTextColor(28, 43, 53);
           doc.text(sanitize(`#${ri.rank}  ${ri.intervention.name}`), margin, y);
           y += 1;
           doc.setFontSize(8);
@@ -556,7 +586,7 @@ export default function CountyDetail() {
           checkPage(32);
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
-          doc.setTextColor(26, 39, 68);
+          doc.setTextColor(28, 43, 53);
           doc.text(sanitize(`#${ri.rank}  ${ri.intervention.name}`), margin, y);
           y += 5;
           labelValue("Evidence strength", ri.intervention.evidenceStrength);
@@ -585,7 +615,7 @@ export default function CountyDetail() {
       // ══════════════════════════════════════════════════════════════
       checkPage(24);
       y += 4;
-      doc.setDrawColor(26, 39, 68);
+      doc.setDrawColor(28, 43, 53);
       doc.setLineWidth(0.3);
       doc.line(margin, y, margin + contentWidth, y);
       y += 5;
@@ -1675,7 +1705,7 @@ function EmbedModal({ fips, countyName, stateAbbr, onClose, copied, setCopied }:
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(15, 27, 45, 0.55)",
+        background: "rgba(28, 43, 53, 0.55)",
         zIndex: 100,
         display: "flex",
         alignItems: "center",
