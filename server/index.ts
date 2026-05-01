@@ -7,6 +7,49 @@ import { createServer } from "http";
 const app = express();
 const httpServer = createServer(app);
 
+// Security headers — set on every response, before static/route handlers.
+// Notes:
+//   - We deliberately DO NOT set X-Frame-Options. Pulse Atlas exposes /embed/:fips
+//     as an iframe-able county card (the "embed in the wild" product feature),
+//     and X-Frame-Options is all-or-nothing across the SPA. We rely on CSP's
+//     `frame-ancestors *` to keep the site embeddable from any host.
+//   - HSTS is only meaningful on HTTPS responses. Render terminates TLS at the
+//     edge and forwards X-Forwarded-Proto, but setting HSTS unconditionally is
+//     standard practice (browsers ignore it on http://) and avoids edge cases.
+//   - CSP allows: self, googletagmanager (GA4 loader), google-analytics
+//     (GA4 beacon), fonts.googleapis (Google Fonts CSS), fonts.gstatic
+//     (Google Fonts woff2). 'unsafe-inline' for scripts is required by the
+//     inline GA snippet and JSON-LD blocks; 'unsafe-inline' for styles is
+//     required by Google Fonts CSS and Tailwind/shadcn inline styles.
+app.use((_req, res, next) => {
+  res.setHeader(
+    "Strict-Transport-Security",
+    "max-age=31536000; includeSubDomains; preload",
+  );
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+  );
+  res.setHeader(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' https://www.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://stats.g.doubleclick.net",
+      "frame-ancestors *",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "object-src 'none'",
+    ].join("; "),
+  );
+  next();
+});
+
 // Gzip compression for all responses (JSON API + static assets)
 // Large JSON payloads like /api/counties (1.7MB) compress ~75% smaller.
 app.use(compression({

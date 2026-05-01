@@ -9,24 +9,36 @@
     <meta name="keywords" content="health equity, county health data, health disparities, maternal mortality, uninsured rate, rural health, social vulnerability, health atlas, U.S. counties, public health" />
     <meta name="theme-color" content="#0B2545" />
 
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://thepulseatlas.com" />
+    <!-- Canonical URL (apex redirects to www; canonical points to the final URL) -->
+    <link rel="canonical" href="https://www.thepulseatlas.com" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Pulse: U.S. Health Equity Atlas" />
     <meta property="og:title" content="Pulse — U.S. Health Equity Atlas" />
     <meta property="og:description" content="Interactive county-by-county atlas mapping health equity gaps across 3,144 U.S. counties. Insurance, maternal mortality, chronic disease, provider shortages, and more." />
-    <meta property="og:url" content="https://thepulseatlas.com" />
-    <meta property="og:image" content="https://thepulseatlas.com/og-image.png" />
+    <meta property="og:url" content="https://www.thepulseatlas.com" />
+    <meta property="og:image" content="https://www.thepulseatlas.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Pulse: U.S. Health Equity Atlas — the atlas of health equity gaps. All 3,144 U.S. counties." />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Pulse — U.S. Health Equity Atlas" />
     <meta name="twitter:description" content="Interactive county-by-county atlas mapping health equity gaps across 3,144 U.S. counties. Insurance, maternal mortality, chronic disease, provider shortages, and more." />
-    <meta name="twitter:image" content="https://thepulseatlas.com/og-image.png" />
+    <meta name="twitter:image" content="https://www.thepulseatlas.com/og-image.png" />
 
-    <!-- Google Analytics 4 — ID wired at runtime via VITE_GA4_ID env var in main.tsx -->
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZZ2S3Y0954"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      // Initial page_view fires automatically on load; subsequent hash-route
+      // navigation page_views are dispatched manually from main.tsx.
+      gtag('config', 'G-ZZ2S3Y0954', { anonymize_ip: true });
+    </script>
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -129,7 +141,9 @@
     ]
     </script>
 
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
