@@ -16,8 +16,19 @@ import {
   ComposableMap,
   Geographies,
   Geography,
+  ZoomableGroup,
 } from "react-simple-maps";
 import { GAP_RAMP, NATIONAL } from "@/lib/pulse-design";
+
+// Map zoom limits — keep counties readable but not infinite. 8x covers single
+// counties in the densest metros (NYC, LA basin, etc.).
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 8;
+// d3-zoom (used by ZoomableGroup) handles double-click natively: it animates a
+// 2x zoom toward the cursor and stops propagation. We can't see that synthetic
+// event in React, so we listen for native dblclick at capture phase and use
+// the timestamp to suppress single-click navigation that would otherwise fire.
+const DBLCLICK_SUPPRESS_MS = 350;
 
 // ─── Dimension definitions for the map ────────────────────────────────────
 //
@@ -493,15 +504,23 @@ function MapInner({
   topology,
   spec,
   onHover,
-  onClick,
+  onCountyClick,
   hoveredFips,
+  zoom,
+  center,
+  onZoomChange,
+  onMoveStart,
 }: {
   countyData: Map<string, CountyRow>;
   topology: any;
   spec: DimSpec;
   onHover: (county: CountyRow | null, evt: React.MouseEvent) => void;
-  onClick: (fips: string) => void;
+  onCountyClick: (fips: string) => void;
   hoveredFips: string | null;
+  zoom: number;
+  center: [number, number];
+  onZoomChange: (pos: { coordinates: [number, number]; zoom: number }) => void;
+  onMoveStart: () => void;
 }) {
   // Memoize the band lookup so we don't re-bucket every county on hover.
   const bandByFips = useMemo(() => {
@@ -519,59 +538,91 @@ function MapInner({
       height={610}
       style={{ width: "100%", height: "auto", display: "block" }}
     >
-      <Geographies geography={topology}>
-        {({ geographies }) =>
-          geographies.map((geo) => {
-            const fips = String(geo.id).padStart(5, "0");
-            const band = bandByFips.get(fips);
-            const fill =
-              band == null ? "#E4DCCB" : GAP_RAMP[Math.max(0, Math.min(4, band))];
-            const isHover = hoveredFips === fips;
-            const row = countyData.get(fips);
-            return (
-              <Geography
-                key={geo.rsmKey}
-                geography={geo}
-                onMouseEnter={(evt) => {
-                  if (row) onHover(row, evt);
-                }}
-                onMouseMove={(evt) => {
-                  if (row) onHover(row, evt);
-                }}
-                onMouseLeave={(evt) => onHover(null, evt)}
-                onClick={() => row && onClick(fips)}
-                style={{
-                  default: {
-                    fill,
-                    stroke: "#FFFDF8",
-                    strokeWidth: 0.3,
-                    outline: "none",
-                    cursor: row ? "pointer" : "default",
-                  },
-                  hover: {
-                    fill,
-                    stroke: "var(--pulse-navy)",
-                    strokeWidth: isHover ? 1.4 : 0.5,
-                    outline: "none",
-                    cursor: row ? "pointer" : "default",
-                  },
-                  pressed: {
-                    fill,
-                    stroke: "var(--pulse-navy)",
-                    strokeWidth: 1.5,
-                    outline: "none",
-                  },
-                }}
-              />
-            );
-          })
-        }
-      </Geographies>
+      <ZoomableGroup
+        zoom={zoom}
+        center={center}
+        minZoom={MIN_ZOOM}
+        maxZoom={MAX_ZOOM}
+        onMoveStart={onMoveStart}
+        onMoveEnd={onZoomChange}
+        translateExtent={[
+          [-200, -200],
+          [1175, 810],
+        ]}
+      >
+        <Geographies geography={topology}>
+          {({ geographies }) =>
+            geographies.map((geo) => {
+              const fips = String(geo.id).padStart(5, "0");
+              const band = bandByFips.get(fips);
+              const fill =
+                band == null
+                  ? "#E4DCCB"
+                  : GAP_RAMP[Math.max(0, Math.min(4, band))];
+              const isHover = hoveredFips === fips;
+              const row = countyData.get(fips);
+              // Stroke scales inversely with zoom so it doesn't get chunky when zoomed in
+              const baseStroke = 0.3 / Math.max(1, zoom * 0.6);
+              const hoverStroke =
+                (isHover ? 1.4 : 0.5) / Math.max(1, zoom * 0.5);
+              return (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  onMouseEnter={(evt) => {
+                    if (row) onHover(row, evt);
+                  }}
+                  onMouseMove={(evt) => {
+                    if (row) onHover(row, evt);
+                  }}
+                  onMouseLeave={(evt) => onHover(null, evt)}
+                  onClick={(evt: React.MouseEvent) => {
+                    if (!row) return;
+                    // The second click of a double-click pair has detail=2.
+                    // Always suppress — d3-zoom handles the zoom natively.
+                    if (evt.detail >= 2) return;
+                    onCountyClick(fips);
+                  }}
+                  style={{
+                    default: {
+                      fill,
+                      stroke: "#FFFDF8",
+                      strokeWidth: baseStroke,
+                      outline: "none",
+                      cursor: row ? "pointer" : "default",
+                    },
+                    hover: {
+                      fill,
+                      stroke: "var(--pulse-navy)",
+                      strokeWidth: hoverStroke,
+                      outline: "none",
+                      cursor: row ? "pointer" : "default",
+                    },
+                    pressed: {
+                      fill,
+                      stroke: "var(--pulse-navy)",
+                      strokeWidth: 1.5 / Math.max(1, zoom * 0.5),
+                      outline: "none",
+                    },
+                  }}
+                />
+              );
+            })
+          }
+        </Geographies>
+      </ZoomableGroup>
     </ComposableMap>
   );
 }
 
 const MapInnerMemo = memo(MapInner);
+
+// Default Albers-USA centered view. The Albers projection's natural center
+// hovers near central Kansas in geo-coordinates terms, but ZoomableGroup
+// expects [longitude, latitude]; the natural geoAlbersUsa default works with
+// [-96, 38] which is roughly the geographic centroid of the contiguous US.
+const DEFAULT_CENTER: [number, number] = [-96, 38];
+const DEFAULT_ZOOM = 1;
 
 export default function InteractiveMap() {
   const [, navigate] = useLocation();
@@ -580,6 +631,17 @@ export default function InteractiveMap() {
   const [topology, setTopology] = useState<any | null>(null);
   const [topoErr, setTopoErr] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Zoom + pan state. ZoomableGroup syncs back via onMoveEnd whenever the user
+  // pans/scrolls/double-clicks (d3-zoom internally). We mirror that into state
+  // so we can show the Reset button only when zoomed.
+  const [zoom, setZoom] = useState<number>(DEFAULT_ZOOM);
+  const [center, setCenter] = useState<[number, number]>(DEFAULT_CENTER);
+  const singleClickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Timestamp of the most recent native dblclick on the map container. The
+  // single-click navigation timer checks this to avoid navigating when the
+  // user actually meant to zoom.
+  const lastDblclickRef = useRef<number>(0);
 
   const spec = DIM_SPECS.find((d) => d.key === dimKey) ?? DIM_SPECS[0];
 
@@ -635,10 +697,70 @@ export default function InteractiveMap() {
     });
   }
 
-  function handleClick(fips: string) {
-    navigate(`/county/${fips}`);
+  // Single-click on a county: defer navigation briefly. d3-zoom intercepts
+  // dblclick at the SVG level and stops its propagation, so we never see it
+  // in React. Instead, a capture-phase native listener (set up below) records
+  // a timestamp; if a dblclick happened within the last DBLCLICK_SUPPRESS_MS,
+  // we cancel the navigation — the user meant to zoom, not to drill in.
+  function handleCountyClick(fips: string) {
+    if (singleClickTimerRef.current) {
+      clearTimeout(singleClickTimerRef.current);
+    }
+    singleClickTimerRef.current = setTimeout(() => {
+      singleClickTimerRef.current = null;
+      const sinceDbl = Date.now() - lastDblclickRef.current;
+      if (sinceDbl < DBLCLICK_SUPPRESS_MS) return;
+      navigate(`/county/${fips}`);
+    }, DBLCLICK_SUPPRESS_MS);
   }
 
+  // Fired by ZoomableGroup when the user drags or scroll-zooms. Sync state
+  // so the controlled props don't snap back.
+  function handleZoomChange(pos: { coordinates: [number, number]; zoom: number }) {
+    setCenter(pos.coordinates);
+    setZoom(pos.zoom);
+  }
+
+  // Hide the tooltip the moment a pan or zoom gesture begins, otherwise it
+  // sticks at a stale screen position while the map moves.
+  function handleMoveStart() {
+    setTip(null);
+  }
+
+  function handleResetView() {
+    setCenter(DEFAULT_CENTER);
+    setZoom(DEFAULT_ZOOM);
+    setTip(null);
+  }
+
+  // Capture-phase dblclick listener so we record the timestamp BEFORE d3-zoom
+  // (which is bound to the SVG) calls stopImmediatePropagation. We also clear
+  // any pending single-click timer here for snappier feel.
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+    const onDbl = () => {
+      lastDblclickRef.current = Date.now();
+      if (singleClickTimerRef.current) {
+        clearTimeout(singleClickTimerRef.current);
+        singleClickTimerRef.current = null;
+      }
+      setTip(null);
+    };
+    node.addEventListener("dblclick", onDbl, true);
+    return () => node.removeEventListener("dblclick", onDbl, true);
+  }, []);
+
+  // Cleanup any pending single-click timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (singleClickTimerRef.current) {
+        clearTimeout(singleClickTimerRef.current);
+      }
+    };
+  }, []);
+
+  const isZoomed = zoom > DEFAULT_ZOOM + 0.01;
   const ready = topology && counties.length > 0;
 
   return (
@@ -744,9 +866,38 @@ export default function InteractiveMap() {
             topology={topology}
             spec={spec}
             onHover={handleHover}
-            onClick={handleClick}
+            onCountyClick={handleCountyClick}
             hoveredFips={tip?.fips ?? null}
+            zoom={zoom}
+            center={center}
+            onZoomChange={handleZoomChange}
+            onMoveStart={handleMoveStart}
           />
+        )}
+        {ready && isZoomed && (
+          <button
+            type="button"
+            onClick={handleResetView}
+            data-testid="button-reset-view"
+            style={{
+              position: "absolute",
+              top: 24,
+              right: 24,
+              background: "var(--pulse-navy)",
+              color: "var(--pulse-cream)",
+              border: "none",
+              padding: "8px 14px",
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              textTransform: "uppercase",
+              letterSpacing: "0.14em",
+              cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(20, 30, 50, 0.18)",
+              zIndex: 2,
+            }}
+          >
+            ✕ Reset view
+          </button>
         )}
         <div
           style={{
@@ -756,10 +907,20 @@ export default function InteractiveMap() {
             color: "var(--pulse-text-muted)",
             textTransform: "uppercase",
             letterSpacing: "0.12em",
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 16,
+            flexWrap: "wrap",
           }}
         >
-          Albers USA projection · us-atlas TopoJSON · Click any county for the
-          full profile
+          <span>
+            Albers USA projection · us-atlas TopoJSON · Click any county for
+            the full profile
+          </span>
+          <span data-testid="text-zoom-hint">
+            Drag to pan · scroll or double-click to zoom
+            {isZoomed ? ` · ${zoom.toFixed(1)}× ` : ""}
+          </span>
         </div>
       </div>
 
