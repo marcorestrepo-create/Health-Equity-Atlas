@@ -5,11 +5,11 @@ import {
   ArrowLeft, Baby, Truck, Languages, HeartPulse, MonitorSmartphone, Users,
   Activity, AlertTriangle, Building2, Wifi, MapPin, Download, FileText,
   TrendingUp, TrendingDown, ExternalLink, Shield, Wind, Car, Stethoscope,
-  Brain, ChevronRight
+  Brain, ChevronRight, ChevronDown, Code2, Copy, Check, X
 } from "lucide-react";
 import { PulseDivider } from "@/components/PulseLayout";
 import { INTERVENTION_COLORS } from "@/lib/constants";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useStructuredData, buildCountyStructuredData } from "@/hooks/useStructuredData";
 import { buildCountySummary } from "@shared/narratives";
@@ -42,6 +42,8 @@ export default function CountyDetail() {
   const [, navigate] = useLocation();
   const [audience, setAudience] = useState("policymaker");
   const [generating, setGenerating] = useState(false);
+  const [embedOpen, setEmbedOpen] = useState(false);
+  const [embedCopied, setEmbedCopied] = useState(false);
 
   const { data, isLoading } = useQuery<any>({
     queryKey: [`/api/counties/${fips}`],
@@ -1229,7 +1231,7 @@ export default function CountyDetail() {
 
       {/* ── Citation block ── */}
       <section className="max-w-[1100px] mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div
             style={{
               background: "var(--pulse-cream)",
@@ -1306,8 +1308,71 @@ export default function CountyDetail() {
               ))}
             </div>
           </div>
+
+          {/* Embed card — opens modal with iframe snippet. */}
+          <div
+            style={{
+              background: "transparent",
+              border: "1px solid var(--pulse-border)",
+              padding: "20px 22px",
+            }}
+            className="flex flex-col justify-between"
+          >
+            <div>
+              <div className="label-mono mb-2.5">Embed this county</div>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 13.5,
+                  lineHeight: 1.6,
+                  color: "var(--pulse-text)",
+                  margin: "0 0 16px",
+                }}
+              >
+                Drop this county's gap profile into a story, dashboard, or
+                board memo with a single iframe snippet. Embeds always show
+                live data.
+              </p>
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmbedCopied(false);
+                  setEmbedOpen(true);
+                }}
+                className="flex items-center gap-1.5 transition-colors hover:bg-[var(--pulse-cream)]"
+                style={{
+                  background: "transparent",
+                  border: "1px solid var(--pulse-navy)",
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  color: "var(--pulse-navy)",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 10,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                }}
+                data-testid="button-copy-embed"
+              >
+                <Code2 className="w-2.5 h-2.5" /> Copy embed code
+              </button>
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* ── Embed modal ── */}
+      {embedOpen && (
+        <EmbedModal
+          fips={county.fips}
+          countyName={county.name}
+          stateAbbr={county.stateAbbr}
+          onClose={() => setEmbedOpen(false)}
+          copied={embedCopied}
+          setCopied={setEmbedCopied}
+        />
+      )}
 
       {/* ── Cross-links: in-state and nearby counties ── */}
       <section className="max-w-[1100px] mx-auto px-6 pb-16 pt-12">
@@ -1407,7 +1472,10 @@ function RelatedCounties({ fips, stateAbbr, stateName }: { fips: string; stateAb
       )}
       {data.nearby.length > 0 && (
         <div>
-          <div className="label-mono mb-4">Nearby counties</div>
+          <div className="flex items-baseline justify-between mb-4">
+            <span className="label-mono">Nearby counties</span>
+            <span aria-hidden="true" />
+          </div>
           <div className="grid grid-cols-1 gap-1.5">
             {data.nearby.map((c) => (
               <Link key={c.fips} href={`/county/${c.fips}`}>
@@ -1478,6 +1546,267 @@ function DataRow({ label, value }: { label: string; value: string }) {
     >
       <span style={{ color: "var(--pulse-text-muted)" }}>{label}</span>
       <span style={{ color: "var(--pulse-navy)" }}>{value}</span>
+    </div>
+  );
+}
+
+// ─── Embed modal ──────────────────────────────────────────────────────────
+// Opens when the user clicks "Copy embed code" on a county page. Renders a
+// pre-selected iframe snippet, a live preview, and a copy button.
+
+interface EmbedModalProps {
+  fips: string;
+  countyName: string;
+  stateAbbr: string;
+  onClose: () => void;
+  copied: boolean;
+  setCopied: (v: boolean) => void;
+}
+
+function EmbedModal({ fips, countyName, stateAbbr, onClose, copied, setCopied }: EmbedModalProps) {
+  // Collapsed by default — most users just want to copy and paste. Power
+  // users (devs, web producers) can expand to see / edit the raw HTML.
+  const [showSnippet, setShowSnippet] = useState(false);
+
+  // The brief specifies https://www.thepulseatlas.com/#/embed/<fips>. We use
+  // the production hostname here regardless of where the page is currently
+  // hosted, since the snippet is for use on third-party sites.
+  const snippet = `<iframe src="https://www.thepulseatlas.com/#/embed/${fips}" width="400" height="320" frameborder="0" style="border:1px solid #e5e7eb; border-radius:8px;" title="Pulse Atlas — ${countyName}, ${stateAbbr}"></iframe>`;
+
+  // For the in-modal preview, point the iframe at the *current* origin so
+  // dev / preview deploys show their own data instead of trying to fetch
+  // production thepulseatlas.com (which would 404 in dev).
+  const previewSrc = `${window.location.origin}/#/embed/${fips}`;
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(snippet);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2400);
+    } catch {
+      // Clipboard API blocked? Expand the snippet and fall back to manual
+      // selection so the user can Cmd-C themselves.
+      setShowSnippet(true);
+      setTimeout(() => {
+        const ta = document.getElementById("embed-snippet-textarea") as HTMLTextAreaElement | null;
+        if (ta) {
+          ta.focus();
+          ta.select();
+        }
+      }, 0);
+    }
+  }
+
+  // Close on Escape
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Embed code"
+      data-testid="embed-modal"
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(15, 27, 45, 0.55)",
+        zIndex: 100,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "var(--pulse-cream)",
+          border: "1px solid var(--pulse-border)",
+          maxWidth: 560,
+          width: "100%",
+          padding: "28px 28px 24px",
+          position: "relative",
+          maxHeight: "min(90vh, 720px)",
+          overflowY: "auto",
+        }}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          data-testid="button-close-embed-modal"
+          style={{
+            position: "absolute",
+            top: 14,
+            right: 14,
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--pulse-text-muted)",
+            padding: 4,
+          }}
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="label-mono" style={{ marginBottom: 8 }}>
+          Embed code
+        </div>
+        <h3
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: 26,
+            color: "var(--pulse-navy)",
+            margin: 0,
+            fontWeight: 400,
+            lineHeight: 1.15,
+          }}
+        >
+          {countyName}, {stateAbbr}
+        </h3>
+        <p
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: 13.5,
+            lineHeight: 1.6,
+            color: "var(--pulse-text)",
+            margin: "10px 0 18px",
+          }}
+        >
+          Paste this snippet into any HTML page. The card always pulls the
+          latest data from Pulse Atlas — there's nothing to update when scores
+          refresh.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => setShowSnippet((v) => !v)}
+          aria-expanded={showSnippet}
+          aria-controls="embed-snippet-textarea"
+          data-testid="button-toggle-snippet"
+          className="flex items-center gap-1.5 hover:text-pulse-navy transition-colors"
+          style={{
+            background: "transparent",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            fontFamily: "var(--font-mono)",
+            fontSize: 11,
+            color: "var(--pulse-text-muted)",
+            textTransform: "uppercase",
+            letterSpacing: "0.12em",
+          }}
+        >
+          <ChevronDown
+            className="w-3.5 h-3.5"
+            style={{
+              transform: showSnippet ? "rotate(0deg)" : "rotate(-90deg)",
+              transition: "transform 150ms ease",
+            }}
+          />
+          {showSnippet ? "Hide HTML snippet" : "View HTML snippet"}
+        </button>
+
+        {showSnippet && (
+          <textarea
+            id="embed-snippet-textarea"
+            readOnly
+            value={snippet}
+            onFocus={(e) => e.currentTarget.select()}
+            rows={4}
+            data-testid="textarea-embed-snippet"
+            style={{
+              width: "100%",
+              background: "var(--pulse-parchment)",
+              border: "1px solid var(--pulse-border)",
+              padding: "12px 14px",
+              fontFamily: "var(--font-mono)",
+              fontSize: 11.5,
+              lineHeight: 1.5,
+              color: "var(--pulse-text)",
+              resize: "vertical",
+              boxSizing: "border-box",
+              borderRadius: 0,
+              marginTop: 10,
+            }}
+          />
+        )}
+
+        <div
+          className="flex items-center gap-3"
+          style={{ marginTop: 14, flexWrap: "wrap" }}
+        >
+          <button
+            type="button"
+            onClick={handleCopy}
+            data-testid="button-copy-snippet"
+            className="flex items-center gap-1.5 transition-colors"
+            style={{
+              background: copied ? "var(--pulse-good)" : "var(--pulse-navy)",
+              color: "var(--pulse-cream)",
+              border: "none",
+              padding: "10px 16px",
+              cursor: "pointer",
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              textTransform: "uppercase",
+              letterSpacing: "0.12em",
+            }}
+          >
+            {copied ? (
+              <>
+                <Check className="w-3 h-3" /> Copied
+              </>
+            ) : (
+              <>
+                <Copy className="w-3 h-3" /> Copy to clipboard
+              </>
+            )}
+          </button>
+          <span
+            className="label-mono"
+            style={{ color: "var(--pulse-text-muted)" }}
+          >
+            Embeds always show live data
+          </span>
+        </div>
+
+        {/* Live preview */}
+        <div style={{ marginTop: 22 }}>
+          <div className="label-mono mb-2">Preview</div>
+          <div
+            style={{
+              border: "1px dashed var(--pulse-border)",
+              padding: 12,
+              background: "var(--pulse-parchment)",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <iframe
+              src={previewSrc}
+              width={400}
+              height={320}
+              frameBorder={0}
+              title={`Embed preview: ${countyName}, ${stateAbbr}`}
+              data-testid="iframe-embed-preview"
+              style={{
+                border: "1px solid #e5e7eb",
+                borderRadius: 8,
+                background: "var(--pulse-cream)",
+                maxWidth: "100%",
+              }}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

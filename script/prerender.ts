@@ -94,9 +94,11 @@ const esc = (s: string) =>
     .replace(/'/g, "&#39;");
 
 function buildRedirectScript(hashTarget: string): string {
-  // Runs before React mounts. If we landed on a path URL, convert it to
-  // the hash URL the SPA understands, then let React take over.
-  return `<script>(function(){var h=${JSON.stringify(hashTarget)};if(location.hash!=="#"+h){history.replaceState(null,"","/#"+h);}})();</script>`;
+  // Runs before React mounts. If we landed on a path URL with NO hash, set
+  // the hash so the SPA can route to the matching page. If the user (or an
+  // iframe consumer) supplied their own hash, respect it — don't clobber
+  // hash routes like #/embed/<fips> that the host might be deep-linking to.
+  return `<script>(function(){var h=${JSON.stringify(hashTarget)};if(!location.hash||location.hash==="#"){history.replaceState(null,"","/#"+h);}})();</script>`;
 }
 
 /**
