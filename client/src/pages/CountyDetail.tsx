@@ -1473,7 +1473,7 @@ function RelatedCounties({ fips, stateAbbr, stateName }: { fips: string; stateAb
     <div className="grid md:grid-cols-2 gap-8">
       {data.inState.length > 0 && (
         <div>
-          <div className="flex items-baseline justify-between mb-4">
+          <div className="flex items-baseline justify-between mb-4 px-3">
             <span className="label-mono">Counties in {stateName}</span>
             {stateSlug && (
               <Link href={`/states/${stateSlug}`}>
@@ -1531,7 +1531,7 @@ function RelatedCounties({ fips, stateAbbr, stateName }: { fips: string; stateAb
       )}
       {data.nearby.length > 0 && (
         <div>
-          <div className="flex items-baseline justify-between mb-4">
+          <div className="flex items-baseline justify-between mb-4 px-3">
             <span className="label-mono">Nearby counties</span>
             <span aria-hidden="true" />
           </div>

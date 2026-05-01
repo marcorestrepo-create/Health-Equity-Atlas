@@ -295,6 +295,9 @@ function Legend({ spec }: { spec: DimSpec }) {
   );
   const [showInfo, setShowInfo] = useState(false);
   const isComposite = spec.key === "composite";
+  // Disclosure applies to every dimension — each one is a relative ranking
+  // across all 3,144 counties, not an absolute health threshold.
+  const showDisclosure = true;
   return (
     <div
       style={{
@@ -313,7 +316,7 @@ function Legend({ spec }: { spec: DimSpec }) {
         style={{ color: "var(--pulse-text-muted)", display: "inline-flex", alignItems: "center", gap: 6 }}
       >
         {spec.label}
-        {isComposite && (
+        {showDisclosure && (
           <button
             type="button"
             aria-label="How to read this score"
@@ -342,7 +345,7 @@ function Legend({ spec }: { spec: DimSpec }) {
           </button>
         )}
       </span>
-      {isComposite && showInfo && (
+      {showDisclosure && showInfo && (
         <div
           role="dialog"
           aria-label="Scores are relative, not absolute"
@@ -378,8 +381,17 @@ function Legend({ spec }: { spec: DimSpec }) {
           <ul style={{ listStyle: "disc", paddingLeft: 18, margin: 0 }}>
             <li><strong>It's a ranking.</strong> Each county is scored against all 3,144 U.S. counties.</li>
             <li><strong>Green ≠ healthy.</strong> Green means smaller gap relative to peers, not no gap.</li>
-            <li><strong>The composite is a lens.</strong> Use it to spot patterns, then drill into the 8 dimensions.</li>
-            <li><strong>Equal-weight composite.</strong> All 8 dimensions contribute equally; one bad metric won't dominate.</li>
+            {isComposite ? (
+              <>
+                <li><strong>The composite is a lens.</strong> Use it to spot patterns, then drill into the 8 dimensions.</li>
+                <li><strong>Equal-weight composite.</strong> All 8 dimensions contribute equally; one bad metric won't dominate.</li>
+              </>
+            ) : (
+              <>
+                <li><strong>One dimension at a time.</strong> Color reflects this metric only — a county can be green here and red on another dimension.</li>
+                <li><strong>Switch back to composite</strong> for the overall picture, or drill into a county for all 8 dimensions side-by-side.</li>
+              </>
+            )}
           </ul>
           <div style={{ marginTop: 10, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.10em", textTransform: "uppercase" }}>
             <a href="#/methods" style={{ color: "#FFD89B", textDecoration: "underline" }}>Read the full methods →</a>
@@ -671,21 +683,21 @@ export default function InteractiveMap() {
       {/* Legend */}
       <div style={{ marginBottom: 16 }}>
         <Legend spec={spec} />
-        {spec.key === "composite" && (
-          <p
-            data-testid="text-legend-caveat"
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: "var(--pulse-text-muted)",
-              textTransform: "uppercase",
-              letterSpacing: "0.12em",
-              marginTop: 6,
-            }}
-          >
-            Score relative to all 3,144 U.S. counties · green ≠ no equity gap
-          </p>
-        )}
+        <p
+          data-testid="text-legend-caveat"
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 10,
+            color: "var(--pulse-text-muted)",
+            textTransform: "uppercase",
+            letterSpacing: "0.12em",
+            marginTop: 6,
+          }}
+        >
+          {spec.key === "composite"
+            ? "Score relative to all 3,144 U.S. counties \u00B7 green \u2260 no equity gap"
+            : `${spec.label} ranked across all 3,144 U.S. counties \u00B7 green \u2260 no gap on this dimension`}
+        </p>
       </div>
 
       {/* Map surface */}
