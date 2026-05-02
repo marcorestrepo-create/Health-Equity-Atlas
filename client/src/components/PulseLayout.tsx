@@ -181,11 +181,12 @@ export function PulseLogo({
       : Math.max(9, Math.round(size * 0.21));
   const subTracking = submark === "tagline" ? "0.16em" : "0.22em";
 
-  // Visual insets keep the lockup from feeling cramped against the pill edges.
-  // ~12% top inset, ~14% bottom inset, with a comfortable gap between Pulse
-  // and the tagline.
+  // "Pulse" sits inset from the pill top with breathing room (~12% inset).
+  // The tagline baseline aligns FLUSH with the pill's bottom edge (no inset)
+  // so the visible bottom of the tagline glyphs lands exactly on the pill
+  // bottom. For all-caps text, baseline = visible glyph bottom.
   const wordCapPad = wordFontSize * 0.13 - size * 0.12;
-  const subDescPad = subFontSize * 0.21 + size * 0.14;
+  const subDescPad = subFontSize * 0.21;
 
   return (
     <span className="flex items-stretch gap-3 shrink-0" style={{ height: size }}>
