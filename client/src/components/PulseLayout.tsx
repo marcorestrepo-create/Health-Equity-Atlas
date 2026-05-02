@@ -188,8 +188,12 @@ export function PulseLogo({
   // Negative top margin to drag the visible cap of "Pulse" up to the pill top.
   // Playfair's ascender pad above the cap is ~0.13 × fontSize.
   const wordCapPad = wordFontSize * 0.13;
-  // Translate the tagline up so its descender area doesn't push past pill bottom.
-  // Barlow's descender pad below the baseline is ~0.21 × fontSize.
+  // For ALL-CAPS text (Barlow uppercase), there are no descenders — the visible
+  // bottom of the glyphs IS the baseline. The line-box, however, extends
+  // below the baseline by the font's descender pad (~0.21 × fontSize for
+  // Barlow). To make the visible bottom of the tagline land exactly on the
+  // pill bottom, we shift the line-box UP so the baseline sits at the pill
+  // bottom edge — i.e. positive `bottom` offset equal to the descender pad.
   const subDescPad = subFontSize * 0.21;
 
   return (
@@ -220,7 +224,9 @@ export function PulseLogo({
             whiteSpace: "nowrap",
             position: "absolute",
             left: 0,
-            bottom: `-${subDescPad}px`,
+            // Shift the line-box UP by the descender pad so the visible glyph
+            // bottoms (= baseline for all-caps) sit on the pill's bottom edge.
+            bottom: `${subDescPad}px`,
           }}
         >
           {submarkText}
