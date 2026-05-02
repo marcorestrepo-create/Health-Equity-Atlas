@@ -158,43 +158,37 @@ export function PulseLogo({
     );
   }
 
-  // Two-line lockup with PRECISE optical alignment to the pill edges.
+  // Two-line lockup with optical alignment to the pill edges + breathing room.
   //
-  // Strategy: position both text spans absolutely inside a fixed-height column,
-  // then use negative-margin (top) and translate (bottom) to compensate for
-  // each font's built-in line-box padding so the *visible glyph edges* land
-  // exactly on the pill's top and bottom edges.
+  // Vertical budget (fractions of `size`, the total lockup height):
+  //   ~5%  top inset  (visual breathing room above "Pulse")
+  //   ~58% "Pulse" cap-height
+  //   ~12% gap between "Pulse" baseline and tagline cap-top
+  //   ~20% tagline cap-height
+  //   ~5%  bottom inset (visual breathing room below tagline)
   //
-  // Font metrics used (measured empirically against Playfair Display 400 and
-  // Barlow 500 in this project):
-  //   Playfair Display: cap-height ≈ 0.685 × font-size, ascender pad ≈ 0.13 × fs
-  //   Barlow caps:      cap-height ≈ 0.72  × font-size, ascender pad ≈ 0.14 × fs
-  //
-  // We want cap-height("Pulse") + gap + cap-height(tagline) ≈ `size`.
-  // Pick wordFontSize so that visible cap-height is roughly 60% of `size`,
-  // and subFontSize so its cap-height is roughly 28% of `size`, leaving ~12%
-  // optical gap.
-  //   wordFontSize = round(size * 0.86)  → cap ≈ size * 0.59
-  //   subFontSize  = round(size * 0.40)  → cap ≈ size * 0.29 (tagline)
-  //                  round(size * 0.42)  for short "Atlas" submark
-  const wordFontSize = Math.round(size * 0.86);
+  // "Pulse" sits in normal flow with a small negative top margin to compensate
+  // for Playfair's built-in ascender padding so its visible cap aligns close
+  // to the top of the pill (with a small visual inset). The tagline is
+  // absolute-positioned with `bottom` set so its baseline (= visible bottom
+  // for all-caps Barlow) sits a small inset above the pill bottom — not flush
+  // — so the lockup feels intentional and breathable.
+  const wordFontSize = Math.round(size * 0.78);
   const submarkText = submark === "tagline" ? "U.S. Health Equity Atlas" : "Atlas";
   const subFontSize =
     submark === "tagline"
-      ? Math.max(10, Math.round(size * 0.26))
-      : Math.max(10, Math.round(size * 0.30));
+      ? Math.max(10, Math.round(size * 0.22))
+      : Math.max(10, Math.round(size * 0.24));
   const subTracking = submark === "tagline" ? "0.16em" : "0.22em";
 
-  // Negative top margin to drag the visible cap of "Pulse" up to the pill top.
-  // Playfair's ascender pad above the cap is ~0.13 × fontSize.
-  const wordCapPad = wordFontSize * 0.13;
-  // For ALL-CAPS text (Barlow uppercase), there are no descenders — the visible
-  // bottom of the glyphs IS the baseline. The line-box, however, extends
-  // below the baseline by the font's descender pad (~0.21 × fontSize for
-  // Barlow). To make the visible bottom of the tagline land exactly on the
-  // pill bottom, we shift the line-box UP so the baseline sits at the pill
-  // bottom edge — i.e. positive `bottom` offset equal to the descender pad.
-  const subDescPad = subFontSize * 0.21;
+  // Negative top margin to align the visible cap of "Pulse" near the pill top.
+  // Playfair's ascender pad above the cap is ~0.13 × fontSize. We leave a small
+  // visual inset (size*0.04) so "Pulse" doesn't kiss the pill top edge.
+  const wordCapPad = wordFontSize * 0.13 - size * 0.04;
+  // Tagline: descender pad below baseline is ~0.21 × fontSize. Pushing the
+  // line-box up by descPad + size*0.06 lands the baseline ~6% inside the pill
+  // bottom — a comfortable visual inset rather than flush with the edge.
+  const subDescPad = subFontSize * 0.21 + size * 0.06;
 
   return (
     <span className="flex items-stretch gap-3 shrink-0" style={{ height: size }}>
