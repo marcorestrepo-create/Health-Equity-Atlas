@@ -173,22 +173,19 @@ export function PulseLogo({
   // absolute-positioned with `bottom` set so its baseline (= visible bottom
   // for all-caps Barlow) sits a small inset above the pill bottom — not flush
   // — so the lockup feels intentional and breathable.
-  const wordFontSize = Math.round(size * 0.78);
+  const wordFontSize = Math.round(size * 0.66);
   const submarkText = submark === "tagline" ? "U.S. Health Equity Atlas" : "Atlas";
   const subFontSize =
     submark === "tagline"
-      ? Math.max(10, Math.round(size * 0.22))
-      : Math.max(10, Math.round(size * 0.24));
+      ? Math.max(9, Math.round(size * 0.19))
+      : Math.max(9, Math.round(size * 0.21));
   const subTracking = submark === "tagline" ? "0.16em" : "0.22em";
 
-  // Negative top margin to align the visible cap of "Pulse" near the pill top.
-  // Playfair's ascender pad above the cap is ~0.13 × fontSize. We leave a small
-  // visual inset (size*0.04) so "Pulse" doesn't kiss the pill top edge.
-  const wordCapPad = wordFontSize * 0.13 - size * 0.04;
-  // Tagline: descender pad below baseline is ~0.21 × fontSize. Pushing the
-  // line-box up by descPad + size*0.06 lands the baseline ~6% inside the pill
-  // bottom — a comfortable visual inset rather than flush with the edge.
-  const subDescPad = subFontSize * 0.21 + size * 0.06;
+  // Visual insets keep the lockup from feeling cramped against the pill edges.
+  // ~12% top inset, ~14% bottom inset, with a comfortable gap between Pulse
+  // and the tagline.
+  const wordCapPad = wordFontSize * 0.13 - size * 0.12;
+  const subDescPad = subFontSize * 0.21 + size * 0.14;
 
   return (
     <span className="flex items-stretch gap-3 shrink-0" style={{ height: size }}>
