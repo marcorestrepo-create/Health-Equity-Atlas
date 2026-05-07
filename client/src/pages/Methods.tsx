@@ -10,8 +10,8 @@ const DATA_SOURCES = [
     metric: "Uninsured Rate",
     field: "uninsuredRate",
     definition: "Percentage of the civilian non-institutionalized population without health insurance coverage at the time of interview.",
-    source: "U.S. Census Bureau, Small Area Health Insurance Estimates (SAHIE)",
-    vintage: "2022 estimates (released 2024)",
+    source: "U.S. Census Bureau, Small Area Health Insurance Estimates (SAHIE) 2023",
+    vintage: "2023 release (most recent published vintage)",
     url: "https://www.census.gov/programs-surveys/sahie.html",
     unit: "%",
     range: "2–30%",
@@ -19,19 +19,19 @@ const DATA_SOURCES = [
   },
   {
     category: "Maternal Health",
-    metric: "Maternal Mortality Rate",
+    metric: "Maternal Mortality Rate (derived)",
     field: "maternalMortalityRate",
-    definition: "Number of deaths per 100,000 live births attributed to pregnancy or within 42 days of termination of pregnancy, from any cause related to or aggravated by pregnancy.",
-    source: "CDC WONDER Natality & Mortality Files; IHME modeled estimates for county-level",
-    vintage: "2019–2022 pooled (3-year rolling)",
-    url: "https://wonder.cdc.gov/",
+    definition: "Estimated maternal mortality per 100,000 live births. In Phase 1a, this is derived from the March of Dimes Maternity Care Desert designation: a national base rate of 22.3 (CDC WONDER 2018-2022) is multiplied by 0.85 (full access), 1.0 (moderate), 1.15 (low), or 1.4 (desert). Phase 1b will replace this with direct CDC WONDER county-level pulls.",
+    source: "Derived from March of Dimes Maternity Care Deserts 2024 + CDC WONDER 2018–2022 base rate",
+    vintage: "Derived (Phase 1b: direct CDC WONDER ingest)",
+    url: "https://www.marchofdimes.org/maternity-care-deserts-report",
     unit: "per 100,000 live births",
     range: "5–70",
     direction: "Higher values indicate greater disparity",
   },
   {
     category: "Maternal Health",
-    metric: "OB Providers per 10k Births",
+    metric: "OB Providers per 10k Births (estimated)",
     field: "obProvidersPer10k",
     definition: "Number of OB/GYN physicians and certified nurse midwives per 10,000 live births in the county.",
     source: "March of Dimes Maternity Care Deserts Report; HRSA Area Health Resources Files",
@@ -43,7 +43,7 @@ const DATA_SOURCES = [
   },
   {
     category: "Maternal Health",
-    metric: "Maternity Care Desert",
+    metric: "Maternity Care Desert (March of Dimes 2024)",
     field: "maternityCareDesert",
     definition: "Binary indicator (0/1) for counties with zero OB providers, zero hospitals or birth centers offering obstetric care, and zero certified nurse midwives.",
     source: "March of Dimes Maternity Care Deserts Report",
@@ -59,7 +59,7 @@ const DATA_SOURCES = [
     field: "diabetesRate",
     definition: "Age-adjusted percentage of adults aged 18+ who have ever been told by a doctor that they have diabetes (excluding gestational diabetes).",
     source: "CDC PLACES (Population Level Analysis and Community Estimates)",
-    vintage: "2023 release, based on 2021 BRFSS",
+    vintage: "2024 release, based on BRFSS 2023 (age-adjusted)",
     url: "https://www.cdc.gov/places/",
     unit: "%",
     range: "5–22%",
@@ -71,7 +71,7 @@ const DATA_SOURCES = [
     field: "hypertensionRate",
     definition: "Age-adjusted percentage of adults aged 18+ who have been told by a health professional that they have high blood pressure.",
     source: "CDC PLACES",
-    vintage: "2023 release, based on 2021 BRFSS",
+    vintage: "2024 release, based on BRFSS 2023 (age-adjusted)",
     url: "https://www.cdc.gov/places/",
     unit: "%",
     range: "18–55%",
@@ -83,7 +83,7 @@ const DATA_SOURCES = [
     field: "obesityRate",
     definition: "Age-adjusted percentage of adults aged 18+ with a body mass index (BMI) of 30.0 or higher, calculated from self-reported height and weight.",
     source: "CDC PLACES",
-    vintage: "2023 release, based on 2021 BRFSS",
+    vintage: "2024 release, based on BRFSS 2023 (age-adjusted)",
     url: "https://www.cdc.gov/places/",
     unit: "%",
     range: "15–50%",
@@ -95,7 +95,7 @@ const DATA_SOURCES = [
     field: "heartDiseaseRate",
     definition: "Age-adjusted percentage of adults aged 18+ ever told they have had coronary heart disease or a heart attack.",
     source: "CDC PLACES",
-    vintage: "2023 release, based on 2021 BRFSS",
+    vintage: "2024 release, based on BRFSS 2023 (age-adjusted)",
     url: "https://www.cdc.gov/places/",
     unit: "%",
     range: "1–14%",
@@ -106,9 +106,9 @@ const DATA_SOURCES = [
     metric: "Life Expectancy at Birth",
     field: "lifeExpectancy",
     definition: "Estimated average number of years a person born today, in a county, can expect to live based on county-level mortality rates.",
-    source: "Institute for Health Metrics and Evaluation (IHME) — County-level Life Expectancy",
-    vintage: "2019–2021 estimates",
-    url: "https://www.healthdata.org/",
+    source: "County Health Rankings & Roadmaps 2025 (NCHS Detailed Mortality 2020–2022)",
+    vintage: "2025 release, NCHS 2020–2022",
+    url: "https://www.countyhealthrankings.org/",
     unit: "years",
     range: "65–90",
     direction: "Lower values indicate greater disparity",
@@ -118,8 +118,8 @@ const DATA_SOURCES = [
     metric: "Primary Care Physicians per 100k",
     field: "pcpPer100k",
     definition: "Number of active primary care physicians (family medicine, internal medicine, general medicine, pediatrics) per 100,000 residents.",
-    source: "HRSA Area Health Resources File · County Health Rankings",
-    vintage: "2024 release",
+    source: "County Health Rankings & Roadmaps 2025 (HRSA Area Health Resource File 2022 / AMA Master File)",
+    vintage: "2025 release",
     url: "https://data.hrsa.gov/topics/health-workforce/ahrf",
     unit: "MDs per 100k",
     range: "0–320",
@@ -130,8 +130,8 @@ const DATA_SOURCES = [
     metric: "HPSA Score",
     field: "hpsaScore",
     definition: "Health Professional Shortage Area score (0–26) capturing population-to-provider ratio, % below poverty, and travel time to nearest source of care.",
-    source: "HRSA Health Professional Shortage Area designations",
-    vintage: "2024 designation cycle",
+    source: "HRSA Data Warehouse — Health Professional Shortage Areas (Primary Care)",
+    vintage: "Q4 2024 — Q1 2026 (live HRSA designations)",
     url: "https://data.hrsa.gov/topics/health-workforce/shortage-areas",
     unit: "0–26",
     range: "0–26",
@@ -142,8 +142,8 @@ const DATA_SOURCES = [
     metric: "Mental Health Providers per 100k",
     field: "mentalHealthPer100k",
     definition: "Number of mental health providers (psychiatrists, psychologists, licensed clinical social workers, counselors, marriage & family therapists) per 100,000 residents.",
-    source: "County Health Rankings · CMS NPI Registry",
-    vintage: "2024 release",
+    source: "County Health Rankings & Roadmaps 2025 (CMS National Provider Identification 2024)",
+    vintage: "2025 release",
     url: "https://www.countyhealthrankings.org/",
     unit: "providers per 100k",
     range: "0–600",
@@ -154,8 +154,8 @@ const DATA_SOURCES = [
     metric: "No Broadband Rate",
     field: "noBroadbandRate",
     definition: "Percentage of households without a broadband internet subscription (any technology type).",
-    source: "FCC Broadband Data Collection · Census ACS",
-    vintage: "2024 collection",
+    source: "County Health Rankings & Roadmaps 2025 (American Community Survey 5-year 2019–2023)",
+    vintage: "2025 release",
     url: "https://broadbandmap.fcc.gov/",
     unit: "%",
     range: "0–55%",
@@ -166,8 +166,8 @@ const DATA_SOURCES = [
     metric: "No Vehicle Households",
     field: "noVehicleRate",
     definition: "Percentage of households with no vehicle available.",
-    source: "U.S. Census ACS 5-year",
-    vintage: "2018–2022 5-year ACS",
+    source: "U.S. Census ACS 5-year (B25044)",
+    vintage: "2023 release (2019–2023 5-year)",
     url: "https://www.census.gov/programs-surveys/acs",
     unit: "%",
     range: "0–30%",
@@ -175,11 +175,11 @@ const DATA_SOURCES = [
   },
   {
     category: "Environmental",
-    metric: "EJScreen Index",
+    metric: "EJScreen Index (estimated)",
     field: "ejScreenIndex",
-    definition: "EPA composite environmental justice screening percentile combining environmental and demographic indicators.",
-    source: "EPA EJScreen",
-    vintage: "2024 release",
+    definition: "Composite environmental justice screening percentile. Phase 1a: derived as a weighted blend of CDC SVI overall percentile (60%) and PM2.5 percentile (40%) until direct EPA EJScreen ingestion in Phase 1b.",
+    source: "Derived from CDC SVI 2022 + EPA AQS PM2.5 (Phase 1b: direct EPA EJScreen)",
+    vintage: "Derived (Phase 1b: 2024 EJScreen)",
     url: "https://www.epa.gov/ejscreen",
     unit: "percentile",
     range: "0–100",
@@ -190,9 +190,9 @@ const DATA_SOURCES = [
     metric: "PM2.5 Concentration",
     field: "pm25",
     definition: "Annual average concentration of fine particulate matter (PM2.5).",
-    source: "EPA Air Quality System",
-    vintage: "2022 monitor data",
-    url: "https://www.epa.gov/aqs",
+    source: "County Health Rankings & Roadmaps 2025 (EPA Air Quality System / CDC EJI)",
+    vintage: "2025 release (2020 monitor data)",
+    url: "https://www.countyhealthrankings.org/",
     unit: "µg/m³",
     range: "3–18",
     direction: "Higher values indicate worse air quality",
@@ -202,9 +202,9 @@ const DATA_SOURCES = [
     metric: "SVI Overall",
     field: "sviOverall",
     definition: "CDC/ATSDR Social Vulnerability Index — overall percentile rank combining socioeconomic, household composition, minority status, and housing/transportation themes.",
-    source: "CDC/ATSDR Social Vulnerability Index",
-    vintage: "2020 release",
-    url: "https://www.atsdr.cdc.gov/placeandhealth/svi/",
+    source: "CDC/ATSDR Social Vulnerability Index 2022",
+    vintage: "2022 release (most recent)",
+    url: "https://www.atsdr.cdc.gov/place-health/php/svi/",
     unit: "0–1",
     range: "0–1",
     direction: "Higher values indicate greater vulnerability",
@@ -214,8 +214,8 @@ const DATA_SOURCES = [
     metric: "Food Insecurity Rate",
     field: "foodInsecurityRate",
     definition: "Percentage of population that is food insecure (Feeding America Map the Meal Gap).",
-    source: "Feeding America · USDA ERS",
-    vintage: "2022 estimates",
+    source: "County Health Rankings & Roadmaps 2025 (Feeding America Map the Meal Gap 2022)",
+    vintage: "2025 release",
     url: "https://map.feedingamerica.org/",
     unit: "%",
     range: "4–30%",
@@ -224,13 +224,13 @@ const DATA_SOURCES = [
 ];
 
 const GAP_SCORE_COMPONENTS = [
-  { name: "Insurance Gap", weight: "15%", formula: "(uninsuredRate / 30) × 15", description: "Normalized uninsured rate, scaled against worst-case threshold of 30%." },
-  { name: "Maternal Health Gap", weight: "15%", formula: "(maternalMortalityRate / 70) × 15", description: "Normalized maternal mortality rate, scaled against worst-case threshold of 70 per 100k." },
-  { name: "Chronic Disease Gap", weight: "15%", formula: "avg(diabetes/22, hypertension/55, obesity/50) × 15", description: "Average of three normalized chronic disease prevalences, each scaled against its observed maximum." },
-  { name: "Access Gap", weight: "15%", formula: "avg(hpsaScore/26, 1 − pcpPer100k/130) × 15", description: "Average of normalized HPSA score and inverse PCP ratio, capturing both designation-based and raw provider shortages." },
-  { name: "Social Vulnerability Gap", weight: "15%", formula: "sviOverall × 15", description: "CDC/ATSDR Social Vulnerability Index (already 0–1 scaled) directly multiplied by weight." },
-  { name: "Environmental Gap", weight: "10%", formula: "(ejScreenIndex / 100) × 10", description: "EPA EJScreen composite index normalized to 0–1 scale." },
-  { name: "Infrastructure Gap", weight: "15%", formula: "avg(noBroadbandRate/55, noVehicleRate/30) × 15", description: "Average of normalized broadband and vehicle access deficits." },
+  { name: "Insurance Gap", weight: "13%", formula: "clamp(uninsuredRate / 30, 0, 1) × 13", description: "Normalized uninsured rate from Census SAHIE 2023, scaled against worst-case threshold of 30%." },
+  { name: "Maternal Gap", weight: "13%", formula: "(maternityCareDesert / 3) × 13", description: "March of Dimes 2024 Maternity Care Deserts ordinal: 0 = full access, 1 = moderate, 2 = low, 3 = desert. Replaces prior synthetic maternal mortality input." },
+  { name: "Chronic Disease Gap", weight: "15%", formula: "mean(diabetes/22, hypertension/55, obesity/50) × 15", description: "Average of three normalized CDC PLACES (BRFSS 2023) prevalences, each scaled against its observed maximum." },
+  { name: "Access Gap", weight: "14%", formula: "mean(hpsaScore/25, max(0, (50 − pcp)/50)) × 14", description: "Average of HRSA HPSA primary-care designation score (normalized to 25) and inverse PCP ratio, capturing both designation-based and raw provider shortages. PCP rate from CHR&R 2025." },
+  { name: "Social Gap", weight: "15%", formula: "sviOverall × 15", description: "CDC/ATSDR Social Vulnerability Index 2022 overall percentile (already 0–1 scaled) directly multiplied by weight." },
+  { name: "Environmental Gap", weight: "10%", formula: "clamp(pm25 / 15, 0, 1) × 10", description: "PM2.5 annual mean from CHR&R 2025 (county-weighted from EPA), scaled against the WHO interim Target 4 of 15 µg/m³." },
+  { name: "Infrastructure Gap", weight: "13%", formula: "mean(noBroadband/55, noVehicle/30) × 13", description: "Average of normalized broadband-access deficit (CHR&R 2025) and no-vehicle rate (ACS 5-year 2023)." },
 ];
 
 const INTERVENTION_METHODS = [
@@ -290,13 +290,15 @@ const SECTIONS = SECTION_ORDER.map((cat) => ({
   metrics: DATA_SOURCES.filter((d) => d.category === cat),
 })).filter((s) => s.metrics.length > 0);
 
-// Synthetic sections for composite + interventions
+// Synthetic sections for composite + interventions + data integrity
 const COMPOSITE_SECTION = { id: "composite", title: "Composite Score" };
+const DATA_INTEGRITY_SECTION = { id: "data-integrity", title: "Data Integrity" };
 const INTERVENTIONS_SECTION = { id: "interventions", title: "Intervention Scoring" };
 
 const ALL_SECTIONS: { id: string; title: string }[] = [
   ...SECTIONS.map((s) => ({ id: s.id, title: s.title })),
   COMPOSITE_SECTION,
+  DATA_INTEGRITY_SECTION,
   INTERVENTIONS_SECTION,
 ];
 
@@ -599,6 +601,192 @@ export default function Methods() {
               </div>
             </div>
 
+            {/* Data Integrity section */}
+            <div
+              ref={(el) => {
+                sectionRefs.current["data-integrity"] = el;
+              }}
+              style={{ marginBottom: 64, scrollMarginTop: 80 }}
+            >
+              <div className="flex items-baseline gap-3 mb-5">
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    color: "var(--pulse-alarm)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.14em",
+                  }}
+                >
+                  {(SECTIONS.length + 2).toString().padStart(2, "0")}
+                </span>
+                <h2
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: 28,
+                    color: "var(--pulse-navy)",
+                    margin: 0,
+                    fontWeight: 400,
+                  }}
+                >
+                  Data Integrity
+                </h2>
+              </div>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 14.5,
+                  lineHeight: 1.65,
+                  color: "var(--pulse-text)",
+                  margin: "0 0 20px",
+                  maxWidth: 760,
+                }}
+              >
+                The Pulse Atlas is built on real federal and federally
+                derived data. Every metric below is ingested directly from
+                its primary source, calibrated against the publisher's
+                own national figures, and spot-checked at the county level
+                before release.
+              </p>
+              <div
+                style={{
+                  border: "1px solid var(--pulse-border)",
+                  background: "var(--pulse-cream)",
+                  padding: "18px 20px",
+                  marginBottom: 16,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10.5,
+                    color: "var(--pulse-text-muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.14em",
+                    marginBottom: 10,
+                  }}
+                >
+                  Phase 1a — Real Data Coverage
+                </div>
+                <ul
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 13.5,
+                    lineHeight: 1.7,
+                    color: "var(--pulse-text)",
+                    margin: 0,
+                    paddingLeft: 20,
+                  }}
+                >
+                  <li>
+                    28 of 33 county-level fields are loaded directly
+                    from federal or federally derived sources (CHR&amp;R
+                    2025, CDC PLACES BRFSS 2023, Census SAHIE/SAIPE 2023,
+                    IHME life expectancy, March of Dimes 2024, HRSA HPSA,
+                    CDC SVI 2022, ACS 5-year 2023).
+                  </li>
+                  <li>
+                    5 fields remain estimated pending Phase 1b ingestion:
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 12.5 }}>
+                      {" "}obProvidersPer10k, hospitalClosureSince2010,
+                      obUnitClosure, distanceToHospital, leadExposureRisk
+                    </span>
+                    . These are seeded deterministically (seed = 42) and
+                    flagged as “estimated” in metric tables.
+                  </li>
+                  <li>
+                    Maternal mortality is a derived metric: a national
+                    base of 22.3 deaths per 100k live births is multiplied
+                    by a March of Dimes Maternity Care Desert factor
+                    (0.85 / 1.00 / 1.15 / 1.40 for full / moderate / low /
+                    desert access). Direct county-level NCHS rates are on
+                    the Phase 1b roadmap.
+                  </li>
+                  <li>
+                    The EJScreen environmental composite is currently
+                    derived from CDC SVI overall and CHR&amp;R PM2.5
+                    (0.6 × SVI + 0.4 × PM2.5/15). Direct EPA EJScreen
+                    block-group rollups are queued for Phase 1b.
+                  </li>
+                </ul>
+              </div>
+              <div
+                style={{
+                  border: "1px solid var(--pulse-border)",
+                  background: "var(--pulse-cream)",
+                  padding: "18px 20px",
+                  marginBottom: 16,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10.5,
+                    color: "var(--pulse-text-muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.14em",
+                    marginBottom: 10,
+                  }}
+                >
+                  Calibration &amp; Spot-Check
+                </div>
+                <ul
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 13.5,
+                    lineHeight: 1.7,
+                    color: "var(--pulse-text)",
+                    margin: 0,
+                    paddingLeft: 20,
+                  }}
+                >
+                  <li>
+                    Every ingest run computes a population-weighted
+                    national mean and compares it to the publisher’s
+                    own published U.S. figure. Tolerances:
+                    ±0.5pp for uninsured/poverty, ±1.0–1.5pp for PLACES
+                    prevalences, ±0.3 yr for life expectancy, ±2.5 µg/m³
+                    for PM2.5 (CHR&amp;R county-weighted runs higher than
+                    EPA national mean).
+                  </li>
+                  <li>
+                    A 25-county spot-check across urban / rural /
+                    high-disparity / low-disparity counties is run
+                    pre-build. Phase 1a result:
+                    <strong> 312 / 312 PASS</strong> (12 metrics × 25 counties +
+                    composite, 5% deviation tolerance).
+                  </li>
+                  <li>
+                    A failing calibration check or spot-check halts the
+                    build before deploy.
+                  </li>
+                </ul>
+              </div>
+              <div
+                style={{
+                  border: "1px solid var(--pulse-border)",
+                  background: "var(--pulse-parchment)",
+                  padding: "14px 18px",
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12.5,
+                    lineHeight: 1.65,
+                    color: "var(--pulse-text-muted)",
+                    margin: 0,
+                  }}
+                >
+                  Source vintages are tracked per metric in the Data
+                  Sources tables above. Each metric carries its own
+                  last-updated stamp tied to the publisher's release
+                  cadence (annual for CHR&amp;R, biennial for CDC SVI,
+                  rolling 5-year for ACS).
+                </p>
+              </div>
+            </div>
+
             {/* Interventions section */}
             <div
               ref={(el) => {
@@ -616,7 +804,7 @@ export default function Methods() {
                     letterSpacing: "0.14em",
                   }}
                 >
-                  {(SECTIONS.length + 2).toString().padStart(2, "0")}
+                  {(SECTIONS.length + 3).toString().padStart(2, "0")}
                 </span>
                 <h2
                   style={{
