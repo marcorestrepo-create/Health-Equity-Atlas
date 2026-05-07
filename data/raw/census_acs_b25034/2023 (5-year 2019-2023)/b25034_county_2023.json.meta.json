@@ -1,0 +1,8 @@
+{
+  "source": "census_acs_b25034",
+  "vintage": "2023 (5-year 2019-2023)",
+  "filename": "b25034_county_2023.json",
+  "url": "https://api.census.gov/data/2023/acs/acs5?get=NAME,B25034_001E,B25034_010E,B25034_011E&for=county:*&in=state:*",
+  "fetched_at": "2026-05-07T17:57:19.600Z",
+  "bytes": 199198
+}

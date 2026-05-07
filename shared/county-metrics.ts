@@ -18,10 +18,9 @@
  *   2. For each real county, looks up each metric by FIPS
  *   3. Where real data exists → uses it directly
  *   4. Where it's suppressed → uses regional median fallback (flagged)
- *   5. For 5 fields without real data yet (obProvidersPer10k, hospitalClosureSince2010,
- *      distanceToHospital, leadExposureRisk, ejScreenIndex), uses deterministic
- *      estimates from the legacy regional-profile + seeded RNG. These are
- *      flagged "estimated" on the Methods page until Phase 1b sources them.
+ *   5. ALL 39 metrics are now real federal data (Phase 1d shipped 6 of the
+ *      previously-estimated fields: obProvidersPer10k, hospitalClosureSince2010,
+ *      obUnitClosure, distanceToHospital, leadExposureRisk, ejScreenIndex).
  *
  * Determinism: with the same processed files + same seed (42), output is identical.
  *
@@ -61,7 +60,7 @@ export interface CountyMetrics {
   lng: number;
   uninsuredRate: number;
   maternalMortalityRate: number;       // legacy field — now derived from MCD designation × national base rate
-  obProvidersPer10k: number;            // estimated (Phase 1b: HRSA AHRF)
+  obProvidersPer10k: number;            // HRSA AHRF 2024-2025 (Phase 1d)
   maternityCareDesert: number;          // 0=full, 1=moderate, 2=low, 3=desert (March of Dimes 2024)
   diabetesRate: number;
   hypertensionRate: number;
@@ -70,14 +69,14 @@ export interface CountyMetrics {
   pcpPer100k: number;
   mentalHealthPer100k: number;
   hpsaScore: number;                    // primary care HPSA score (HRSA)
-  hospitalClosureSince2010: number;     // estimated (Phase 1b: UNC Sheps + Chartis)
-  obUnitClosure: number;                // estimated (Phase 1b: AHA Annual Survey)
+  hospitalClosureSince2010: number;     // UNC Sheps Center rural hospital closures since 2010 (Phase 1d)
+  obUnitClosure: number;                // CMS POS Q2 2025 OB_SRVC_CD (inverse of presence) (Phase 1d)
   noVehicleRate: number;                // ACS 5-year B25044
-  distanceToHospital: number;           // estimated (Phase 1b: HRSA HCFA + AHA)
+  distanceToHospital: number;           // CMS POS Q2 2025 — pop-weighted county avg miles (Phase 1d)
   noBroadbandRate: number;              // 100 - broadband_access_pct (CHR&R / FCC ACS)
   pm25: number;                         // CHR&R / EPA AQS / CDC EJI
-  leadExposureRisk: number;             // estimated (Phase 1b: HUD AHS + EPA)
-  ejScreenIndex: number;                // estimated (Phase 1b: EPA EJScreen direct)
+  leadExposureRisk: number;             // ACS B25034 % pre-1950 housing (Phase 1d)
+  ejScreenIndex: number;                // EPA EJScreen 2.3 supplemental EJ Index percentile, pop-weighted (Phase 1d)
   sviOverall: number;                   // CDC/ATSDR SVI 2022 RPL_THEMES
   sviSocioeconomic: number;             // RPL_THEME1
   sviMinority: number;                  // RPL_THEME3
@@ -214,6 +213,13 @@ const data = {
   disconnectedYouth: loadProcessed("disconnected_youth_pct"),
   childCareCost: loadProcessed("child_care_cost_burden_pct"),
   reading: loadProcessed("reading_scores_grade_level"),
+  // Phase 1d real federal data — replaces RNG estimates
+  obProviders: loadProcessed("ob_providers_per_10k"),
+  hospitalClosure: loadProcessed("hospital_closure_since_2010"),
+  obUnitPresence: loadProcessed("ob_unit_presence"),
+  distanceToHospital: loadProcessed("distance_to_hospital"),
+  leadExposure: loadProcessed("lead_exposure_pct"),
+  ejScreen: loadProcessed("ej_screen_index"),
 };
 
 // ---------------------------------------------------------------------------
@@ -274,6 +280,11 @@ const NATIONAL_MEANS = {
   noVehicle: nationalMean(data.noVehicle),
   lep: nationalMean(data.lep),
   sviOverall: nationalMean(data.sviOverall),
+  // Phase 1d
+  obProviders: nationalMean(data.obProviders),
+  distanceToHospital: nationalMean(data.distanceToHospital),
+  leadExposure: nationalMean(data.leadExposure),
+  ejScreen: nationalMean(data.ejScreen),
 };
 
 function getOrFallback(file: ProcessedFile | null, fips: string, fallback: number): number {
@@ -287,8 +298,9 @@ function getOrFallback(file: ProcessedFile | null, fips: string, fallback: numbe
 
 export function generateCounties(): CountyMetrics[] {
   const allCounties: CountyMetrics[] = [];
-  // Seeded RNG for the 5 estimated-pending fields only — keeps prerender deterministic.
+  // Seeded RNG retained but no longer wired to any field after Phase 1d.
   const rand = seededRandom(42);
+  void rand; void gaussianRandom;
 
   for (const rc of realCounties as RealCounty[]) {
     const ruralUrban = classifyRuralUrban(rc.population);
@@ -359,18 +371,28 @@ export function generateCounties(): CountyMetrics[] {
     const mcdMultiplier = [0.85, 1.0, 1.15, 1.4][maternityCareDesert] ?? 1.0;
     const maternalMortalityRate = clamp(22.3 * mcdMultiplier, 5, 70);
 
-    // ------------------- ESTIMATED (Phase 1b sources pending) -------------------
-    // These five fields are flagged "estimated" on the Methods page until they get
-    // real federal-source ingestions in Phase 1b. They use seeded RNG for determinism.
-    const obProvidersPer10k = clamp(gaussianRandom(rand, isRural ? 2 : 8, 3), 0, 18);
-    const hospitalClosureSince2010 = isRural && rand() < 0.15 ? 1 : 0;
-    const obUnitClosure = (isRural && rand() < 0.25) || hospitalClosureSince2010 ? 1 : 0;
-    const distanceToHospital = isRural
-      ? clamp(gaussianRandom(rand, 25, 12), 3, 65)
-      : clamp(gaussianRandom(rand, 6, 3), 1, 20);
-    const leadExposureRisk = clamp(gaussianRandom(rand, 45, 20), 5, 98);
-    // EJ Screen Index — proxy from real SVI overall + PM2.5 percentile until EPA EJScreen direct ingestion.
-    const ejScreenIndex = clamp(sviOverall * 60 + (pm25 / 15) * 40, 5, 98);
+    // ------------------- Phase 1d: Real federal data -------------------
+    const obProvidersPer10k = clamp(getOrFallback(data.obProviders, rc.fips, NATIONAL_MEANS.obProviders), 0, 30);
+    const hospitalClosureSince2010 = Math.round(getOrFallback(data.hospitalClosure, rc.fips, 0));
+    // CMS POS reports OB-unit presence (1 = has OB unit, 0 = no OB unit).
+    // We expose the inverse as obUnitClosure (1 = no OB services, 0 = OB services present).
+    const obUnitPresence = getOrFallback(data.obUnitPresence, rc.fips, 1);
+    const obUnitClosure = obUnitPresence > 0.5 ? 0 : 1;
+    const distanceToHospital = clamp(
+      getOrFallback(data.distanceToHospital, rc.fips, NATIONAL_MEANS.distanceToHospital),
+      0,
+      200,
+    );
+    const leadExposureRisk = clamp(
+      getOrFallback(data.leadExposure, rc.fips, NATIONAL_MEANS.leadExposure),
+      0,
+      100,
+    );
+    const ejScreenIndex = clamp(
+      getOrFallback(data.ejScreen, rc.fips, NATIONAL_MEANS.ejScreen),
+      0,
+      100,
+    );
 
     // ------------------- HEALTH EQUITY GAP SCORE on REAL DATA -------------------
     // Reweighted from the previous synthetic version because real distributions differ.
@@ -409,7 +431,7 @@ export function generateCounties(): CountyMetrics[] {
       interventionScores.push({
         slug: "ob-access",
         score: clamp(maternalMortalityRate * 0.8, 5, 60),
-        rationale: `March of Dimes 2024 designation: ${["full access", "moderate access", "low access", "desert"][maternityCareDesert]}. OB provider ratio: ${obProvidersPer10k.toFixed(1)} per 10k births (estimated).`,
+        rationale: `March of Dimes 2024 designation: ${["full access", "moderate access", "low access", "desert"][maternityCareDesert]}. OB provider ratio: ${obProvidersPer10k.toFixed(1)} per 10k births (HRSA AHRF 2024-2025).`,
       });
     }
 

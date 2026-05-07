@@ -31,15 +31,51 @@ const DATA_SOURCES = [
   },
   {
     category: "Maternal Health",
-    metric: "OB Providers per 10k Births (estimated)",
+    metric: "OB Providers per 10k Women (15–44)",
     field: "obProvidersPer10k",
-    definition: "Number of OB/GYN physicians and certified nurse midwives per 10,000 live births in the county.",
-    source: "March of Dimes Maternity Care Deserts Report; HRSA Area Health Resources Files",
-    vintage: "2024 report year",
-    url: "https://www.marchofdimes.org/maternity-care-deserts-report",
-    unit: "providers per 10k births",
+    definition: "Number of OB/GYN physicians and certified nurse midwives per 10,000 women of reproductive age (15–44) in the county. Computed directly from HRSA Area Health Resources File 2024–2025 (active OB/GYN MD/DO counts and CNM counts) divided by the female population aged 15–44 from the same release.",
+    source: "HRSA Area Health Resources File (AHRF) 2024–2025",
+    vintage: "2024–2025 release",
+    url: "https://data.hrsa.gov/topics/health-workforce/ahrf",
+    unit: "providers per 10k women 15–44",
     range: "0–18",
     direction: "Lower values indicate fewer providers (greater disparity)",
+  },
+  {
+    category: "Maternal Health",
+    metric: "OB Unit Presence (Hospital)",
+    field: "obUnitClosure",
+    definition: "Binary indicator (0 = OB unit present, 1 = no OB unit) derived from the CMS Provider of Services (POS) file. A county is flagged as having no OB unit when no in-county short-term acute care hospital reports an obstetric service code (OB_SRVC_CD = 1 or 2).",
+    source: "CMS Provider of Services (POS) File, Q2 2025",
+    vintage: "2025 Q2",
+    url: "https://data.cms.gov/provider-characteristics/hospitals-and-other-facilities/provider-of-services-file-hospital-non-hospital-facilities",
+    unit: "0 or 1",
+    range: "0–1",
+    direction: "1 = no in-county OB unit",
+  },
+  {
+    category: "Maternal Health",
+    metric: "Distance to Nearest Hospital (mi)",
+    field: "distanceToHospital",
+    definition: "Population-weighted average straight-line distance (miles) from the county centroid to the nearest short-term acute care hospital. Computed from the CMS POS file using a great-circle (Haversine) distance.",
+    source: "CMS Provider of Services (POS) File, Q2 2025",
+    vintage: "2025 Q2",
+    url: "https://data.cms.gov/provider-characteristics/hospitals-and-other-facilities/provider-of-services-file-hospital-non-hospital-facilities",
+    unit: "miles",
+    range: "0–60+",
+    direction: "Higher values indicate greater access barrier",
+  },
+  {
+    category: "Maternal Health",
+    metric: "Hospital Closures Since 2010",
+    field: "hospitalClosureSince2010",
+    definition: "Binary indicator (0/1) for whether the county has experienced at least one rural hospital closure since 2010, based on the UNC Sheps Center Rural Hospital Closures tracker. Closures are matched to CMS POS hospitals via fuzzy name+state matching (Jaccard ≥ 0.7).",
+    source: "UNC Sheps Center Rural Hospital Closures Tracker",
+    vintage: "Through 2025",
+    url: "https://www.shepscenter.unc.edu/programs-projects/rural-health/rural-hospital-closures/",
+    unit: "0 or 1",
+    range: "0–1",
+    direction: "1 = at least one closure since 2010",
   },
   {
     category: "Maternal Health",
@@ -175,15 +211,27 @@ const DATA_SOURCES = [
   },
   {
     category: "Environmental",
-    metric: "EJScreen Index (estimated)",
+    metric: "EJScreen Index",
     field: "ejScreenIndex",
-    definition: "Composite environmental justice screening percentile. Phase 1a: derived as a weighted blend of CDC SVI overall percentile (60%) and PM2.5 percentile (40%) until direct EPA EJScreen ingestion in Phase 1b.",
-    source: "Derived from CDC SVI 2022 + EPA AQS PM2.5 (Phase 1b: direct EPA EJScreen)",
-    vintage: "Derived (Phase 1b: 2024 EJScreen)",
+    definition: "County-level composite environmental justice percentile, computed as a population-weighted average of the 13 EJScreen 2.3 P_D2_* supplemental demographic index percentiles across all census tracts in the county. Pulled from EPA EJScreen 2.3 (mirrored on Harvard Dataverse).",
+    source: "EPA EJScreen 2.3 (Harvard Dataverse mirror, doi:10.7910/DVN/JISNPL)",
+    vintage: "2024 release (EJScreen 2.3)",
     url: "https://www.epa.gov/ejscreen",
     unit: "percentile",
     range: "0–100",
     direction: "Higher values indicate greater environmental burden",
+  },
+  {
+    category: "Environmental",
+    metric: "Lead Exposure Risk (% pre-1950 housing)",
+    field: "leadExposureRisk",
+    definition: "Percentage of housing units built before 1950, used as a validated proxy for lead-paint and lead-pipe exposure risk. Computed from ACS table B25034 (Year Structure Built) summed across pre-1950 buckets and divided by total housing units.",
+    source: "American Community Survey 5-Year Estimates, Table B25034",
+    vintage: "2023 5-year (2019–2023)",
+    url: "https://api.census.gov/data/2023/acs/acs5/groups/B25034.html",
+    unit: "%",
+    range: "0–80%",
+    direction: "Higher values indicate greater lead exposure risk",
   },
   {
     category: "Environmental",
@@ -903,34 +951,32 @@ export default function Methods() {
                   }}
                 >
                   <li>
-                    28 of 33 county-level fields are loaded directly
-                    from federal or federally derived sources (CHR&amp;R
-                    2025, CDC PLACES BRFSS 2023, Census SAHIE/SAIPE 2023,
-                    IHME life expectancy, March of Dimes 2024, HRSA HPSA,
-                    CDC SVI 2022, ACS 5-year 2023).
+                    All county-level fields shown in the atlas are loaded
+                    directly from federal or federally derived sources
+                    (CHR&amp;R 2025, CDC PLACES BRFSS 2023, Census
+                    SAHIE/SAIPE/ACS 5-year 2023, IHME life expectancy,
+                    March of Dimes 2024, HRSA HPSA, HRSA AHRF 2024–2025,
+                    CMS POS 2025 Q2, UNC Sheps Center, EPA EJScreen 2.3,
+                    CDC WONDER, CDC NVSS, CDC SVI 2022).
                   </li>
                   <li>
-                    5 fields remain estimated pending Phase 1b ingestion:
+                    Phase 1d (May 2026) replaced the last estimated fields
+                    with real federal data:
                     <span style={{ fontFamily: "var(--font-mono)", fontSize: 12.5 }}>
-                      {" "}obProvidersPer10k, hospitalClosureSince2010,
-                      obUnitClosure, distanceToHospital, leadExposureRisk
+                      {" "}obProvidersPer10k (HRSA AHRF), hospitalClosureSince2010
+                      (UNC Sheps), obUnitClosure (CMS POS), distanceToHospital
+                      (CMS POS), leadExposureRisk (ACS B25034), ejScreenIndex
+                      (EPA EJScreen 2.3).
                     </span>
-                    . These are seeded deterministically (seed = 42) and
-                    flagged as “estimated” in metric tables.
+                    {" "}No synthetic or seeded values remain in the atlas.
                   </li>
                   <li>
-                    Maternal mortality is a derived metric: a national
-                    base of 22.3 deaths per 100k live births is multiplied
-                    by a March of Dimes Maternity Care Desert factor
-                    (0.85 / 1.00 / 1.15 / 1.40 for full / moderate / low /
-                    desert access). Direct county-level NCHS rates are on
-                    the Phase 1b roadmap.
-                  </li>
-                  <li>
-                    The EJScreen environmental composite is currently
-                    derived from CDC SVI overall and CHR&amp;R PM2.5
-                    (0.6 × SVI + 0.4 × PM2.5/15). Direct EPA EJScreen
-                    block-group rollups are queued for Phase 1b.
+                    Maternal mortality is the only remaining derived metric:
+                    a national base of 22.3 deaths per 100k live births is
+                    multiplied by a March of Dimes Maternity Care Desert
+                    factor (0.85 / 1.00 / 1.15 / 1.40 for full / moderate /
+                    low / desert access). Direct county-level NCHS rates
+                    are on the Phase 1e roadmap.
                   </li>
                 </ul>
               </div>

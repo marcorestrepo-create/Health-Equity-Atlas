@@ -103,6 +103,14 @@ const FIELD_TO_SLUG: Array<[string, string, number]> = [
   ["infantMortalityRate", "infant_mortality_per_1000", 1.0],
   ["lowBirthWeightRate", "low_birth_weight_pct", 0.5],
   ["teenBirthsRate", "teen_births_per_1000", 1.0],
+  // Phase 1d — federal data infrastructure (6 fields)
+  ["obProvidersPer10k", "ob_providers_per_10k", 0.05],
+  ["hospitalClosureSince2010", "hospital_closure_since_2010", 0.5],
+  ["distanceToHospital", "distance_to_hospital", 0.5],
+  ["leadExposureRisk", "lead_exposure_pct", 0.5],
+  ["ejScreenIndex", "ej_screen_index", 0.5],
+  // obUnitClosure is INVERSE of ob_unit_presence — handled as special case below
+  ["obUnitClosure", "ob_unit_presence", 0.5],
 ];
 
 // Fields where the composer LEGITIMATELY returns null on suppression (no fallback).
@@ -167,7 +175,11 @@ async function main() {
         }
         continue;
       }
-      const procVal = procEntry.value;
+      let procVal = procEntry.value;
+      // Phase 1d special case: obUnitClosure is INVERSE of ob_unit_presence (1 - presence rounded)
+      if (field === "obUnitClosure") {
+        procVal = procVal > 0.5 ? 0 : 1;
+      }
       if (composerVal == null) {
         // Composer null but processed has value — only OK if not suppression-preserving (shouldn't happen)
         failures++;

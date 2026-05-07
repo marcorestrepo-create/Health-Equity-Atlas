@@ -4,3 +4,9 @@ sqlite.db
 sqlite.db-wal
 sqlite.db-shm
 *.log
+
+# Phase 1d: large federal data dumps (regenerable from public sources)
+data/raw/cms_pos/
+data/raw/ejscreen/
+data/raw/hrsa_ahrf/
+data/raw/hrsa_hpsa/
