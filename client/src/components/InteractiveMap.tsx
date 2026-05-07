@@ -525,9 +525,9 @@ function MapInner({
   // Memoize the band lookup so we don't re-bucket every county on hover.
   const bandByFips = useMemo(() => {
     const m = new Map<string, number | null>();
-    for (const [fips, row] of countyData.entries()) {
+    countyData.forEach((row, fips) => {
       m.set(fips, bucket(spec, spec.pick(row)));
-    }
+    });
     return m;
   }, [countyData, spec]);
 

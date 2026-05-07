@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  data-integrity:
+    name: Data integrity (spot-check + calibration + build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npm run check
+
+      - name: Spot-check (25 counties, 888 cells, must be 100%)
+        run: npx tsx scripts/spot_check_25.ts
+
+      - name: Rebuild reproducibility manifest
+        run: npm run manifest
+
+      - name: Verify manifest content matches committed copy (ignoring timestamp)
+        run: |
+          # Ignore generated_at timestamp; everything else (sha256, row counts,
+          # calibration) must match what's committed.
+          node -e "
+          const fs = require('fs');
+          const head = JSON.parse(require('child_process').execSync('git show HEAD:data/processed/_manifest.json').toString());
+          const cur  = JSON.parse(fs.readFileSync('data/processed/_manifest.json', 'utf8'));
+          delete head.generated_at; delete cur.generated_at;
+          if (JSON.stringify(head) !== JSON.stringify(cur)) {
+            console.error('::error::Manifest content drift detected (sha256/row_count/calibration). Re-run \`npm run manifest\` and commit.');
+            process.exit(1);
+          }
+          console.log('[manifest-drift] OK — content matches committed manifest');
+          "
+
+      - name: CI gate (calibration + coverage thresholds)
+        run: npx tsx scripts/ci_gate.ts
+
+      - name: Production build (with strict schema validation)
+        env:
+          NODE_ENV: production
+          ATLAS_STRICT: "1"
+        run: npm run build
