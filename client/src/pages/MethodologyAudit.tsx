@@ -39,6 +39,7 @@ type AuditLog = {
   calibration_summary: {
     total_metrics: number;
     metrics_with_calibration: number;
+    metrics_unanchored?: number;
     calibration_pass: number;
     calibration_fail: number;
     pass_rate_pct: number | null;
@@ -47,6 +48,11 @@ type AuditLog = {
       observed: number;
       published: number | null;
       delta: number | null;
+    }>;
+    unanchored_metrics?: Array<{
+      slug: string;
+      source: string;
+      reason: string;
     }>;
   };
   moe_filtered_metrics: Array<{
@@ -205,7 +211,11 @@ export default function MethodologyAudit() {
               <KpiCard
                 label="Total metrics tracked"
                 value={`${data.calibration_summary.total_metrics}`}
-                detail={`across ${data.suppression_totals.total_county_rows.toLocaleString()} county-rows`}
+                detail={
+                  data.calibration_summary.metrics_unanchored
+                    ? `${data.calibration_summary.metrics_unanchored} unanchored (definition-only)`
+                    : `across ${data.suppression_totals.total_county_rows.toLocaleString()} county-rows`
+                }
               />
               <KpiCard
                 label="MOE-aware ingests"
@@ -341,6 +351,76 @@ export default function MethodologyAudit() {
                 </tbody>
               </table>
             </div>
+
+            {/* Unanchored metrics */}
+            {data.calibration_summary.unanchored_metrics &&
+              data.calibration_summary.unanchored_metrics.length > 0 && (
+                <>
+                  <h2 style={{ ...SECTION_STYLE, marginTop: 48 }}>
+                    Unanchored metrics
+                  </h2>
+                  <p
+                    style={{
+                      ...PARAGRAPH_STYLE,
+                      marginTop: 8,
+                      marginBottom: 20,
+                      maxWidth: 760,
+                    }}
+                  >
+                    A small number of metrics have no nationally published
+                    reference value to calibrate against. Rather than hide
+                    them, we surface them here with the reason and the
+                    underlying source so reviewers can verify the choice.
+                  </p>
+                  <div
+                    className="flex flex-col gap-3"
+                    data-testid="list-unanchored"
+                  >
+                    {data.calibration_summary.unanchored_metrics.map((u) => (
+                      <div
+                        key={u.slug}
+                        style={{
+                          padding: 16,
+                          border: "1px solid var(--pulse-rule)",
+                          background: "white",
+                        }}
+                        data-testid={`card-unanchored-${u.slug}`}
+                      >
+                        <div
+                          style={{
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 13,
+                            color: "var(--pulse-navy)",
+                            marginBottom: 4,
+                          }}
+                        >
+                          {u.slug}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "var(--font-sans)",
+                            fontSize: 12,
+                            color: "var(--pulse-text-muted)",
+                            marginBottom: 8,
+                          }}
+                        >
+                          {u.source}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "var(--font-sans)",
+                            fontSize: 14,
+                            lineHeight: 1.55,
+                            color: "var(--pulse-text)",
+                          }}
+                        >
+                          {u.reason}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
 
             {/* MOE Suppression */}
             {data.moe_filtered_metrics.length > 0 && (

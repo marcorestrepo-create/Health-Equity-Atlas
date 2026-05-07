@@ -11,6 +11,7 @@
     "validate:maternal": "tsx scripts/maternal_access_validation.ts",
     "validate:heg": "tsx scripts/heg_validation_study.ts",
     "validate:bh": "tsx scripts/behavioral_health_validation.ts",
+    "validate:maternal:dx": "tsx scripts/maternal_composite_diagnosis.ts",
     "ci-gate": "tsx scripts/ci_gate.ts",
     "spot-check": "tsx scripts/spot_check_25.ts",
     "start": "NODE_ENV=production node dist/index.cjs",

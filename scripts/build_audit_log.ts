@@ -88,11 +88,13 @@ function summarizeCalibration(entries: MetricEntry[]) {
     c?.within_tolerance === false || c?.pass === false;
 
   const withCal = entries.filter((e) => getPub(e.calibration) != null);
+  const unanchored = entries.filter((e) => getPub(e.calibration) == null);
   const pass = withCal.filter((e) => isPass(e.calibration));
   const fail = withCal.filter((e) => isFail(e.calibration));
   return {
     total_metrics: entries.length,
     metrics_with_calibration: withCal.length,
+    metrics_unanchored: unanchored.length,
     calibration_pass: pass.length,
     calibration_fail: fail.length,
     pass_rate_pct:
@@ -105,7 +107,20 @@ function summarizeCalibration(entries: MetricEntry[]) {
       published: getPub(e.calibration),
       delta: e.calibration?.delta ?? null,
     })),
+    unanchored_metrics: unanchored.map((e) => ({
+      slug: e.slug,
+      source: e.source,
+      reason: anchorReason(e.slug),
+    })),
   };
+}
+
+// Why a given metric has no published anchor for calibration.
+function anchorReason(slug: string): string {
+  if (slug.startsWith("hpsa_")) {
+    return "HRSA does not publish a national-mean HPSA score; the metric is a definitional shortage-area severity index (0–25) where calibration to a published mean is not meaningful.";
+  }
+  return "No nationally published value available; metric is reported here using the source's primary value as-is.";
 }
 
 function loadValidationReport(filename: string) {
@@ -120,6 +135,7 @@ function buildAuditLog() {
   const maternal = loadValidationReport("maternal_access_validation_report.json");
   const heg = loadValidationReport("heg_validation_report.json");
   const bh = loadValidationReport("behavioral_health_validation_report.json");
+  const maternalDx = loadValidationReport("maternal_composite_diagnosis_report.json");
 
   const moeFiltered = entries
     .filter((e) => e.moe_filtered_note)
@@ -179,8 +195,8 @@ function buildAuditLog() {
     });
   }
   if (bh) {
-    const r1 = bh?.results?.drug_overdose?.pearson_r;
-    const r2 = bh?.results?.suicide?.pearson_r;
+    const r1 = bh?.drug_overdose?.pearson_r ?? bh?.results?.drug_overdose?.pearson_r;
+    const r2 = bh?.suicide?.pearson_r ?? bh?.results?.suicide?.pearson_r;
     validations.push({
       slug: "behavioral_health",
       title: "Behavioral health burden vs. drug overdose + suicide mortality",
@@ -193,6 +209,23 @@ function buildAuditLog() {
           : "see report",
       detail: bh,
       report_md: "scripts/behavioral_health_validation_report.md",
+    });
+  }
+  if (maternalDx) {
+    const imR = maternalDx?.ols?.infant_mortality?.multiple_r;
+    const lbwR = maternalDx?.ols?.lbw?.multiple_r;
+    validations.push({
+      slug: "maternal_diagnosis",
+      title: "Maternal access composite — ceiling diagnosis",
+      hypothesis:
+        "Question: is the modest r=0.28 vs infant mortality a formula artifact, or are the underlying inputs themselves signal-limited?",
+      independent: true,
+      headline:
+        imR != null && lbwR != null
+          ? `optimal multiple R = ${imR.toFixed(3)} vs IM, ${lbwR.toFixed(3)} vs LBW — reweighting cannot meaningfully exceed the current composite\u2019s r=0.28`
+          : "see report",
+      detail: maternalDx,
+      report_md: "scripts/maternal_composite_diagnosis_report.md",
     });
   }
 

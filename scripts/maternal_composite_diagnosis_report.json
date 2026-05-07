@@ -1,0 +1,169 @@
+{
+  "generated_at": "2026-05-07T20:42:44.286Z",
+  "n_counties_total": 3144,
+  "n_with_chr": 3144,
+  "correlations": {
+    "lbw": {
+      "desert_raw": {
+        "pearson": 0.09637538866737404,
+        "spearman": 0.08523186939935254,
+        "n": 3035
+      },
+      "ob_per_10k": {
+        "pearson": 0.03715883364634313,
+        "spearman": 0.042072865915647115,
+        "n": 3035
+      },
+      "ob_deficit": {
+        "pearson": -0.04250325681209034,
+        "spearman": -0.04199228554365099,
+        "n": 3035
+      },
+      "ob_unit": {
+        "pearson": 0.1418935586719519,
+        "spearman": 0.1358917781077393,
+        "n": 3035
+      },
+      "distance_raw": {
+        "pearson": -0.01761489771033697,
+        "spearman": -0.005370735343445034,
+        "n": 3035
+      },
+      "distance_log": {
+        "pearson": -0.001519341354988407,
+        "spearman": -0.005370735343445034,
+        "n": 3035
+      },
+      "distance_clamp30": {
+        "pearson": -0.0037858537814232413,
+        "spearman": -0.005347205159234025,
+        "n": 3035
+      },
+      "distance_clamp60": {
+        "pearson": -0.008271015084106277,
+        "spearman": -0.005373570996928179,
+        "n": 3035
+      },
+      "composite_current": {
+        "pearson": 0.08711713218980338,
+        "spearman": 0.04835846317058187,
+        "n": 3035
+      },
+      "composite_distance_uncapped": {
+        "pearson": 0.09126366695771973,
+        "spearman": 0.05003946227424306,
+        "n": 3035
+      },
+      "composite_distance_log": {
+        "pearson": 0.08689461308306497,
+        "spearman": 0.04765863140698671,
+        "n": 3035
+      },
+      "composite_no_obunit": {
+        "pearson": 0.041498438731999605,
+        "spearman": 0.01664259683327046,
+        "n": 3035
+      },
+      "composite_provider_heavy": {
+        "pearson": 0.04293519132201994,
+        "spearman": 0.034855985650554505,
+        "n": 3035
+      }
+    },
+    "infant_mortality": {
+      "desert_raw": {
+        "pearson": 0.3132067697562935,
+        "spearman": 0.2632320188844864,
+        "n": 1172
+      },
+      "ob_per_10k": {
+        "pearson": -0.15142164549929385,
+        "spearman": -0.21732641520136708,
+        "n": 1172
+      },
+      "ob_deficit": {
+        "pearson": 0.19650626326647755,
+        "spearman": 0.21799331392839924,
+        "n": 1172
+      },
+      "ob_unit": {
+        "pearson": 0.15919342842773487,
+        "spearman": 0.14806153262739685,
+        "n": 1172
+      },
+      "distance_raw": {
+        "pearson": 0.14043725985135164,
+        "spearman": 0.04415436242745263,
+        "n": 1172
+      },
+      "distance_log": {
+        "pearson": 0.09554803807109417,
+        "spearman": 0.04415436242745263,
+        "n": 1172
+      },
+      "distance_clamp30": {
+        "pearson": 0.09340223694711565,
+        "spearman": 0.04414374016497539,
+        "n": 1172
+      },
+      "distance_clamp60": {
+        "pearson": 0.11769279120344014,
+        "spearman": 0.04414374016497539,
+        "n": 1172
+      },
+      "composite_current": {
+        "pearson": 0.2802632232701919,
+        "spearman": 0.237755450847813,
+        "n": 1172
+      },
+      "composite_distance_uncapped": {
+        "pearson": 0.28363426497661537,
+        "spearman": 0.23811456428653155,
+        "n": 1172
+      },
+      "composite_distance_log": {
+        "pearson": 0.27847972909068575,
+        "spearman": 0.23735687177890635,
+        "n": 1172
+      },
+      "composite_no_obunit": {
+        "pearson": 0.29901290047358137,
+        "spearman": 0.2361838748859596,
+        "n": 1172
+      },
+      "composite_provider_heavy": {
+        "pearson": 0.25958664905244394,
+        "spearman": 0.23156836276324344,
+        "n": 1172
+      }
+    }
+  },
+  "ols": {
+    "lbw": {
+      "n": 3035,
+      "multiple_r": 0.2195474042065817,
+      "r_squared": 0.04820106269384816,
+      "standardized_betas": {
+        "desert": 0.11859535746026376,
+        "ob_deficit": -0.16753766444674714,
+        "ob_unit": 0.20766979895940454,
+        "distance_log": -0.1207667014091255
+      }
+    },
+    "infant_mortality": {
+      "n": 1172,
+      "multiple_r": 0.31891374405437195,
+      "r_squared": 0.10170597614677745,
+      "standardized_betas": {
+        "desert": 0.28427366792658915,
+        "ob_deficit": 0.05369444324872405,
+        "ob_unit": -0.010759683599296474,
+        "distance_log": 0.04009622265458102
+      }
+    }
+  },
+  "interpretation": {
+    "compares_components": "Each predictor variant correlated against IM and LBW alone",
+    "goal": "Identify whether the maternal access signal is in any single component, and whether reweighting the composite would meaningfully improve r vs perinatal outcomes"
+  }
+}
