@@ -1,0 +1,8 @@
+{
+  "source": "census_acs_b25044",
+  "vintage": "2023",
+  "filename": "b25044_county_2023.json",
+  "url": "https://api.census.gov/data/2023/acs/acs5?get=NAME,B25044_001E,B25044_003E,B25044_010E&for=county:*&in=state:*",
+  "fetched_at": "2026-05-07T15:40:33.732Z",
+  "bytes": 195828
+}

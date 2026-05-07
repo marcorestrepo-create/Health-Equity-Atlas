@@ -1,0 +1,8 @@
+{
+  "source": "cdc_svi",
+  "vintage": "2022",
+  "filename": "SVI_2022_US_county.csv",
+  "url": "https://svi.cdc.gov/Documents/Data/2022/csv/states_counties/SVI_2022_US_county.csv",
+  "fetched_at": "2026-05-07T15:38:39.635Z",
+  "bytes": 2301480
+}
