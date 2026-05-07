@@ -3,22 +3,22 @@
   "source": "UNC Cecil G. Sheps Center for Health Services Research — Rural Hospital Closures",
   "source_url": "https://www.shepscenter.unc.edu/programs-projects/rural-health/rural-hospital-closures/",
   "vintage": "Sheps Center, accessed 2026-05-07",
-  "fetched_at": "2026-05-07T18:00:47.660Z",
-  "ingested_at": "2026-05-07T18:00:47.660Z",
+  "fetched_at": "2026-05-07T19:15:24.154Z",
+  "ingested_at": "2026-05-07T19:15:24.155Z",
   "calibration": {
     "publishedValue": 140,
     "publishedSource": "Sheps Center: 152 closures since 2010 across ~140 unique counties",
     "tolerance": 25,
-    "observedValue": 130,
-    "delta": -10,
+    "observedValue": 147,
+    "delta": 7,
     "pass": true,
     "unit": "counties"
   },
   "notes": [
     "Binary indicator: 1 if county had ≥1 rural hospital closure or conversion since 2010-01-01, else 0.",
     "Source: UNC Sheps Center Rural Hospital Closures table (152 closures since 2010).",
-    "Sheps table lacks city/CCN; matched to county FIPS by fuzzy name match (Jaccard ≥0.7) against CMS POS file (Q2 2025).",
-    "Matched 135/152 closures to 130 unique counties.",
+    "Sheps table lacks city/CCN; matched to county FIPS by fuzzy name match (Jaccard ≥0.7) against CMS POS file (Q2 2025), with manual overrides for hospitals that closed pre-2025 (and so are absent or differently named in current POS).",
+    "Matched 135 fuzzy + 17 manual = 152/152 closures, covering 147 unique counties.",
     "Counties with no closure receive 0 (not suppressed) — absence of a closure is meaningful."
   ],
   "values": {
@@ -183,7 +183,7 @@
       "suppression_status": "available"
     },
     "12075": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "12077": {
@@ -3943,7 +3943,7 @@
       "suppression_status": "available"
     },
     "26131": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "26133": {
@@ -4563,7 +4563,7 @@
       "suppression_status": "available"
     },
     "28101": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "28103": {
@@ -4795,7 +4795,7 @@
       "suppression_status": "available"
     },
     "29053": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "29055": {
@@ -5047,7 +5047,7 @@
       "suppression_status": "available"
     },
     "29179": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "29181": {
@@ -5951,7 +5951,7 @@
       "suppression_status": "available"
     },
     "35006": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "35007": {
@@ -6095,7 +6095,7 @@
       "suppression_status": "available"
     },
     "36013": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "36015": {
@@ -7007,7 +7007,7 @@
       "suppression_status": "available"
     },
     "39039": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "39041": {
@@ -7927,7 +7927,7 @@
       "suppression_status": "available"
     },
     "42097": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "42099": {
@@ -8531,7 +8531,7 @@
       "suppression_status": "available"
     },
     "47031": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "47033": {
@@ -8587,7 +8587,7 @@
       "suppression_status": "available"
     },
     "47059": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "47061": {
@@ -8699,7 +8699,7 @@
       "suppression_status": "available"
     },
     "47115": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "47117": {
@@ -8787,7 +8787,7 @@
       "suppression_status": "available"
     },
     "47159": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "47161": {
@@ -9523,7 +9523,7 @@
       "suppression_status": "available"
     },
     "48337": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "48339": {
@@ -9623,7 +9623,7 @@
       "suppression_status": "available"
     },
     "48387": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "48389": {
@@ -9783,7 +9783,7 @@
       "suppression_status": "available"
     },
     "48467": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "48469": {
@@ -9843,7 +9843,7 @@
       "suppression_status": "available"
     },
     "48497": {
-      "value": 0,
+      "value": 1,
       "suppression_status": "available"
     },
     "48499": {

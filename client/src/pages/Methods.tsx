@@ -811,7 +811,12 @@ export default function Methods() {
                 mean: 41.1, median: 45.9. Phase 1f (May 2026) re-weighted v1 to
                 fold in the new behavioral-health, perinatal, child-poverty, and
                 broader environmental signals from Phases 1b–1d. Higher scores
-                indicate greater disparity.
+                indicate greater disparity. Construct validity vs CHR&R 2025
+                Premature Death (YPLL75): Pearson r = 0.68 (95% CI 0.66–0.70,
+                Spearman ρ = 0.75, n = 3,080). Sensitivity to single-component
+                weight perturbations of ±20%: minimum top-decile Jaccard 0.89
+                across 20 perturbations — the top-10% county list is robust to
+                plausible analyst variation in weights.
               </p>
               <div
                 style={{

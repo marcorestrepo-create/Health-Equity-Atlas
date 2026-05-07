@@ -148,10 +148,84 @@ function resolveProcessedDir(): string {
 
 const PROCESSED_DIR = resolveProcessedDir();
 
+// Validation strictness:
+//   STRICT_SCHEMA = true  → throw on missing required fields, malformed values, suspicious row counts.
+//                          Use during build / CI.
+//   STRICT_SCHEMA = false → log warning to stderr but return the file as-is. Use in dev / hot-reload.
+// Default: strict in production builds (NODE_ENV === "production") and when ATLAS_STRICT=1 is set.
+const STRICT_SCHEMA =
+  process.env.NODE_ENV === "production" || process.env.ATLAS_STRICT === "1";
+
+// Counties expected in a complete file (3144 = 50 states + DC + PR-equivalents in our atlas universe).
+// Files smaller than MIN_ROWS are suspicious — likely an ingestion failure.
+const MIN_ROWS = 2900;
+
+function validateProcessed(slug: string, raw: unknown): ProcessedFile {
+  const errs: string[] = [];
+  const warn = (m: string) => errs.push(m);
+
+  if (raw === null || typeof raw !== "object") {
+    throw new Error(`[loadProcessed] ${slug}: file is not a JSON object`);
+  }
+  const o = raw as Record<string, unknown>;
+
+  if (typeof o.source !== "string" || !o.source) warn("missing 'source'");
+  if (typeof o.vintage !== "string" || !o.vintage) warn("missing 'vintage'");
+
+  if (o.values === null || typeof o.values !== "object") {
+    throw new Error(`[loadProcessed] ${slug}: missing or non-object 'values'`);
+  }
+  const values = o.values as Record<string, unknown>;
+  const fipsKeys = Object.keys(values);
+  if (fipsKeys.length < MIN_ROWS) {
+    warn(`only ${fipsKeys.length} rows (expected ≥ ${MIN_ROWS})`);
+  }
+
+  // Validate up to 50 random-ish entries (cheap sample) — full sweep is O(n) but mostly fast either way.
+  const sample = fipsKeys.length <= 50 ? fipsKeys : fipsKeys.filter((_, i) => i % Math.ceil(fipsKeys.length / 50) === 0);
+  let badShape = 0;
+  let availableCount = 0;
+  let suppressedCount = 0;
+  for (const k of sample) {
+    if (!/^\d{5}$/.test(k)) { badShape++; continue; }
+    const v = values[k];
+    if (v === null || typeof v !== "object") { badShape++; continue; }
+    const r = v as Record<string, unknown>;
+    const status = typeof r.suppression_status === "string" ? r.suppression_status : "";
+    // Accept "available" or any "suppressed[_*]" sub-type (e.g. suppressed_low_count, suppressed_quality)
+    const isAvailable = status === "available";
+    const isSuppressed = status === "suppressed" || status.startsWith("suppressed_");
+    if (!isAvailable && !isSuppressed) {
+      badShape++; continue;
+    }
+    if (isAvailable) {
+      availableCount++;
+      if (typeof r.value !== "number" || !isFinite(r.value)) badShape++;
+    } else {
+      suppressedCount++;
+    }
+  }
+  if (badShape > 0) warn(`${badShape}/${sample.length} sampled rows have malformed shape`);
+  if (availableCount === 0 && fipsKeys.length > 0) warn("0 available rows in sample — possibly all-suppressed or all-zero file");
+
+  if (errs.length > 0) {
+    const msg = `[loadProcessed] ${slug}: schema issues — ${errs.join("; ")}`;
+    if (STRICT_SCHEMA) throw new Error(msg);
+    console.warn(msg);
+  }
+  return o as unknown as ProcessedFile;
+}
+
 function loadProcessed(slug: string): ProcessedFile | null {
   const path = resolve(PROCESSED_DIR, `${slug}.json`);
   if (!existsSync(path)) return null;
-  return JSON.parse(readFileSync(path, "utf8")) as ProcessedFile;
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(path, "utf8"));
+  } catch (err) {
+    throw new Error(`[loadProcessed] ${slug}: invalid JSON — ${(err as Error).message}`);
+  }
+  return validateProcessed(slug, raw);
 }
 
 // Lookup a real metric value for a FIPS. Returns null if missing or suppressed.
@@ -159,7 +233,8 @@ function getMetric(file: ProcessedFile | null, fips: string): number | null {
   if (!file) return null;
   const v = file.values[fips];
   if (!v) return null;
-  if (v.suppression_status === "suppressed") return null;
+  // Treat any "suppressed" or "suppressed_*" as missing
+  if (typeof v.suppression_status === "string" && v.suppression_status.startsWith("suppressed")) return null;
   return typeof v.value === "number" ? v.value : null;
 }
 

@@ -1,0 +1,199 @@
+{
+  "generated_at": "2026-05-07T19:21:44.120Z",
+  "sample_sizes": {
+    "premature_death": 3080,
+    "preventable_stays": 3061
+  },
+  "construct_validity": {
+    "premature_death": {
+      "pearson_r": 0.6784046090075024,
+      "pearson_ci_lo": 0.656557300576841,
+      "pearson_ci_hi": 0.7020736813669494,
+      "spearman_rho": 0.7484061114971494,
+      "n": 3080,
+      "source": "CHR&R 2025 — Premature Death (YPLL75 per 100,000) — NCHS underlying source"
+    },
+    "preventable_stays": {
+      "pearson_r": 0.33276461885146075,
+      "pearson_ci_lo": 0.30229942903731166,
+      "pearson_ci_hi": 0.36313297743764483,
+      "spearman_rho": 0.3457393737838035,
+      "n": 3061,
+      "source": "CHR&R 2025 — Preventable Hospital Stays (per 100,000 Medicare enrollees) — CMS source"
+    }
+  },
+  "sensitivity": {
+    "perturbation_pct": 20,
+    "top_decile_size": 314,
+    "results": [
+      {
+        "component": "insurance",
+        "deltaPct": -20,
+        "jaccard": 0.9204892966360856,
+        "rankShift": 10
+      },
+      {
+        "component": "insurance",
+        "deltaPct": 20,
+        "jaccard": 0.9263803680981595,
+        "rankShift": 12
+      },
+      {
+        "component": "maternalAccess",
+        "deltaPct": -20,
+        "jaccard": 0.891566265060241,
+        "rankShift": 16
+      },
+      {
+        "component": "maternalAccess",
+        "deltaPct": 20,
+        "jaccard": 0.9146341463414634,
+        "rankShift": 10
+      },
+      {
+        "component": "chronicDisease",
+        "deltaPct": -20,
+        "jaccard": 0.9204892966360856,
+        "rankShift": 9
+      },
+      {
+        "component": "chronicDisease",
+        "deltaPct": 20,
+        "jaccard": 0.9263803680981595,
+        "rankShift": 10
+      },
+      {
+        "component": "providerAccess",
+        "deltaPct": -20,
+        "jaccard": 0.9204892966360856,
+        "rankShift": 13
+      },
+      {
+        "component": "providerAccess",
+        "deltaPct": 20,
+        "jaccard": 0.9146341463414634,
+        "rankShift": 9
+      },
+      {
+        "component": "behavioralHealth",
+        "deltaPct": -20,
+        "jaccard": 0.9442724458204335,
+        "rankShift": 9
+      },
+      {
+        "component": "behavioralHealth",
+        "deltaPct": 20,
+        "jaccard": 0.9146341463414634,
+        "rankShift": 12
+      },
+      {
+        "component": "perinatal",
+        "deltaPct": -20,
+        "jaccard": 0.9263803680981595,
+        "rankShift": 9
+      },
+      {
+        "component": "perinatal",
+        "deltaPct": 20,
+        "jaccard": 0.9263803680981595,
+        "rankShift": 11
+      },
+      {
+        "component": "childPoverty",
+        "deltaPct": -20,
+        "jaccard": 0.9263803680981595,
+        "rankShift": 8
+      },
+      {
+        "component": "childPoverty",
+        "deltaPct": 20,
+        "jaccard": 0.9263803680981595,
+        "rankShift": 10
+      },
+      {
+        "component": "social",
+        "deltaPct": -20,
+        "jaccard": 0.9030303030303031,
+        "rankShift": 12
+      },
+      {
+        "component": "social",
+        "deltaPct": 20,
+        "jaccard": 0.9323076923076923,
+        "rankShift": 9
+      },
+      {
+        "component": "environmental",
+        "deltaPct": -20,
+        "jaccard": 0.9263803680981595,
+        "rankShift": 10
+      },
+      {
+        "component": "environmental",
+        "deltaPct": 20,
+        "jaccard": 0.9263803680981595,
+        "rankShift": 10
+      },
+      {
+        "component": "infrastructure",
+        "deltaPct": -20,
+        "jaccard": 0.9263803680981595,
+        "rankShift": 9
+      },
+      {
+        "component": "infrastructure",
+        "deltaPct": 20,
+        "jaccard": 0.9204892966360856,
+        "rankShift": 10
+      }
+    ],
+    "min_jaccard": 0.891566265060241,
+    "mean_jaccard": 0.9217229822335418,
+    "threshold_pass": true
+  },
+  "stress": {
+    "chronic_disease_plus_50": 0.9146341463414634,
+    "drop_component": [
+      {
+        "component": "insurance",
+        "jaccard": 0.7690140845070422
+      },
+      {
+        "component": "maternalAccess",
+        "jaccard": 0.5660847880299252
+      },
+      {
+        "component": "chronicDisease",
+        "jaccard": 0.8362573099415205
+      },
+      {
+        "component": "providerAccess",
+        "jaccard": 0.7158469945355191
+      },
+      {
+        "component": "behavioralHealth",
+        "jaccard": 0.8802395209580839
+      },
+      {
+        "component": "perinatal",
+        "jaccard": 0.8525073746312685
+      },
+      {
+        "component": "childPoverty",
+        "jaccard": 0.8579881656804734
+      },
+      {
+        "component": "social",
+        "jaccard": 0.692722371967655
+      },
+      {
+        "component": "environmental",
+        "jaccard": 0.9204892966360856
+      },
+      {
+        "component": "infrastructure",
+        "jaccard": 0.9088145896656535
+      }
+    ]
+  }
+}

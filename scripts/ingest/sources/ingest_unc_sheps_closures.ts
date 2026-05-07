@@ -42,6 +42,40 @@ const PUBLISHED_TOLERANCE = 25;
 const CLOSURES_FILE = path.resolve("/home/user/workspace/hospital_closures_final.json");
 const POS_FILE = path.resolve("data/raw/cms_pos/pos_2025q2.csv");
 
+// Manual overrides for closures that the fuzzy matcher misses.
+// Each entry maps a (state, year, name) signature to a researched county FIPS.
+// Researched 2026-05-07 from primary sources (local news, IHS, county directories).
+// Key format: STATE|YEAR|normalized name (lowercased, punctuation stripped, spaces collapsed)
+const MANUAL_OVERRIDES: Record<string, { fips: string; rationale: string }> = {
+  "OH|2024|community memorial hospital": { fips: "39039", rationale: "Hicksville, Defiance County OH (West Bend News, 2024-09-11)" },
+  "MI|2024|aspirus onotonagon hospital": { fips: "26131", rationale: "Sheps spelling typo of Ontonagon County MI (POS: ASPIRUS ONTONAGON HOSPITAL fips 26131)" },
+  "NM|2022|acoma canoncito laguna service unit": { fips: "35006", rationale: "IHS Acoma-Canoncito-Laguna IHC, San Fidel NM = Cibola County (ihs.gov)" },
+  "TX|2020|central hospital of bowie": { fips: "48337", rationale: "Bowie TX = Montague County (POS: CENTRAL HOSPITAL OF BOWIE LP fips 48337, j=0.67 just below threshold)" },
+  "PA|2020|upmc susquehanna sunbury": { fips: "42097", rationale: "Sunbury PA = Northumberland County (Post-Gazette 2020-02-09)" },
+  "MO|2020|pinnacle regional hospital": { fips: "29053", rationale: "Boonville MO = Cooper County (KCUR 2020-01-15; aka Cooper County Memorial)" },
+  "TX|2019|texas general van zandt regional medical center": { fips: "48467", rationale: "Grand Saline TX = Van Zandt County (Yelp listing as Van Zandt Regional Hospital)" },
+  "FL|2019|regional general hospital": { fips: "12075", rationale: "Williston FL = Levy County (WUFT 2019-10-07)" },
+  "TN|2019|takoma regional hospital": { fips: "47059", rationale: "Greeneville TN = Greene County (WCYB 2019-08-30)" },
+  "NY|2017|lake shore health care center": { fips: "36013", rationale: "Irving NY = Chautauqua County (POS: LAKE SHORE HOSPITAL fips 36013, j=0.67 just below threshold)" },
+  "MO|2016|southeasthealth center of reynolds county": { fips: "29179", rationale: "Ellington MO = Reynolds County (POS confirms SOUTHEAST HEALTH CENTER OF REYNOLDS COUNTY fips 29179)" },
+  "MS|2015|pioneer community hospital of newton": { fips: "28101", rationale: "Newton MS = Newton County (POS: PIONEER HEALTH SERVICES OF NEWTON fips 28101, j=0.67 below threshold)" },
+  "TN|2015|united regional medical center": { fips: "47031", rationale: "Manchester TN = Coffee County (TN Healthcare Campaign closure list)" },
+  "TN|2015|parkridge west hospital": { fips: "47115", rationale: "Jasper TN = Marion County (TN Healthcare Campaign closure list)" },
+  "TX|2014|east texas medical center clarksville": { fips: "48387", rationale: "Clarksville TX = Red River County (KETR 2014-08-07)" },
+  "TX|2013|wise regional health system bridgeport": { fips: "48497", rationale: "Bridgeport TX = Wise County (POS: WISE HEALTH SYSTEM fips 48497)" },
+  "TN|2012|riverview regional medical center south": { fips: "47159", rationale: "Carthage TN = Smith County (POS: (CLOSED) RIVERVIEW REGIONAL MEDICAL CENTER SOUTH fips 47159, j=0.67 below threshold due to (CLOSED) prefix)" },
+};
+
+function overrideKey(closure: ShepsClosure): string {
+  const n = closure.name
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return `${closure.state}|${closure.year}|${n}`;
+}
+
 interface ShepsClosure {
   name: string;
   city: string;
@@ -213,17 +247,25 @@ async function main(): Promise<void> {
 
   const closedFips = new Set<string>();
   let matched = 0;
+  let manualMatched = 0;
   const unmatched: ShepsClosure[] = [];
   for (const c of closures) {
     const m = matchClosureToFips(c, posByState);
     if (m) {
       closedFips.add(m.fips);
       matched++;
-    } else {
-      unmatched.push(c);
+      continue;
     }
+    // Try manual override
+    const ov = MANUAL_OVERRIDES[overrideKey(c)];
+    if (ov) {
+      closedFips.add(ov.fips);
+      manualMatched++;
+      continue;
+    }
+    unmatched.push(c);
   }
-  console.log(`[sheps]   matched ${matched} / unmatched ${unmatched.length}`);
+  console.log(`[sheps]   matched fuzzy ${matched} / manual ${manualMatched} / unmatched ${unmatched.length}`);
   console.log(`[sheps]   ${closedFips.size} unique counties with closures since 2010`);
   if (unmatched.length > 0 && unmatched.length <= 20) {
     console.log(`[sheps]   sample unmatched:`, unmatched.slice(0, 10).map((c) => `${c.name} (${c.state}, ${c.year})`));
@@ -269,8 +311,8 @@ async function main(): Promise<void> {
     notes: [
       "Binary indicator: 1 if county had ≥1 rural hospital closure or conversion since 2010-01-01, else 0.",
       "Source: UNC Sheps Center Rural Hospital Closures table (152 closures since 2010).",
-      "Sheps table lacks city/CCN; matched to county FIPS by fuzzy name match (Jaccard ≥0.7) against CMS POS file (Q2 2025).",
-      `Matched ${matched}/${closures.length} closures to ${countyCount} unique counties.`,
+      "Sheps table lacks city/CCN; matched to county FIPS by fuzzy name match (Jaccard ≥0.7) against CMS POS file (Q2 2025), with manual overrides for hospitals that closed pre-2025 (and so are absent or differently named in current POS).",
+      `Matched ${matched} fuzzy + ${manualMatched} manual = ${matched + manualMatched}/${closures.length} closures, covering ${countyCount} unique counties.`,
       "Counties with no closure receive 0 (not suppressed) — absence of a closure is meaningful.",
     ],
     values: result,
