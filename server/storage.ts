@@ -46,6 +46,16 @@ sqlite.exec(`
     life_expectancy REAL,
     lep_rate REAL,
     food_insecurity_rate REAL,
+    depression_rate REAL,
+    excessive_drinking_rate REAL,
+    lack_emotional_support_rate REAL,
+    loneliness_rate REAL,
+    child_under5_poverty_rate REAL,
+    some_college_rate REAL,
+    high_school_graduation_rate REAL,
+    disconnected_youth_rate REAL,
+    child_care_cost_burden_rate REAL,
+    reading_scores_grade_level REAL,
     health_equity_gap_score REAL,
     top_interventions TEXT
   );

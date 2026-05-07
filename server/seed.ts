@@ -145,8 +145,11 @@ export async function seedDatabase() {
       pm25, lead_exposure_risk, ej_screen_index,
       svi_overall, svi_socioeconomic, svi_minority, svi_housing_transport,
       life_expectancy, lep_rate, food_insecurity_rate,
+      depression_rate, excessive_drinking_rate, lack_emotional_support_rate, loneliness_rate,
+      child_under5_poverty_rate, some_college_rate, high_school_graduation_rate,
+      disconnected_youth_rate, child_care_cost_burden_rate, reading_scores_grade_level,
       health_equity_gap_score, top_interventions)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const insertCI = sqlite.prepare(`
@@ -167,6 +170,9 @@ export async function seedDatabase() {
         county.pm25, county.leadExposureRisk, county.ejScreenIndex,
         county.sviOverall, county.sviSocioeconomic, county.sviMinority, county.sviHousingTransport,
         county.lifeExpectancy, county.lepRate, county.foodInsecurityRate,
+        county.depressionRate, county.excessiveDrinkingRate, county.lackEmotionalSupportRate, county.lonelinessRate,
+        county.childUnder5PovertyRate, county.someCollegeRate, county.highSchoolGraduationRate,
+        county.disconnectedYouthRate, county.childCareCostBurdenRate, county.readingScoresGradeLevel,
         county.healthEquityGapScore, county.topInterventions
       );
 

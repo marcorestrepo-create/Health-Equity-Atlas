@@ -85,6 +85,18 @@ export interface CountyMetrics {
   lifeExpectancy: number;               // CHR&R 2025 (NCHS 2020-2022)
   lepRate: number;                      // ACS 5-year S1601
   foodInsecurityRate: number;           // CHR&R 2025 (Feeding America Map the Meal Gap)
+  // ---- Phase 1b: Behavioral Health (real federal data, suppression preserved as null) ----
+  depressionRate: number | null;        // CDC PLACES 2024 (BRFSS 2023)
+  excessiveDrinkingRate: number | null; // CDC PLACES 2024
+  lackEmotionalSupportRate: number | null; // CDC PLACES 2024
+  lonelinessRate: number | null;        // CDC PLACES 2024
+  // ---- Phase 1b: Pediatric Care (real federal data) ----
+  childUnder5PovertyRate: number | null;  // ACS 5-year 2023 B17001
+  someCollegeRate: number | null;       // CHR&R 2025 (ACS)
+  highSchoolGraduationRate: number | null; // CHR&R 2025 (EDFacts)
+  disconnectedYouthRate: number | null; // CHR&R 2025 (ACS)
+  childCareCostBurdenRate: number | null; // CHR&R 2025 (Living Wage Institute)
+  readingScoresGradeLevel: number | null; // CHR&R 2025 (Stanford SEDA)
   healthEquityGapScore: number;
   topInterventions: string;
   interventionScores: InterventionScore[];
@@ -181,6 +193,18 @@ const data = {
   sviHousingTransport: loadProcessed("svi_housing_transport"),
   noVehicle: loadProcessed("no_vehicle_rate"),
   lep: loadProcessed("lep_rate"),
+  // Phase 1b BH (PLACES)
+  depression: loadProcessed("depression_prevalence"),
+  binge: loadProcessed("excessive_drinking_pct"),
+  emotionspt: loadProcessed("lack_emotional_support_pct"),
+  loneliness: loadProcessed("loneliness_pct"),
+  // Phase 1b PC
+  under5Poverty: loadProcessed("youth_under5_poverty_pct"),
+  someCollege: loadProcessed("some_college_pct"),
+  hsGrad: loadProcessed("high_school_graduation_pct"),
+  disconnectedYouth: loadProcessed("disconnected_youth_pct"),
+  childCareCost: loadProcessed("child_care_cost_burden_pct"),
+  reading: loadProcessed("reading_scores_grade_level"),
 };
 
 // ---------------------------------------------------------------------------
@@ -292,6 +316,22 @@ export function generateCounties(): CountyMetrics[] {
     const sviSocioeconomic = clamp(getOrFallback(data.sviSocio, rc.fips, sviOverall), 0, 1);
     const sviMinority = clamp(getOrFallback(data.sviMinority, rc.fips, sviOverall), 0, 1);
     const sviHousingTransport = clamp(getOrFallback(data.sviHousingTransport, rc.fips, sviOverall), 0, 1);
+
+    // ------------------- Phase 1b: Behavioral Health (suppression-preserving) -------------------
+    // Use getMetric() not getOrFallback() — null means "not published for this county".
+    // PLACES drops ~2,299 counties for LONELINESS/EMOTIONSPT.
+    const depressionRateRaw = getMetric(data.depression, rc.fips);
+    const excessiveDrinkingRaw = getMetric(data.binge, rc.fips);
+    const lackEmotionalSupportRaw = getMetric(data.emotionspt, rc.fips);
+    const lonelinessRaw = getMetric(data.loneliness, rc.fips);
+
+    // ------------------- Phase 1b: Pediatric Care (suppression-preserving) -------------------
+    const childUnder5PovertyRaw = getMetric(data.under5Poverty, rc.fips);
+    const someCollegeRaw = getMetric(data.someCollege, rc.fips);
+    const hsGradRaw = getMetric(data.hsGrad, rc.fips);
+    const disconnectedYouthRaw = getMetric(data.disconnectedYouth, rc.fips);
+    const childCareCostRaw = getMetric(data.childCareCost, rc.fips);
+    const readingScoresRaw = getMetric(data.reading, rc.fips);  // grade-level units, not %
 
     // ------------------- DERIVED FROM REAL DATA -------------------
     // Maternal mortality: derive from MCD designation. National avg = 22.3 per 100k.
@@ -427,6 +467,18 @@ export function generateCounties(): CountyMetrics[] {
       lifeExpectancy: Math.round(lifeExpectancy * 10) / 10,
       lepRate: Math.round(lepRate * 10) / 10,
       foodInsecurityRate: Math.round(foodInsecurityRate * 10) / 10,
+      // Phase 1b BH — round to 1 decimal, preserve null on suppression
+      depressionRate: depressionRateRaw == null ? null : Math.round(depressionRateRaw * 10) / 10,
+      excessiveDrinkingRate: excessiveDrinkingRaw == null ? null : Math.round(excessiveDrinkingRaw * 10) / 10,
+      lackEmotionalSupportRate: lackEmotionalSupportRaw == null ? null : Math.round(lackEmotionalSupportRaw * 10) / 10,
+      lonelinessRate: lonelinessRaw == null ? null : Math.round(lonelinessRaw * 10) / 10,
+      // Phase 1b PC — round to 1 decimal except reading scores (grade-level, 2 decimals)
+      childUnder5PovertyRate: childUnder5PovertyRaw == null ? null : Math.round(childUnder5PovertyRaw * 10) / 10,
+      someCollegeRate: someCollegeRaw == null ? null : Math.round(someCollegeRaw * 10) / 10,
+      highSchoolGraduationRate: hsGradRaw == null ? null : Math.round(hsGradRaw * 10) / 10,
+      disconnectedYouthRate: disconnectedYouthRaw == null ? null : Math.round(disconnectedYouthRaw * 10) / 10,
+      childCareCostBurdenRate: childCareCostRaw == null ? null : Math.round(childCareCostRaw * 10) / 10,
+      readingScoresGradeLevel: readingScoresRaw == null ? null : Math.round(readingScoresRaw * 100) / 100,
       healthEquityGapScore: Math.round(healthEquityGapScore * 10) / 10,
       topInterventions: JSON.stringify(topInterventions),
       interventionScores: interventionScores.map((is, idx) => ({ ...is, rank: idx + 1 })),

@@ -62,6 +62,20 @@ export const counties = sqliteTable("counties", {
   // Food insecurity
   foodInsecurityRate: real("food_insecurity_rate"),
   
+  // Phase 1b: Behavioral Health (CDC PLACES 2024)
+  depressionRate: real("depression_rate"),
+  excessiveDrinkingRate: real("excessive_drinking_rate"),
+  lackEmotionalSupportRate: real("lack_emotional_support_rate"),
+  lonelinessRate: real("loneliness_rate"),
+
+  // Phase 1b: Pediatric Care (ACS / CHR&R 2025)
+  childUnder5PovertyRate: real("child_under5_poverty_rate"),
+  someCollegeRate: real("some_college_rate"),
+  highSchoolGraduationRate: real("high_school_graduation_rate"),
+  disconnectedYouthRate: real("disconnected_youth_rate"),
+  childCareCostBurdenRate: real("child_care_cost_burden_rate"),
+  readingScoresGradeLevel: real("reading_scores_grade_level"),
+
   // Composite scores (0-100, higher = worse)
   healthEquityGapScore: real("health_equity_gap_score"),
   

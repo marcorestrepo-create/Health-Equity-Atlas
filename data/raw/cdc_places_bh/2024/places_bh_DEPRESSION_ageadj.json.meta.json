@@ -1,0 +1,8 @@
+{
+  "source": "cdc_places_bh",
+  "vintage": "2024",
+  "filename": "places_bh_DEPRESSION_ageadj.json",
+  "url": "https://data.cdc.gov/resource/swc5-untb.json?%24where=measureid%3D%27DEPRESSION%27+AND+datavaluetypeid%3D%27AgeAdjPrv%27&%24select=year%2Cstateabbr%2Clocationname%2Cdata_value%2Cdata_value_type%2Clocationid%2Cmeasureid%2Cdatavaluetypeid&%24limit=10000",
+  "fetched_at": "2026-05-07T16:53:14.631Z",
+  "bytes": 588783
+}

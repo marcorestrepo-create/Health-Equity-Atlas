@@ -693,6 +693,40 @@ export default function CountyDetail() {
     : county.ruralUrban === "micro" ? "Micropolitan"
     : county.ruralUrban;
 
+  // Phase 1b: Behavioral Health cells (PLACES 2024). null → "Not published".
+  // National references: DEPRESSION 20.7%, BINGE 16.6%, EMOTIONSPT 24.1%, LONELINESS 33.2%.
+  const fmtPctOrDash = (v: number | null | undefined, dp = 1) =>
+    v == null ? "Not published" : `${v.toFixed(dp)}%`;
+  const fmtNumOrDash = (v: number | null | undefined, dp = 2) =>
+    v == null ? "Not published" : v.toFixed(dp);
+
+  const bhIndicators = [
+    { label: "Adult depression",        value: fmtPctOrDash(county.depressionRate),           natl: "20.7%" },
+    { label: "Excessive drinking",      value: fmtPctOrDash(county.excessiveDrinkingRate),    natl: "16.6%" },
+    { label: "Frequent mental distress", value: fmtPctOrDash((county as any).fmdRate ?? null), natl: "—" },
+    { label: "Lacks emotional support", value: fmtPctOrDash(county.lackEmotionalSupportRate), natl: "24.1%" },
+    { label: "Loneliness",              value: fmtPctOrDash(county.lonelinessRate),           natl: "33.2%" },
+    { label: "Drug overdose deaths",    value: county.drugOverdoseRate != null ? `${county.drugOverdoseRate.toFixed(1)}/100k` : "—", natl: "32.6/100k" },
+    { label: "Suicide rate",            value: county.suicideRate != null ? `${county.suicideRate.toFixed(1)}/100k` : "—", natl: "14.1/100k" },
+    { label: "MH providers",            value: county.mentalHealthPer100k != null ? `${county.mentalHealthPer100k.toFixed(0)}/100k` : "—", natl: "294/100k" },
+  ];
+
+  // Phase 1b: Pediatric Care cells.
+  const pcIndicators = [
+    { label: "Child poverty (<18)",        value: fmtPctOrDash((county as any).childPovertyRate ?? null), natl: "—" },
+    { label: "Child poverty (<5)",         value: fmtPctOrDash(county.childUnder5PovertyRate),            natl: "17.6%" },
+    { label: "Child uninsured (<19)",      value: fmtPctOrDash((county as any).childUninsuredRate ?? null), natl: "—" },
+    { label: "Infant mortality",           value: (county as any).infantMortalityRate != null ? `${(county as any).infantMortalityRate.toFixed(1)}/1k` : "—", natl: "5.4/1k" },
+    { label: "Low birth weight",           value: (county as any).lowBirthWeightRate != null ? `${(county as any).lowBirthWeightRate.toFixed(1)}%` : "—", natl: "8.6%" },
+    { label: "Teen births",                value: (county as any).teenBirthsRate != null ? `${(county as any).teenBirthsRate.toFixed(1)}/1k` : "—", natl: "13.6/1k" },
+    { label: "Some college (25–44)",       value: fmtPctOrDash(county.someCollegeRate),                   natl: "67.8%" },
+    { label: "HS graduation",              value: fmtPctOrDash(county.highSchoolGraduationRate),           natl: "87.0%" },
+    { label: "Disconnected youth",         value: fmtPctOrDash(county.disconnectedYouthRate),              natl: "6.8%" },
+    { label: "Child-care cost burden",     value: fmtPctOrDash(county.childCareCostBurdenRate),            natl: "27.9%" },
+    { label: "Reading scores",             value: fmtNumOrDash(county.readingScoresGradeLevel, 2) === "Not published" ? "Not published" : `${fmtNumOrDash(county.readingScoresGradeLevel, 2)} grade`, natl: "3.05 grade" },
+    { label: "Pediatric care HPSA",        value: (county as any).hpsaScore != null ? `${(county as any).hpsaScore.toFixed(0)}` : "—", natl: "—" },
+  ];
+
   // Underlying indicator grid (8 cells, 4 columns × 2 rows)
   const indicators = [
     { label: "Uninsured rate",       value: county.uninsuredRate != null ? `${county.uninsuredRate.toFixed(1)}%` : "—",          natl: `${NATIONAL.avgUninsured}%` },
@@ -1059,6 +1093,116 @@ export default function CountyDetail() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <PulseDivider />
+
+      {/* ── Phase 1b: Behavioral Health ── */}
+      <section className="max-w-[1100px] mx-auto px-6" data-testid="section-behavioral-health">
+        <div className="label-mono mb-4">Behavioral health</div>
+        <h2 style={{
+          fontFamily: "var(--font-serif)", fontSize: 22, color: "var(--pulse-navy)",
+          margin: "0 0 14px", fontWeight: 400,
+        }}>
+          Mental health and substance use
+        </h2>
+        <p style={{
+          fontFamily: "var(--font-sans)", fontSize: 13.5, lineHeight: 1.6,
+          color: "var(--pulse-text-muted)", margin: "0 0 18px", maxWidth: 720,
+        }}>
+          County-level small-area estimates from CDC PLACES (BRFSS 2023) plus mortality
+          and provider counts. Counties not published by CDC PLACES are shown as
+          “Not published” rather than imputed.
+        </p>
+        <div
+          className="grid grid-cols-2 md:grid-cols-4"
+          style={{ border: "1px solid var(--pulse-border)", background: "var(--pulse-cream)" }}
+        >
+          {bhIndicators.map((m, i) => (
+            <div
+              key={m.label}
+              style={{
+                padding: "16px 18px",
+                borderRight: ((i + 1) % 4 === 0) ? "none" : "1px solid var(--pulse-border-faint)",
+                borderBottom: i < 4 ? "1px solid var(--pulse-border-faint)" : "none",
+              }}
+              data-testid={`bh-cell-${i}`}
+            >
+              <div className="label-mono mb-2" style={{ fontSize: 9.5 }}>{m.label}</div>
+              <div style={{
+                fontFamily: "var(--font-serif)", fontSize: 22,
+                color: m.value === "Not published" ? "var(--pulse-text-muted)" : "var(--pulse-text)",
+                lineHeight: 1.1, marginBottom: 6,
+              }}>
+                {m.value}
+              </div>
+              <div style={{
+                fontFamily: "var(--font-mono)", fontSize: 9.5,
+                color: "var(--pulse-text-muted)",
+                textTransform: "uppercase", letterSpacing: "0.1em",
+              }}>
+                Natl. {m.natl}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <PulseDivider />
+
+      {/* ── Phase 1b: Pediatric Care ── */}
+      <section className="max-w-[1100px] mx-auto px-6" data-testid="section-pediatric-care">
+        <div className="label-mono mb-4">Pediatric care</div>
+        <h2 style={{
+          fontFamily: "var(--font-serif)", fontSize: 22, color: "var(--pulse-navy)",
+          margin: "0 0 14px", fontWeight: 400,
+        }}>
+          Children, youth, and educational supports
+        </h2>
+        <p style={{
+          fontFamily: "var(--font-sans)", fontSize: 13.5, lineHeight: 1.6,
+          color: "var(--pulse-text-muted)", margin: "0 0 18px", maxWidth: 720,
+        }}>
+          County Health Rankings 2025 (CHR&amp;R) social determinants for kids and youth,
+          alongside ACS poverty and CDC vital statistics. “Not published” means CHR&amp;R
+          suppresses the value for that county due to insufficient sample size.
+        </p>
+        <div
+          className="grid grid-cols-2 md:grid-cols-4"
+          style={{ border: "1px solid var(--pulse-border)", background: "var(--pulse-cream)" }}
+        >
+          {pcIndicators.map((m, i) => {
+            const row = Math.floor(i / 4);
+            const totalRows = Math.ceil(pcIndicators.length / 4);
+            return (
+              <div
+                key={m.label}
+                style={{
+                  padding: "16px 18px",
+                  borderRight: ((i + 1) % 4 === 0) ? "none" : "1px solid var(--pulse-border-faint)",
+                  borderBottom: row < totalRows - 1 ? "1px solid var(--pulse-border-faint)" : "none",
+                }}
+                data-testid={`pc-cell-${i}`}
+              >
+                <div className="label-mono mb-2" style={{ fontSize: 9.5 }}>{m.label}</div>
+                <div style={{
+                  fontFamily: "var(--font-serif)", fontSize: 22,
+                  color: m.value === "Not published" ? "var(--pulse-text-muted)" : "var(--pulse-text)",
+                  lineHeight: 1.1, marginBottom: 6,
+                }}>
+                  {m.value}
+                </div>
+                <div style={{
+                  fontFamily: "var(--font-mono)", fontSize: 9.5,
+                  color: "var(--pulse-text-muted)",
+                  textTransform: "uppercase", letterSpacing: "0.1em",
+                }}>
+                  Natl. {m.natl}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 

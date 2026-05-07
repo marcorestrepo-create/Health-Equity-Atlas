@@ -83,7 +83,25 @@ const FIELD_TO_SLUG: Array<[string, string, number]> = [
   ["lepRate", "lep_rate", 0.5],
   ["noVehicleRate", "no_vehicle_rate", 0.5],
   ["sviOverall", "svi_overall", 0.05],
+  // Phase 1b BH/PC — suppression-preserving (composer null OK when processed null)
+  ["depressionRate", "depression_prevalence", 0.5],
+  ["excessiveDrinkingRate", "excessive_drinking_pct", 0.5],
+  ["lackEmotionalSupportRate", "lack_emotional_support_pct", 0.5],
+  ["lonelinessRate", "loneliness_pct", 0.5],
+  ["childUnder5PovertyRate", "youth_under5_poverty_pct", 0.5],
+  ["someCollegeRate", "some_college_pct", 0.5],
+  ["highSchoolGraduationRate", "high_school_graduation_pct", 0.5],
+  ["disconnectedYouthRate", "disconnected_youth_pct", 0.5],
+  ["childCareCostBurdenRate", "child_care_cost_burden_pct", 0.5],
+  ["readingScoresGradeLevel", "reading_scores_grade_level", 0.05],
 ];
+
+// Fields where the composer LEGITIMATELY returns null on suppression (no fallback).
+const SUPPRESSION_PRESERVING_FIELDS = new Set([
+  "depressionRate", "excessiveDrinkingRate", "lackEmotionalSupportRate", "lonelinessRate",
+  "childUnder5PovertyRate", "someCollegeRate", "highSchoolGraduationRate",
+  "disconnectedYouthRate", "childCareCostBurdenRate", "readingScoresGradeLevel",
+]);
 
 async function main() {
   console.log("[spot-check] Loading composer output...");
@@ -108,7 +126,7 @@ async function main() {
 
     for (const [field, slug, tol] of FIELD_TO_SLUG) {
       totalChecks++;
-      const composerVal = (county as any)[field] as number;
+      const composerVal = (county as any)[field] as number | null;
       const procFile = processed[slug];
       if (!procFile) {
         failures++;
@@ -117,7 +135,17 @@ async function main() {
       }
       const procEntry = procFile.values[fips];
       if (!procEntry || procEntry.suppression_status === "suppressed" || procEntry.value == null) {
-        // Composer should fall back to national mean — skip strict check, just verify it's not absurd
+        // For suppression-preserving fields, composer null IS the correct behavior.
+        if (SUPPRESSION_PRESERVING_FIELDS.has(field)) {
+          if (composerVal == null) {
+            passes++;
+          } else {
+            failures++;
+            issues.push(`[FAIL] ${fips} ${field}: composer=${composerVal} but processed is suppressed (should be null)`);
+          }
+          continue;
+        }
+        // Other fields fall back to national mean — just verify not NaN/null.
         if (composerVal == null || isNaN(composerVal)) {
           failures++;
           issues.push(`[FAIL] ${fips} ${field}: composer NaN/null on suppressed county`);
@@ -127,6 +155,12 @@ async function main() {
         continue;
       }
       const procVal = procEntry.value;
+      if (composerVal == null) {
+        // Composer null but processed has value — only OK if not suppression-preserving (shouldn't happen)
+        failures++;
+        issues.push(`[FAIL] ${fips} ${field}: composer null but processed has value ${procVal}`);
+        continue;
+      }
       const delta = Math.abs(composerVal - procVal);
       if (delta <= tol) {
         passes++;
