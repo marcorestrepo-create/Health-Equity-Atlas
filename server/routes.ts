@@ -3,6 +3,7 @@ import type { Server } from "http";
 import { storage } from "./storage";
 import { seedDatabase } from "./seed";
 import { STATES } from "../shared/state-meta";
+import { TOPICS } from "../shared/topic-meta";
 
 export async function registerRoutes(server: Server, app: Express) {
   // Seed database on startup
@@ -28,10 +29,17 @@ export async function registerRoutes(server: Server, app: Express) {
       `  <url>\n    <loc>${baseUrl}/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>`,
       `  <url>\n    <loc>${baseUrl}/map</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`,
       `  <url>\n    <loc>${baseUrl}/methods</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
+      `  <url>\n    <loc>${baseUrl}/methods/audit</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
       `  <url>\n    <loc>${baseUrl}/contact</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>yearly</changefreq>\n    <priority>0.4</priority>\n  </url>`,
       `  <url>\n    <loc>${baseUrl}/about</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
       `  <url>\n    <loc>${baseUrl}/states</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`,
+      `  <url>\n    <loc>${baseUrl}/topics</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`,
     ];
+
+    const topicUrls = TOPICS.map(
+      (t) =>
+        `  <url>\n    <loc>${baseUrl}/topics/${t.slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`,
+    );
 
     // State index pages (51 — 50 states + DC)
     const stateUrls = STATES.map(
@@ -53,6 +61,7 @@ export async function registerRoutes(server: Server, app: Express) {
       `<?xml version="1.0" encoding="UTF-8"?>`,
       `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
       ...staticUrls,
+      ...topicUrls,
       ...stateUrls,
       ...interventionUrls,
       ...countyUrls,
@@ -177,6 +186,7 @@ export async function registerRoutes(server: Server, app: Express) {
     res.json(counties.map(c => ({
       fips: c.fips,
       name: c.name,
+      state: c.state,
       stateAbbr: c.stateAbbr,
       population: c.population,
       ruralUrban: c.ruralUrban,
@@ -185,19 +195,23 @@ export async function registerRoutes(server: Server, app: Express) {
       healthEquityGapScore: c.healthEquityGapScore,
       uninsuredRate: c.uninsuredRate,
       maternalMortalityRate: c.maternalMortalityRate,
+      obProvidersPer10k: c.obProvidersPer10k,
       diabetesRate: c.diabetesRate,
       hypertensionRate: c.hypertensionRate,
       obesityRate: c.obesityRate,
+      heartDiseaseRate: c.heartDiseaseRate,
       lifeExpectancy: c.lifeExpectancy,
       maternityCareDesert: c.maternityCareDesert,
       hospitalClosureSince2010: c.hospitalClosureSince2010,
       obUnitClosure: c.obUnitClosure,
+      distanceToHospital: c.distanceToHospital,
       noBroadbandRate: c.noBroadbandRate,
       noVehicleRate: c.noVehicleRate,
       sviOverall: c.sviOverall,
       ejScreenIndex: c.ejScreenIndex,
       topInterventions: c.topInterventions,
       pcpPer100k: c.pcpPer100k,
+      mentalHealthPer100k: c.mentalHealthPer100k,
       hpsaScore: c.hpsaScore,
       pm25: c.pm25,
     })));

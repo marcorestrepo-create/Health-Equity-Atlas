@@ -15,6 +15,8 @@ import Contact from "@/pages/Contact";
 import About from "@/pages/About";
 import States from "@/pages/States";
 import StateDetail from "@/pages/StateDetail";
+import TopicDetail from "@/pages/TopicDetail";
+import Topics from "@/pages/Topics";
 import NotFound from "@/pages/not-found";
 
 /**
@@ -39,6 +41,8 @@ function ChromeRoutes() {
           <Route path="/about" component={About} />
           <Route path="/states" component={States} />
           <Route path="/states/:slug" component={StateDetail} />
+          <Route path="/topics" component={Topics} />
+          <Route path="/topics/:slug" component={TopicDetail} />
           <Route component={NotFound} />
         </Switch>
       </main>

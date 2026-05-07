@@ -24,6 +24,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateCounties, type CountyMetrics } from "../shared/county-metrics";
 import { STATES, stateSlugFromAbbr, haversineMiles } from "../shared/state-meta";
+import { TOPICS, topCountiesForTopic } from "../shared/topic-meta";
 
 // Inline county type — intentionally kept tiny so we don't pull in server/schema
 type Row = {
@@ -355,7 +356,60 @@ async function main() {
   const counties: Row[] = JSON.parse(countiesRaw);
   console.log(`[prerender] ${counties.length} counties loaded`);
 
+  // Build metric lookup early — needed for both topic ranking and county JSON-LD.
+  console.log("[prerender] generating county metrics...");
+  const metricsByFips = new Map<string, CountyMetrics>();
+  const allMetrics: CountyMetrics[] = [];
+  for (const m of generateCounties()) {
+    metricsByFips.set(m.fips, m);
+    allMetrics.push(m);
+  }
+  console.log(`[prerender] metrics ready for ${metricsByFips.size} counties`);
+
+  // Build a county lookup by FIPS for the topic hub link blocks.
+  const countyByFips = new Map<string, Row>(
+    counties.map((c) => [c.fips, c]),
+  );
+
+  // Pre-rank counties for each topic so we can use top-N in homepage cross-links
+  // and on each topic page itself.
+  const topicRankings = new Map(
+    TOPICS.map((t) => [t.slug, topCountiesForTopic(t, allMetrics, 100)]),
+  );
+
+  // Top 20 counties by Health Equity Gap Score — the highest-need counties
+  // surfaced on the homepage as a crawlable starting set for Googlebot.
+  const highestNeed = allMetrics
+    .slice()
+    .sort((a, b) => (b.healthEquityGapScore ?? 0) - (a.healthEquityGapScore ?? 0))
+    .slice(0, 20);
+
+  // ─── Cross-link blocks reused across multiple prerendered pages ───
+  const topicHubLinksHtml = `<h2 style="font-size:16px;margin:18px 0 8px;">Topic hubs</h2><ul style="list-style:none;padding:0;margin:0;">${TOPICS.map(
+    (t) => `<li><a href="/topics/${t.slug}">${esc(t.h1)}</a></li>`,
+  ).join("")}</ul>`;
+
+  const stateIndexLinkHtml = `<p style="margin:12px 0;"><a href="/states">Browse all 50 states + DC →</a></p>`;
+  const methodsLinksHtml = `<p style="margin:12px 0;"><a href="/methods">Methods & data sources</a> · <a href="/methods/audit">Methodology audit log</a> · <a href="/about">About Pulse Atlas</a></p>`;
+
   // ─── Static routes ───
+  // Homepage internal-link block: highest-need counties + state index + topics + methods.
+  const homepageHighestNeedLinks = highestNeed
+    .slice(0, 12)
+    .map((m) => {
+      const c = countyByFips.get(m.fips);
+      if (!c) return "";
+      return `<li><a href="/county/${m.fips}">${esc(c.name)}, ${esc(c.stateAbbr)}</a> — gap ${m.healthEquityGapScore.toFixed(1)}</li>`;
+    })
+    .filter(Boolean)
+    .join("");
+  const homepageLinksHtml = [
+    stateIndexLinkHtml,
+    methodsLinksHtml,
+    topicHubLinksHtml,
+    `<h2 style="font-size:16px;margin:18px 0 8px;">Counties with the widest health equity gaps</h2><ul style="list-style:none;padding:0;margin:0;">${homepageHighestNeedLinks}</ul>`,
+  ].join("");
+
   const staticRoutes: RouteSpec[] = [
     {
       pathUrl: "/",
@@ -365,6 +419,7 @@ async function main() {
         "Interactive county-by-county atlas mapping health equity gaps across all 3,144 U.S. counties. Insurance, maternal mortality, chronic disease, provider shortages, and evidence-based interventions.",
       h1: "Pulse: U.S. Health Equity Atlas — Mapping the Gaps in American Health Equity",
       shellBody: `Pulse Atlas maps the structural determinants of health across every one of the 3,144 counties in the United States. Each county is scored on a composite Health Equity Gap Score (0–100) combining insurance coverage, maternal mortality, chronic disease prevalence, provider supply, hospital access, transportation, broadband, and environmental exposure. Data is free, open, and licensed under CC BY 4.0. Built for policymakers, health systems, and community coalitions.`,
+      shellLinksHtml: homepageLinksHtml,
     },
     {
       pathUrl: "/methods",
@@ -374,6 +429,25 @@ async function main() {
         "Full methodology for the Pulse Atlas Health Equity Gap Score: data sources (CDC PLACES, Census SAHIE, HRSA, EJScreen, March of Dimes), formulas, vintage years, and transformations.",
       h1: "Methods & Data Sources",
       shellBody: `Pulse Atlas combines more than a dozen federal datasets — CDC PLACES, Census SAHIE and ACS, HRSA HPSA, FCC Broadband Data Collection, EPA EJScreen, CDC/ATSDR SVI, March of Dimes Maternity Care Deserts, IHME, and County Health Rankings — normalizes them to FIPS codes, and recomputes a composite gap score when underlying indicators change. This page documents every source, vintage year, formula, and intervention-scoring rule.`,
+      shellLinksHtml: [
+        `<p style="margin:12px 0;"><a href="/methods/audit">Methodology audit log →</a></p>`,
+        topicHubLinksHtml,
+        stateIndexLinkHtml,
+      ].join(""),
+    },
+    {
+      pathUrl: "/methods/audit",
+      hashUrl: "/methods/audit",
+      title: "Methodology Audit Log — Pulse U.S. Health Equity Atlas",
+      description:
+        "Public audit log for the Pulse Atlas methodology: per-metric calibration vs. published federal values, MOE-aware suppression, and independent validation studies (maternal access, behavioral health, HEG composite).",
+      h1: "Methodology Audit Log",
+      shellBody: `Pulse Atlas publishes an open audit log: 46 of 46 anchored metrics calibrated to published federal means within tolerance (100% pass), 8 ACS/SAIPE/SAHIE metrics with MOE-aware suppression, 4 independent validation studies (maternal access vs. infant mortality and low birth weight, HEG vs. county life-expectancy, behavioral health vs. drug overdose mortality, maternal composite ceiling diagnosis), and 3 unanchored shortage-area severity indices explicitly disclosed.`,
+      shellLinksHtml: [
+        `<p style="margin:12px 0;"><a href="/methods">Full methods page →</a></p>`,
+        topicHubLinksHtml,
+        stateIndexLinkHtml,
+      ].join(""),
     },
     {
       pathUrl: "/contact",
@@ -392,6 +466,7 @@ async function main() {
         "About Pulse Atlas: what the atlas measures, who it's built for, and why health equity data should be free and open. 3,144 U.S. counties scored on insurance, maternal care, chronic disease, provider supply, and social infrastructure. CC BY 4.0.",
       h1: "A county-level atlas of American health equity",
       shellBody: `Pulse Atlas is a free, open atlas mapping structural health inequities across all 3,144 U.S. counties. It combines more than a dozen federal datasets — CDC PLACES, Census SAHIE and ACS, HRSA HPSA, FCC Broadband, EPA EJScreen, CDC/ATSDR SVI, March of Dimes — into a single Health Equity Gap Score (0–100) and surfaces ranked, evidence-based interventions. Built for policymakers, health systems, and nonprofit coalitions who need defensible, comparable numbers. All data is licensed CC BY 4.0 — reuse it, cite it, build on it.`,
+      shellLinksHtml: [topicHubLinksHtml, stateIndexLinkHtml, methodsLinksHtml].join(""),
     },
     {
       pathUrl: "/map",
@@ -401,6 +476,7 @@ async function main() {
         "National choropleth view of the Pulse Atlas Health Equity Gap Score across 3,144 U.S. counties. Hover any state to preview its highest-need county and drill into ranked interventions.",
       h1: "The map of health equity gaps",
       shellBody: `Pulse Atlas's national map shades every U.S. county by its composite Health Equity Gap Score (0–100), combining insurance coverage, maternal mortality, chronic disease prevalence, provider supply, hospital access, transportation, broadband, and environmental exposure. Hover any state to preview its highest-need county; click to open the state hub with every county ranked and matched to evidence-based interventions. National median gap score is 44.6 across 3,144 counties.`,
+      shellLinksHtml: [topicHubLinksHtml, stateIndexLinkHtml, methodsLinksHtml].join(""),
     },
   ];
 
@@ -424,17 +500,60 @@ async function main() {
   }
   console.log(`[prerender] ${INTERVENTIONS.length} intervention routes written`);
 
-  // ─── County routes ───
-  // Build a fips→metrics lookup using the same deterministic generator the
-  // server uses to seed SQLite. This guarantees the JSON-LD values baked into
-  // pre-rendered HTML match what users see in the live app.
-  console.log("[prerender] generating county metrics for JSON-LD...");
-  const metricsByFips = new Map<string, CountyMetrics>();
-  for (const m of generateCounties()) {
-    metricsByFips.set(m.fips, m);
+  // ─── Topic hub routes ((/topics + 4 × /topics/:slug) ───
+  // /topics index page — lists every topic hub for crawler discovery.
+  {
+    const topicLinks = TOPICS.map(
+      (t) => `<li><a href="/topics/${t.slug}">${esc(t.h1)}</a> — ${esc(t.topicLabel)}</li>`,
+    ).join("");
+    await writeRoute(shell, {
+      pathUrl: "/topics",
+      hashUrl: "/topics",
+      title: "Health Equity Topics — Pulse U.S. Health Equity Atlas",
+      description:
+        "Thematic landing pages for U.S. health equity: maternity care deserts, uninsured rates, chronic disease burden, and provider shortages. All 3,144 counties ranked.",
+      h1: "Health equity topics",
+      shellBody:
+        "Pulse Atlas organizes its 49 metrics into a small number of high-signal topic hubs. Each hub ranks the 100 U.S. counties with the most severe gaps on that dimension and links straight into full county profiles.",
+      shellLinksHtml: `<ul style="font-size:14px;line-height:1.8;list-style:none;padding:0;margin:16px 0;">${topicLinks}</ul>${stateIndexLinkHtml}${methodsLinksHtml}`,
+    });
+    console.log("[prerender] /topics index written");
   }
-  console.log(`[prerender] metrics ready for ${metricsByFips.size} counties`);
 
+  // /topics/:slug — one page per topic with a top-100 county list.
+  for (const topic of TOPICS) {
+    const ranked = topicRankings.get(topic.slug) ?? [];
+    const countyLinks = ranked
+      .map((m, i) => {
+        const c = countyByFips.get(m.fips);
+        if (!c) return "";
+        const lead = topic.formatLeadMetric(m);
+        return `<li><a href="/county/${c.fips}">${esc(c.name)}, ${esc(c.stateAbbr)}</a> — ${esc(lead)}</li>`;
+      })
+      .filter(Boolean)
+      .join("");
+    const otherTopicLinks = TOPICS.filter((t) => t.slug !== topic.slug)
+      .map((t) => `<li><a href="/topics/${t.slug}">${esc(t.h1)}</a></li>`)
+      .join("");
+    await writeRoute(shell, {
+      pathUrl: `/topics/${topic.slug}`,
+      hashUrl: `/topics/${topic.slug}`,
+      title: topic.title,
+      description: topic.metaDescription,
+      h1: topic.h1,
+      shellBody: topic.intro,
+      shellLinksHtml: [
+        `<h2 style="font-size:16px;margin:18px 0 8px;">Top 100 counties by ${esc(topic.leadMetricLabel.toLowerCase())}</h2>`,
+        `<ol style="font-size:13px;line-height:1.8;padding-left:24px;margin:0 0 18px;">${countyLinks}</ol>`,
+        `<h2 style="font-size:16px;margin:18px 0 8px;">Other topic hubs</h2><ul style="list-style:none;padding:0;margin:0;">${otherTopicLinks}</ul>`,
+        stateIndexLinkHtml,
+        methodsLinksHtml,
+      ].join(""),
+    });
+  }
+  console.log(`[prerender] ${TOPICS.length} topic hubs written`);
+
+  // ─── County routes ───
   // Group counties by state abbreviation for the state index pages and for
   // the "Counties in {state}" crawlable link block on each county page.
   const countiesByState = new Map<string, Row[]>();
@@ -491,7 +610,7 @@ async function main() {
       description: `Health equity data for every county in ${s.name}. Gap scores, uninsured rates, maternal health, chronic disease, and provider access. Direct links to all ${inState.length} ${s.abbr} county profiles.`,
       h1: `${s.name} — All Counties`,
       shellBody: `Pulse Atlas tracks every county in ${s.name} on a composite Health Equity Gap Score combining insurance coverage, maternal mortality, chronic disease prevalence, provider supply, hospital access, social vulnerability, and environmental exposure. ${inState.length} counties · total population ${totalPop.toLocaleString()}.`,
-      shellLinksHtml: `<ul style="font-size:14px;line-height:1.8;list-style:none;padding:0;margin:16px 0;column-count:2;">${countyLinks}</ul>`,
+      shellLinksHtml: `<ul style="font-size:14px;line-height:1.8;list-style:none;padding:0;margin:16px 0;column-count:2;">${countyLinks}</ul>${topicHubLinksHtml}`,
     });
   }
   console.log(`[prerender] ${STATES.length} state hub pages written`);
@@ -556,6 +675,7 @@ async function main() {
       nearbyLinks
         ? `<h2 style="font-size:16px;margin:18px 0 8px;">Nearby counties</h2><ul style="list-style:none;padding:0;margin:0;">${nearbyLinks}</ul>`
         : "",
+      topicHubLinksHtml,
     ].join("");
 
     await writeRoute(shell, {
@@ -575,7 +695,7 @@ async function main() {
   }
   console.log(`[prerender] ${countyCount} county routes written (${metricsHits} with variableMeasured)`);
 
-  const total = staticRoutes.length + 1 + STATES.length + INTERVENTIONS.length + countyCount;
+  const total = staticRoutes.length + 1 + STATES.length + INTERVENTIONS.length + countyCount + 1 + TOPICS.length;
   console.log(`[prerender] ✅ done — ${total} static HTML files written to dist/public/`);
 }
 
