@@ -33,6 +33,11 @@ const allowlist = [
 async function buildAll() {
   await rm("dist", { recursive: true, force: true });
 
+  console.log("building audit log artifact...");
+  // Dynamic import — tsx resolves .ts extensions at runtime
+  // @ts-expect-error - tsx handles .ts ESM resolution
+  await import("../scripts/build_audit_log.ts");
+
   console.log("building client...");
   await viteBuild();
 

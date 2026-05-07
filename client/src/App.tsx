@@ -9,6 +9,7 @@ import CountyDetail from "@/pages/CountyDetail";
 import CountyEmbed from "@/pages/CountyEmbed";
 import InterventionDetail from "@/pages/InterventionDetail";
 import Methods from "@/pages/Methods";
+import MethodologyAudit from "@/pages/MethodologyAudit";
 import MapView from "@/pages/MapView";
 import Contact from "@/pages/Contact";
 import About from "@/pages/About";
@@ -32,6 +33,8 @@ function ChromeRoutes() {
           <Route path="/intervention/:slug" component={InterventionDetail} />
           <Route path="/map" component={MapView} />
           <Route path="/methods" component={Methods} />
+          <Route path="/methods/audit" component={MethodologyAudit} />
+          <Route path="/audit" component={MethodologyAudit} />
           <Route path="/contact" component={Contact} />
           <Route path="/about" component={About} />
           <Route path="/states" component={States} />

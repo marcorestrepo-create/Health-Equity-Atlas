@@ -7,6 +7,7 @@
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
     "manifest": "tsx scripts/build_manifest.ts",
+    "audit:build": "tsx scripts/build_audit_log.ts",
     "validate:maternal": "tsx scripts/maternal_access_validation.ts",
     "validate:heg": "tsx scripts/heg_validation_study.ts",
     "validate:bh": "tsx scripts/behavioral_health_validation.ts",

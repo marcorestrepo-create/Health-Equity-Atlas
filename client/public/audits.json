@@ -1,0 +1,1207 @@
+{
+  "generated_at": "2026-05-07T20:28:56.422Z",
+  "calibration_summary": {
+    "total_metrics": 49,
+    "metrics_with_calibration": 46,
+    "calibration_pass": 46,
+    "calibration_fail": 0,
+    "pass_rate_pct": 100,
+    "failing_metrics": []
+  },
+  "moe_filtered_metrics": [
+    {
+      "slug": "all_ages_poverty_rate",
+      "counties_filtered": 0,
+      "note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (0 counties filtered)."
+    },
+    {
+      "slug": "child_poverty_rate_u18",
+      "counties_filtered": 0,
+      "note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (0 counties filtered)."
+    },
+    {
+      "slug": "child_uninsured_rate_under19",
+      "counties_filtered": null,
+      "note": "Census SAHIE point estimate (PCTUI_PT). 90% confidence intervals (PCTUI_LB90 / PCTUI_UB90) used for MOE-aware suppression."
+    },
+    {
+      "slug": "lead_exposure_pct",
+      "counties_filtered": 55,
+      "note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (55 counties filtered)."
+    },
+    {
+      "slug": "lep_rate",
+      "counties_filtered": 1144,
+      "note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (1144 counties filtered)."
+    },
+    {
+      "slug": "no_vehicle_rate",
+      "counties_filtered": 476,
+      "note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (476 counties filtered)."
+    },
+    {
+      "slug": "uninsured_rate",
+      "counties_filtered": null,
+      "note": "Census SAHIE point estimate (PCTUI_PT). 90% confidence intervals (PCTUI_LB90 / PCTUI_UB90) used for MOE-aware suppression."
+    },
+    {
+      "slug": "youth_under5_poverty_pct",
+      "counties_filtered": 1197,
+      "note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (1197 counties filtered)."
+    }
+  ],
+  "suppression_totals": {
+    "total_county_rows": 141478,
+    "suppressed": 13781
+  },
+  "validation_studies": [
+    {
+      "slug": "maternal_access",
+      "title": "Maternal access composite vs. birth outcomes",
+      "hypothesis": "Counties with worse maternal access (higher composite) should show higher infant mortality and low birth weight rates.",
+      "independent": true,
+      "headline": "r=0.28 vs IM, r=0.09 vs LBW",
+      "detail": {
+        "generated_at": "2026-05-07T19:36:33.329Z",
+        "methodology": {
+          "pivot_rationale": "CDC WONDER API blocks county-level grouping for vital statistics; >90% of US counties have suppressed maternal mortality at the county level. Pivoted to validating maternalAccess against perinatal outcomes (infant mortality, low birth weight) which have strong county coverage in CHR&R 2025.",
+          "composite_definition": "maternalAccessComposite = mean(maternityCareDesert/3, obProvidersDeficit, obUnitClosure, clamp(distance/30, 0, 1)). Range 0-1.",
+          "outcomes_independent": "Both outcomes (LBW, infant mortality) are NOT inputs to the maternalAccess composite. They ARE inputs to the separate `perinatal` HEG component but that component is computed independently from maternalAccess.",
+          "bootstrap": "1000 resamples, seed 42, percentile method 95% CI",
+          "source": "CHR&R 2025 (NCHS Detailed Mortality + Natality 2017-2023 underlying)"
+        },
+        "correlations": {
+          "low_birth_weight": {
+            "outcome": "Low Birth Weight (% of live births)",
+            "n": 3035,
+            "pearson_r": 0.08711713218980338,
+            "pearson_ci_lo": 0.04871362656869312,
+            "pearson_ci_hi": 0.12694148271075542,
+            "spearman_rho": 0.04835846317058187
+          },
+          "infant_mortality": {
+            "outcome": "Infant Mortality (per 1k live births)",
+            "n": 1172,
+            "pearson_r": 0.2802632232701919,
+            "pearson_ci_lo": 0.211756825221377,
+            "pearson_ci_hi": 0.348507085860199,
+            "spearman_rho": 0.237755450847813
+          }
+        },
+        "stratified_by_maternity_care_desert": {
+          "lbw": {
+            "desert_mean": 8.701924338006418,
+            "desert_n": 1249,
+            "non_desert_mean": 8.224732445951869,
+            "non_desert_n": 1786,
+            "delta_pp": 0.4771918920545488
+          },
+          "infMort": {
+            "desert_mean": 8.041397478584274,
+            "desert_n": 178,
+            "non_desert_mean": 6.304766653432597,
+            "non_desert_n": 994,
+            "delta_per_1k": 1.7366308251516775
+          }
+        }
+      },
+      "report_md": "scripts/maternal_access_validation_report.md"
+    },
+    {
+      "slug": "heg",
+      "title": "Health Equity Gap (HEG) vs. premature death",
+      "hypothesis": "Counties with higher HEG should have higher premature death rates (years of potential life lost).",
+      "independent": true,
+      "headline": "r≈0.677 vs YPLL",
+      "detail": {
+        "generated_at": "2026-05-07T20:18:42.853Z",
+        "sample_sizes": {
+          "premature_death": 3080,
+          "preventable_stays": 3061
+        },
+        "construct_validity": {
+          "premature_death": {
+            "pearson_r": 0.6766408344977486,
+            "pearson_ci_lo": 0.6549263852104602,
+            "pearson_ci_hi": 0.7001563910711455,
+            "spearman_rho": 0.7461551985504669,
+            "n": 3080,
+            "source": "CHR&R 2025 — Premature Death (YPLL75 per 100,000) — NCHS underlying source"
+          },
+          "preventable_stays": {
+            "pearson_r": 0.3311588972676571,
+            "pearson_ci_lo": 0.30061509797849867,
+            "pearson_ci_hi": 0.36174091577452117,
+            "spearman_rho": 0.3437423470758004,
+            "n": 3061,
+            "source": "CHR&R 2025 — Preventable Hospital Stays (per 100,000 Medicare enrollees) — CMS source"
+          }
+        },
+        "sensitivity": {
+          "perturbation_pct": 20,
+          "top_decile_size": 314,
+          "results": [
+            {
+              "component": "insurance",
+              "deltaPct": -20,
+              "jaccard": 0.9323076923076923,
+              "rankShift": 11
+            },
+            {
+              "component": "insurance",
+              "deltaPct": 20,
+              "jaccard": 0.9323076923076923,
+              "rankShift": 11
+            },
+            {
+              "component": "maternalAccess",
+              "deltaPct": -20,
+              "jaccard": 0.891566265060241,
+              "rankShift": 16
+            },
+            {
+              "component": "maternalAccess",
+              "deltaPct": 20,
+              "jaccard": 0.9263803680981595,
+              "rankShift": 10
+            },
+            {
+              "component": "chronicDisease",
+              "deltaPct": -20,
+              "jaccard": 0.9382716049382716,
+              "rankShift": 9
+            },
+            {
+              "component": "chronicDisease",
+              "deltaPct": 20,
+              "jaccard": 0.9382716049382716,
+              "rankShift": 10
+            },
+            {
+              "component": "providerAccess",
+              "deltaPct": -20,
+              "jaccard": 0.9263803680981595,
+              "rankShift": 14
+            },
+            {
+              "component": "providerAccess",
+              "deltaPct": 20,
+              "jaccard": 0.9382716049382716,
+              "rankShift": 9
+            },
+            {
+              "component": "behavioralHealth",
+              "deltaPct": -20,
+              "jaccard": 0.9625,
+              "rankShift": 9
+            },
+            {
+              "component": "behavioralHealth",
+              "deltaPct": 20,
+              "jaccard": 0.9263803680981595,
+              "rankShift": 12
+            },
+            {
+              "component": "perinatal",
+              "deltaPct": -20,
+              "jaccard": 0.9503105590062112,
+              "rankShift": 8
+            },
+            {
+              "component": "perinatal",
+              "deltaPct": 20,
+              "jaccard": 0.9382716049382716,
+              "rankShift": 11
+            },
+            {
+              "component": "childPoverty",
+              "deltaPct": -20,
+              "jaccard": 0.9382716049382716,
+              "rankShift": 9
+            },
+            {
+              "component": "childPoverty",
+              "deltaPct": 20,
+              "jaccard": 0.9382716049382716,
+              "rankShift": 10
+            },
+            {
+              "component": "social",
+              "deltaPct": -20,
+              "jaccard": 0.9146341463414634,
+              "rankShift": 12
+            },
+            {
+              "component": "social",
+              "deltaPct": 20,
+              "jaccard": 0.9323076923076923,
+              "rankShift": 9
+            },
+            {
+              "component": "environmental",
+              "deltaPct": -20,
+              "jaccard": 0.9382716049382716,
+              "rankShift": 10
+            },
+            {
+              "component": "environmental",
+              "deltaPct": 20,
+              "jaccard": 0.9382716049382716,
+              "rankShift": 9
+            },
+            {
+              "component": "infrastructure",
+              "deltaPct": -20,
+              "jaccard": 0.9503105590062112,
+              "rankShift": 8
+            },
+            {
+              "component": "infrastructure",
+              "deltaPct": 20,
+              "jaccard": 0.9382716049382716,
+              "rankShift": 11
+            }
+          ],
+          "min_jaccard": 0.891566265060241,
+          "mean_jaccard": 0.9344915077538065,
+          "threshold_pass": true
+        },
+        "stress": {
+          "chronic_disease_plus_50": 0.9146341463414634,
+          "drop_component": [
+            {
+              "component": "insurance",
+              "jaccard": 0.7740112994350282
+            },
+            {
+              "component": "maternalAccess",
+              "jaccard": 0.5660847880299252
+            },
+            {
+              "component": "chronicDisease",
+              "jaccard": 0.8309037900874635
+            },
+            {
+              "component": "providerAccess",
+              "jaccard": 0.7300275482093664
+            },
+            {
+              "component": "behavioralHealth",
+              "jaccard": 0.8802395209580839
+            },
+            {
+              "component": "perinatal",
+              "jaccard": 0.8579881656804734
+            },
+            {
+              "component": "childPoverty",
+              "jaccard": 0.8525073746312685
+            },
+            {
+              "component": "social",
+              "jaccard": 0.6972972972972973
+            },
+            {
+              "component": "environmental",
+              "jaccard": 0.9146341463414634
+            },
+            {
+              "component": "infrastructure",
+              "jaccard": 0.9088145896656535
+            }
+          ]
+        }
+      },
+      "report_md": "scripts/heg_validation_report.md"
+    },
+    {
+      "slug": "behavioral_health",
+      "title": "Behavioral health burden vs. drug overdose + suicide mortality",
+      "hypothesis": "Counties with higher BH burden (depression, FMD, lack of emotional support, loneliness) should show higher drug overdose and suicide mortality.",
+      "independent": true,
+      "headline": "see report",
+      "detail": {
+        "generated_at": "2026-05-07T20:22:49.828Z",
+        "methodology": {
+          "hypothesis": "If the behavioral health (BH) burden of a county is real, counties with higher BH burden should have higher rates of behavioral-health mortality outcomes (drug overdose, suicide).",
+          "bh_burden_index": "mean(depression/30, frequent_mental_distress/22, lack_emotional_support/25, loneliness/35), each clamped 0-1.",
+          "circularity_check": "drug_overdose and suicide are NOT inputs to bh_burden_index. They ARE inputs to HEG's behavHealthGap component, but bh_burden_index is constructed independently to keep the test clean.",
+          "bh_inputs": [
+            "depression_prevalence (CDC PLACES 2024)",
+            "frequent_mental_distress (CDC PLACES 2024)",
+            "lack_emotional_support_pct (CDC PLACES 2024)",
+            "loneliness_pct (CDC PLACES 2024)"
+          ],
+          "outcomes": [
+            "drug_overdose_deaths_per_100k (CHR&R 2025 / NCHS 2018-2022 pooled)",
+            "suicide_rate_per_100k (CHR&R 2025 / NCHS 2017-2021 pooled)"
+          ],
+          "stat_methods": [
+            "Pearson r (linear)",
+            "Spearman rho (rank)",
+            "1000-iteration bootstrap 95% CI",
+            "Top-vs-bottom-quartile delta"
+          ]
+        },
+        "drug_overdose": {
+          "outcome": "Drug overdose deaths per 100k (NCHS 2018-2022 pooled)",
+          "n": 1461,
+          "pearson_r": 0.4009958548723428,
+          "pearson_ci_lo": 0.3612853417916083,
+          "pearson_ci_hi": 0.4422058728028667,
+          "spearman_rho": 0.3711761658137103,
+          "x_mean": 0.8891261263263305,
+          "x_sd": 0.0553271047595397,
+          "y_mean": 32.179184353792245,
+          "y_sd": 18.841856765674162
+        },
+        "suicide": {
+          "outcome": "Suicide rate per 100k (NCHS 2017-2021 pooled)",
+          "n": 1796,
+          "pearson_r": 0.22744814864522447,
+          "pearson_ci_lo": 0.18704360762399996,
+          "pearson_ci_hi": 0.26915609736249957,
+          "spearman_rho": 0.2659595043076853,
+          "x_mean": 0.8871730276034278,
+          "x_sd": 0.056125699652918096,
+          "y_mean": 18.91199600386884,
+          "y_sd": 7.6836049086610405
+        },
+        "stratified": {
+          "drug_overdose": {
+            "outcome": "Drug overdose deaths/100k",
+            "unit": "deaths per 100k",
+            "low_burden_mean": 24.417393458916465,
+            "low_burden_n": 365,
+            "high_burden_mean": 42.199504870290156,
+            "high_burden_n": 365,
+            "delta": 17.78211141137369,
+            "delta_relative_pct": 72.82559230285173
+          },
+          "suicide": {
+            "outcome": "Suicide rate/100k",
+            "unit": "deaths per 100k",
+            "low_burden_mean": 16.727943375092654,
+            "low_burden_n": 449,
+            "high_burden_mean": 20.99431164686991,
+            "high_burden_n": 449,
+            "delta": 4.266368271777257,
+            "delta_relative_pct": 25.504439942866714
+          }
+        }
+      },
+      "report_md": "scripts/behavioral_health_validation_report.md"
+    }
+  ],
+  "metrics": [
+    {
+      "slug": "adult_smoking_pct",
+      "source": "BRFSS 2022 (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2022",
+      "ingested_at": "2026-05-07T15:32:41.773Z",
+      "calibration": {
+        "metric": "adult_smoking_pct",
+        "computed_weighted_mean": 14.511,
+        "published": 13.2,
+        "delta": 1.311,
+        "within_tolerance": true,
+        "counties_included": 3137,
+        "counties_suppressed": 7
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "air_pollution_pm25",
+      "source": "EPA Air Quality System / CDC EJI (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2020",
+      "ingested_at": "2026-05-07T15:32:41.747Z",
+      "calibration": {
+        "metric": "air_pollution_pm25",
+        "computed_weighted_mean": 9.153,
+        "published": 9,
+        "delta": 0.153,
+        "within_tolerance": true,
+        "counties_included": 3062,
+        "counties_suppressed": 82
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "all_ages_poverty_rate",
+      "source": "Census SAIPE",
+      "source_url": "https://www.census.gov/programs-surveys/saipe.html",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T20:17:10.256Z",
+      "calibration": {
+        "metric": "all_ages_poverty_rate",
+        "computed_weighted_mean": 12.188,
+        "published": 12.4,
+        "delta": 0.212,
+        "within_tolerance": true,
+        "counties_included": 3143,
+        "counties_suppressed": 0
+      },
+      "moe_filtered_note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (0 counties filtered)."
+    },
+    {
+      "slug": "broadband_access_pct",
+      "source": "American Community Survey 5-year 2019-2023 (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2019-2023",
+      "ingested_at": "2026-05-07T15:32:41.666Z",
+      "calibration": {
+        "metric": "broadband_access_pct",
+        "computed_weighted_mean": 89.785,
+        "published": 89.7,
+        "delta": 0.085,
+        "within_tolerance": true,
+        "counties_included": 3137,
+        "counties_suppressed": 7
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "child_care_cost_burden_pct",
+      "source": "County Health Rankings & Roadmaps 2025",
+      "source_url": "https://www.countyhealthrankings.org/health-data",
+      "vintage": "2025",
+      "ingested_at": "2026-05-07T17:01:42.210Z",
+      "calibration": {
+        "metric": "child_care_cost_burden_pct",
+        "computed_weighted_mean": 30.253,
+        "published": 27.886,
+        "delta": 2.367,
+        "within_tolerance": true,
+        "counties_included": 3140,
+        "counties_suppressed": 4
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "child_poverty_rate_u18",
+      "source": "Census SAIPE",
+      "source_url": "https://www.census.gov/programs-surveys/saipe.html",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T20:17:10.256Z",
+      "calibration": {
+        "metric": "child_poverty_rate_u18",
+        "computed_weighted_mean": 15.35,
+        "published": 15.5,
+        "delta": 0.15,
+        "within_tolerance": true,
+        "counties_included": 3143,
+        "counties_suppressed": 0
+      },
+      "moe_filtered_note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (0 counties filtered)."
+    },
+    {
+      "slug": "child_uninsured_rate_under19",
+      "source": "Census SAHIE",
+      "source_url": "https://www.census.gov/data/datasets/time-series/demo/sahie/estimates-acs.html",
+      "vintage": "2023",
+      "ingested_at": "2026-05-07T20:16:33.893Z",
+      "calibration": {
+        "metric": "child_uninsured_rate_under19",
+        "computed_weighted_mean": 5.232,
+        "published": 5.3,
+        "delta": 0.068,
+        "within_tolerance": true,
+        "counties_included": 3139,
+        "counties_suppressed": 5
+      },
+      "moe_filtered_note": "Census SAHIE point estimate (PCTUI_PT). 90% confidence intervals (PCTUI_LB90 / PCTUI_UB90) used for MOE-aware suppression."
+    },
+    {
+      "slug": "depression_prevalence",
+      "source": "CDC PLACES 2024 (BRFSS 2023)",
+      "source_url": "https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-County-Data-20/swc5-untb",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T16:53:14.759Z",
+      "calibration": {
+        "metric": "depression_prevalence",
+        "computed_weighted_mean": 22.114,
+        "published": 20.7,
+        "delta": 1.414,
+        "within_tolerance": true,
+        "counties_included": 2956,
+        "counties_suppressed": 188
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "diabetes_prevalence",
+      "source": "CDC PLACES 2024 (BRFSS 2023)",
+      "source_url": "https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-County-Data-20/swc5-untb",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T15:22:05.581Z",
+      "calibration": {
+        "metric": "diabetes_prevalence",
+        "computed_weighted_mean": 10.664,
+        "published": 10.3,
+        "delta": 0.364,
+        "within_tolerance": true,
+        "counties_included": 2956,
+        "counties_suppressed": 188
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "disconnected_youth_pct",
+      "source": "County Health Rankings & Roadmaps 2025",
+      "source_url": "https://www.countyhealthrankings.org/health-data",
+      "vintage": "2025",
+      "ingested_at": "2026-05-07T16:53:45.021Z",
+      "calibration": {
+        "metric": "disconnected_youth_pct",
+        "computed_weighted_mean": 6.954,
+        "published": 6.818,
+        "delta": 0.136,
+        "within_tolerance": true,
+        "counties_included": 1146,
+        "counties_suppressed": 1998
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "distance_to_hospital",
+      "source": "CMS Provider of Services File (Hospital & Non-Hospital Facilities)",
+      "source_url": "https://data.cms.gov/provider-characteristics/hospitals-and-other-facilities/provider-of-services-file-hospital-non-hospital-facilities",
+      "vintage": "Q2 2025",
+      "ingested_at": "2026-05-07T17:56:05.800Z",
+      "calibration": {
+        "metric": "distance_to_hospital",
+        "computed_weighted_mean": 0.506,
+        "published": 0.5,
+        "delta": 0.006,
+        "within_tolerance": true,
+        "counties_included": 3144,
+        "counties_suppressed": 0
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "drug_overdose_deaths_per_100k",
+      "source": "NCHS Multiple Cause of Death 2019-2023 (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2019-2023",
+      "ingested_at": "2026-05-07T15:32:41.861Z",
+      "calibration": {
+        "metric": "drug_overdose_deaths_per_100k",
+        "computed_weighted_mean": 31.282,
+        "published": 30.81,
+        "delta": 0.472,
+        "within_tolerance": true,
+        "counties_included": 2003,
+        "counties_suppressed": 1141
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "ej_screen_index",
+      "source": "U.S. EPA EJScreen 2.3 (preserved by Harvard Dataverse, doi:10.7910/DVN/JISNPL)",
+      "source_url": "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/JISNPL",
+      "vintage": "EJScreen 2.3 (2024)",
+      "ingested_at": "2026-05-07T18:03:42.091Z",
+      "calibration": {
+        "metric": "ej_screen_index",
+        "computed_weighted_mean": 46.105,
+        "published": 50,
+        "delta": 3.895,
+        "within_tolerance": true,
+        "counties_included": 3144,
+        "counties_suppressed": 0
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "excessive_drinking_pct",
+      "source": "CDC PLACES 2024 (BRFSS 2023)",
+      "source_url": "https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-County-Data-20/swc5-untb",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T16:53:15.157Z",
+      "calibration": {
+        "metric": "excessive_drinking_pct",
+        "computed_weighted_mean": 17.119,
+        "published": 16.6,
+        "delta": 0.519,
+        "within_tolerance": true,
+        "counties_included": 2956,
+        "counties_suppressed": 188
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "food_insecurity_pct",
+      "source": "Feeding America Map the Meal Gap 2022 (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2022",
+      "ingested_at": "2026-05-07T15:32:41.693Z",
+      "calibration": {
+        "metric": "food_insecurity_pct",
+        "computed_weighted_mean": 12.87,
+        "published": 13.5,
+        "delta": 0.63,
+        "within_tolerance": true,
+        "counties_included": 3137,
+        "counties_suppressed": 7
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "frequent_mental_distress",
+      "source": "CDC PLACES 2024 (BRFSS 2023)",
+      "source_url": "https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-County-Data-20/swc5-untb",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T15:22:05.725Z",
+      "calibration": {
+        "metric": "frequent_mental_distress",
+        "computed_weighted_mean": 17.24,
+        "published": 16.3,
+        "delta": 0.94,
+        "within_tolerance": true,
+        "counties_included": 2956,
+        "counties_suppressed": 188
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "heart_disease_prevalence",
+      "source": "CDC PLACES 2024 (BRFSS 2023)",
+      "source_url": "https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-County-Data-20/swc5-untb",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T15:22:05.689Z",
+      "calibration": {
+        "metric": "heart_disease_prevalence",
+        "computed_weighted_mean": 5.326,
+        "published": 5.3,
+        "delta": 0.026,
+        "within_tolerance": true,
+        "counties_included": 2956,
+        "counties_suppressed": 188
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "high_school_graduation_pct",
+      "source": "County Health Rankings & Roadmaps 2025",
+      "source_url": "https://www.countyhealthrankings.org/health-data",
+      "vintage": "2025",
+      "ingested_at": "2026-05-07T16:53:45.005Z",
+      "calibration": {
+        "metric": "high_school_graduation_pct",
+        "computed_weighted_mean": 86.737,
+        "published": 87,
+        "delta": 0.263,
+        "within_tolerance": true,
+        "counties_included": 2496,
+        "counties_suppressed": 648
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "hospital_closure_since_2010",
+      "source": "UNC Cecil G. Sheps Center for Health Services Research — Rural Hospital Closures",
+      "source_url": "https://www.shepscenter.unc.edu/programs-projects/rural-health/rural-hospital-closures/",
+      "vintage": "Sheps Center, accessed 2026-05-07",
+      "ingested_at": "2026-05-07T19:15:24.155Z",
+      "calibration": {
+        "publishedValue": 140,
+        "publishedSource": "Sheps Center: 152 closures since 2010 across ~140 unique counties",
+        "tolerance": 25,
+        "observedValue": 147,
+        "delta": 7,
+        "pass": true,
+        "unit": "counties"
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "hpsa_dental_score",
+      "source": "HRSA Data Warehouse — Health Professional Shortage Areas (Dental HPSA)",
+      "source_url": "https://data.hrsa.gov/topics/health-workforce/shortage-areas",
+      "vintage": "2025",
+      "ingested_at": "2026-05-07T15:41:04.751Z",
+      "calibration": null,
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "hpsa_mental_health_score",
+      "source": "HRSA Data Warehouse — Health Professional Shortage Areas (Mental Health HPSA)",
+      "source_url": "https://data.hrsa.gov/topics/health-workforce/shortage-areas",
+      "vintage": "2025",
+      "ingested_at": "2026-05-07T15:41:01.472Z",
+      "calibration": null,
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "hpsa_primary_care_score",
+      "source": "HRSA Data Warehouse — Health Professional Shortage Areas (Primary Care HPSA)",
+      "source_url": "https://data.hrsa.gov/topics/health-workforce/shortage-areas",
+      "vintage": "2025",
+      "ingested_at": "2026-05-07T15:40:59.235Z",
+      "calibration": null,
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "hypertension_prevalence",
+      "source": "CDC PLACES 2024 (BRFSS 2023)",
+      "source_url": "https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-County-Data-20/swc5-untb",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T15:22:05.617Z",
+      "calibration": {
+        "metric": "hypertension_prevalence",
+        "computed_weighted_mean": 31.435,
+        "published": 30.7,
+        "delta": 0.735,
+        "within_tolerance": true,
+        "counties_included": 2956,
+        "counties_suppressed": 188
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "infant_mortality_per_1000",
+      "source": "NCHS Detailed Mortality + Natality 2017-2023 (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2017-2023",
+      "ingested_at": "2026-05-07T15:32:41.816Z",
+      "calibration": {
+        "metric": "infant_mortality_per_1000",
+        "computed_weighted_mean": 5.549,
+        "published": 5.63,
+        "delta": 0.081,
+        "within_tolerance": true,
+        "counties_included": 1179,
+        "counties_suppressed": 1965
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "lack_emotional_support_pct",
+      "source": "CDC PLACES 2024 (BRFSS 2023)",
+      "source_url": "https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-County-Data-20/swc5-untb",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T16:53:15.583Z",
+      "calibration": {
+        "metric": "lack_emotional_support_pct",
+        "computed_weighted_mean": 25.124,
+        "published": 24.1,
+        "delta": 1.024,
+        "within_tolerance": true,
+        "counties_included": 2299,
+        "counties_suppressed": 845
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "lead_exposure_pct",
+      "source": "U.S. Census Bureau American Community Survey 5-year 2019-2023",
+      "source_url": "https://www.census.gov/programs-surveys/acs",
+      "vintage": "2023 (5-year 2019-2023)",
+      "ingested_at": "2026-05-07T20:14:46.953Z",
+      "calibration": {
+        "metric": "lead_exposure_pct",
+        "computed_weighted_mean": 15.9,
+        "published": 16,
+        "delta": 0.1,
+        "within_tolerance": true,
+        "counties_included": 3089,
+        "counties_suppressed": 55
+      },
+      "moe_filtered_note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (55 counties filtered)."
+    },
+    {
+      "slug": "lep_rate",
+      "source": "Census ACS 5-year 2023 (S1601)",
+      "source_url": "https://www.census.gov/programs-surveys/acs",
+      "vintage": "2023",
+      "ingested_at": "2026-05-07T20:15:58.165Z",
+      "calibration": {
+        "metric": "lep_rate",
+        "computed_weighted_mean": 7.811,
+        "published": 8.2,
+        "delta": 0.389,
+        "within_tolerance": true,
+        "counties_included": 2000,
+        "counties_suppressed": 1144
+      },
+      "moe_filtered_note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (1144 counties filtered)."
+    },
+    {
+      "slug": "life_expectancy",
+      "source": "County Health Rankings & Roadmaps (NCHS Vital Statistics 2020-2022)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2025",
+      "ingested_at": "2026-05-07T15:25:27.721Z",
+      "calibration": {
+        "metric": "life_expectancy",
+        "computed_weighted_mean": 77.258,
+        "published": 77.1,
+        "delta": 0.158,
+        "within_tolerance": true,
+        "counties_included": 3067,
+        "counties_suppressed": 77
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "loneliness_pct",
+      "source": "CDC PLACES 2024 (BRFSS 2023)",
+      "source_url": "https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-County-Data-20/swc5-untb",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T16:53:15.939Z",
+      "calibration": {
+        "metric": "loneliness_pct",
+        "computed_weighted_mean": 34.85,
+        "published": 33.2,
+        "delta": 1.65,
+        "within_tolerance": true,
+        "counties_included": 2299,
+        "counties_suppressed": 845
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "low_birth_weight_pct",
+      "source": "NCHS Natality 2017-2023 (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2017-2023",
+      "ingested_at": "2026-05-07T15:32:41.843Z",
+      "calibration": {
+        "metric": "low_birth_weight_pct",
+        "computed_weighted_mean": 8.343,
+        "published": 8.4,
+        "delta": 0.057,
+        "within_tolerance": true,
+        "counties_included": 3042,
+        "counties_suppressed": 102
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "maternity_care_desert",
+      "source": "March of Dimes Maternity Care Deserts 2024",
+      "source_url": "https://www.marchofdimes.org/sites/default/files/2024-09/2024_MoD_MCD_Report.pdf",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T15:39:48.456Z",
+      "calibration": {
+        "metric": "maternity_care_desert",
+        "computed_weighted_mean": 35.17,
+        "published": 35.1,
+        "delta": 0.07,
+        "within_tolerance": true,
+        "counties_included": 3139,
+        "counties_suppressed": 5
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "mental_health_providers_per_100k",
+      "source": "CMS National Provider Identification 2024 (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T15:32:41.639Z",
+      "calibration": {
+        "metric": "mental_health_providers_per_100k",
+        "computed_weighted_mean": 331.4,
+        "published": 332.5,
+        "delta": 1.1,
+        "within_tolerance": true,
+        "counties_included": 2966,
+        "counties_suppressed": 178
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "no_vehicle_rate",
+      "source": "Census ACS 5-year 2023 (B25044)",
+      "source_url": "https://www.census.gov/programs-surveys/acs",
+      "vintage": "2023",
+      "ingested_at": "2026-05-07T20:15:57.059Z",
+      "calibration": {
+        "metric": "no_vehicle_rate",
+        "computed_weighted_mean": 8.116,
+        "published": 8.3,
+        "delta": 0.184,
+        "within_tolerance": true,
+        "counties_included": 2668,
+        "counties_suppressed": 476
+      },
+      "moe_filtered_note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (476 counties filtered)."
+    },
+    {
+      "slug": "ob_providers_per_10k",
+      "source": "HRSA Area Health Resources File 2024-2025 Release (AMA Physician Master File 2023; Census 2020)",
+      "source_url": "https://data.hrsa.gov/topics/health-workforce/ahrf",
+      "vintage": "2023 (numerator) / 2020 (denominator)",
+      "ingested_at": "2026-05-07T17:53:49.183Z",
+      "calibration": {
+        "metric": "ob_providers_per_10k",
+        "computed_weighted_mean": 3.268,
+        "published": 3.25,
+        "delta": 0.018,
+        "within_tolerance": true,
+        "counties_included": 3142,
+        "counties_suppressed": 2
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "ob_unit_presence",
+      "source": "CMS Provider of Services File (Hospital & Non-Hospital Facilities)",
+      "source_url": "https://data.cms.gov/provider-characteristics/hospitals-and-other-facilities/provider-of-services-file-hospital-non-hospital-facilities",
+      "vintage": "Q2 2025",
+      "ingested_at": "2026-05-07T17:56:05.803Z",
+      "calibration": {
+        "metric": "ob_unit_presence",
+        "computed_weighted_mean": 0.933,
+        "published": 0.9,
+        "delta": 0.033,
+        "within_tolerance": true,
+        "counties_included": 3144,
+        "counties_suppressed": 0
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "obesity_prevalence",
+      "source": "CDC PLACES 2024 (BRFSS 2023)",
+      "source_url": "https://data.cdc.gov/500-Cities-Places/PLACES-Local-Data-for-Better-Health-County-Data-20/swc5-untb",
+      "vintage": "2024",
+      "ingested_at": "2026-05-07T15:22:05.654Z",
+      "calibration": {
+        "metric": "obesity_prevalence",
+        "computed_weighted_mean": 33.405,
+        "published": 32.9,
+        "delta": 0.505,
+        "within_tolerance": true,
+        "counties_included": 2956,
+        "counties_suppressed": 188
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "physical_inactivity_pct",
+      "source": "CDC US Diabetes Surveillance System 2021 (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2021",
+      "ingested_at": "2026-05-07T15:32:41.800Z",
+      "calibration": {
+        "metric": "physical_inactivity_pct",
+        "computed_weighted_mean": 23.666,
+        "published": 23.2,
+        "delta": 0.466,
+        "within_tolerance": true,
+        "counties_included": 3137,
+        "counties_suppressed": 7
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "primary_care_physicians_per_100k",
+      "source": "HRSA Area Health Resource File 2022 / AMA Master File (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2022",
+      "ingested_at": "2026-05-07T15:32:41.611Z",
+      "calibration": {
+        "metric": "primary_care_physicians_per_100k",
+        "computed_weighted_mean": 74.993,
+        "published": 74.9,
+        "delta": 0.093,
+        "within_tolerance": true,
+        "counties_included": 2985,
+        "counties_suppressed": 159
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "reading_scores_grade_level",
+      "source": "County Health Rankings & Roadmaps 2025",
+      "source_url": "https://www.countyhealthrankings.org/health-data",
+      "vintage": "2025",
+      "ingested_at": "2026-05-07T17:01:42.234Z",
+      "calibration": {
+        "metric": "reading_scores_grade_level",
+        "computed_weighted_mean": 3.037,
+        "published": 3.05,
+        "delta": 0.013,
+        "within_tolerance": true,
+        "counties_included": 2591,
+        "counties_suppressed": 553
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "severe_housing_problems_pct",
+      "source": "HUD Comprehensive Housing Affordability Strategy 2017-2021 (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2017-2021",
+      "ingested_at": "2026-05-07T15:32:41.720Z",
+      "calibration": {
+        "metric": "severe_housing_problems_pct",
+        "computed_weighted_mean": 16.971,
+        "published": 16.8,
+        "delta": 0.171,
+        "within_tolerance": true,
+        "counties_included": 3137,
+        "counties_suppressed": 7
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "some_college_pct",
+      "source": "County Health Rankings & Roadmaps 2025",
+      "source_url": "https://www.countyhealthrankings.org/health-data",
+      "vintage": "2025",
+      "ingested_at": "2026-05-07T16:53:44.979Z",
+      "calibration": {
+        "metric": "some_college_pct",
+        "computed_weighted_mean": 67.309,
+        "published": 67.825,
+        "delta": 0.516,
+        "within_tolerance": true,
+        "counties_included": 3136,
+        "counties_suppressed": 8
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "suicide_rate_per_100k",
+      "source": "NCHS Underlying Cause of Death 2018-2022 (via CHR&R 2025), age-adjusted",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2018-2022",
+      "ingested_at": "2026-05-07T15:32:41.883Z",
+      "calibration": {
+        "metric": "suicide_rate_per_100k",
+        "computed_weighted_mean": 14.132,
+        "published": 13.99,
+        "delta": 0.142,
+        "within_tolerance": true,
+        "counties_included": 2446,
+        "counties_suppressed": 698
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "svi_housing_transport",
+      "source": "CDC/ATSDR Social Vulnerability Index 2022",
+      "source_url": "https://www.atsdr.cdc.gov/place-health/php/svi/svi-data-documentation-download.html",
+      "vintage": "2022",
+      "ingested_at": "2026-05-07T15:40:23.925Z",
+      "calibration": {
+        "metric": "svi_housing_transport",
+        "computed_weighted_mean": 0.622,
+        "published": 0.622,
+        "delta": 0,
+        "within_tolerance": true,
+        "counties_included": 3144,
+        "counties_suppressed": 0
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "svi_minority",
+      "source": "CDC/ATSDR Social Vulnerability Index 2022",
+      "source_url": "https://www.atsdr.cdc.gov/place-health/php/svi/svi-data-documentation-download.html",
+      "vintage": "2022",
+      "ingested_at": "2026-05-07T15:40:23.896Z",
+      "calibration": {
+        "metric": "svi_minority",
+        "computed_weighted_mean": 0.714,
+        "published": 0.715,
+        "delta": 0.001,
+        "within_tolerance": true,
+        "counties_included": 3144,
+        "counties_suppressed": 0
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "svi_overall",
+      "source": "CDC/ATSDR Social Vulnerability Index 2022",
+      "source_url": "https://www.atsdr.cdc.gov/place-health/php/svi/svi-data-documentation-download.html",
+      "vintage": "2022",
+      "ingested_at": "2026-05-07T15:40:23.841Z",
+      "calibration": {
+        "metric": "svi_overall",
+        "computed_weighted_mean": 0.582,
+        "published": 0.582,
+        "delta": 0,
+        "within_tolerance": true,
+        "counties_included": 3144,
+        "counties_suppressed": 0
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "svi_socioeconomic",
+      "source": "CDC/ATSDR Social Vulnerability Index 2022",
+      "source_url": "https://www.atsdr.cdc.gov/place-health/php/svi/svi-data-documentation-download.html",
+      "vintage": "2022",
+      "ingested_at": "2026-05-07T15:40:23.869Z",
+      "calibration": {
+        "metric": "svi_socioeconomic",
+        "computed_weighted_mean": 0.535,
+        "published": 0.535,
+        "delta": 0,
+        "within_tolerance": true,
+        "counties_included": 3144,
+        "counties_suppressed": 0
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "teen_births_per_1000",
+      "source": "NCHS Natality 2017-2023 (via CHR&R 2025)",
+      "source_url": "https://www.countyhealthrankings.org/health-data/methodology-and-sources/data-documentation",
+      "vintage": "2017-2023",
+      "ingested_at": "2026-05-07T15:32:41.908Z",
+      "calibration": {
+        "metric": "teen_births_per_1000",
+        "computed_weighted_mean": 15.61,
+        "published": 15.54,
+        "delta": 0.07,
+        "within_tolerance": true,
+        "counties_included": 2908,
+        "counties_suppressed": 236
+      },
+      "moe_filtered_note": null
+    },
+    {
+      "slug": "uninsured_rate",
+      "source": "Census SAHIE",
+      "source_url": "https://www.census.gov/data/datasets/time-series/demo/sahie/estimates-acs.html",
+      "vintage": "2023",
+      "ingested_at": "2026-05-07T20:16:33.852Z",
+      "calibration": {
+        "metric": "uninsured_rate",
+        "computed_weighted_mean": 9.435,
+        "published": 9.5,
+        "delta": 0.065,
+        "within_tolerance": true,
+        "counties_included": 3143,
+        "counties_suppressed": 1
+      },
+      "moe_filtered_note": "Census SAHIE point estimate (PCTUI_PT). 90% confidence intervals (PCTUI_LB90 / PCTUI_UB90) used for MOE-aware suppression."
+    },
+    {
+      "slug": "youth_under5_poverty_pct",
+      "source": "Census SAIPE 2023",
+      "source_url": "https://www.census.gov/programs-surveys/saipe.html",
+      "vintage": "2023",
+      "ingested_at": "2026-05-07T20:18:00.746Z",
+      "calibration": {
+        "metric": "youth_under5_poverty_pct",
+        "computed_weighted_mean": 17.385,
+        "published": 17.58,
+        "delta": 0.195,
+        "within_tolerance": true,
+        "counties_included": 1941,
+        "counties_suppressed": 1203
+      },
+      "moe_filtered_note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (1197 counties filtered)."
+    }
+  ]
+}

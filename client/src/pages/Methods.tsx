@@ -675,6 +675,26 @@ export default function Methods() {
           exposure — and synthesizes them into a single composite Health Equity Gap
           Score for each county.
         </p>
+        <div style={{ marginTop: 22 }}>
+          <Link href="/methods/audit">
+            <a
+              className="inline-flex items-center gap-1.5"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: "0.14em",
+                color: "var(--pulse-navy)",
+                borderBottom: "1px solid var(--pulse-navy)",
+                paddingBottom: 2,
+              }}
+              data-testid="link-methodology-audit"
+            >
+              Methodology audit log
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </Link>
+        </div>
       </section>
 
       <PulseDivider />
