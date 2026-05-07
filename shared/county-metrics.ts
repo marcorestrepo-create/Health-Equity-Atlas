@@ -285,6 +285,17 @@ const NATIONAL_MEANS = {
   distanceToHospital: nationalMean(data.distanceToHospital),
   leadExposure: nationalMean(data.leadExposure),
   ejScreen: nationalMean(data.ejScreen),
+  // Phase 1f — national means for HEG v2 components (used as fallback when county is suppressed,
+  // so the gap score always renders even when a behavioral-health or perinatal field is null).
+  depression: nationalMean(data.depression),
+  fmd: nationalMean(data.fmd),
+  drugOverdose: nationalMean(data.drugOverdose),
+  suicide: nationalMean(data.suicide),
+  infantMort: nationalMean(data.infantMort),
+  lbw: nationalMean(data.lbw),
+  teenBirths: nationalMean(data.teenBirths),
+  childPoverty: nationalMean(data.childPoverty),
+  childUninsured: nationalMean(data.childUninsured),
 };
 
 function getOrFallback(file: ProcessedFile | null, fips: string, fallback: number): number {
@@ -394,27 +405,61 @@ export function generateCounties(): CountyMetrics[] {
       100,
     );
 
-    // ------------------- HEALTH EQUITY GAP SCORE on REAL DATA -------------------
-    // Reweighted from the previous synthetic version because real distributions differ.
-    // Components (each 0–1):
-    //   insurance gap:   uninsured / 30
-    //   maternal gap:    mcd_designation / 3 (0=full → 0, 3=desert → 1)
-    //   chronic gap:     mean(diabetes/22, hyper/55, obesity/50)
-    //   access gap:      mean(hpsa/25, max(0, (50 - pcp)/50))   # high HPSA + low PCP
-    //   social gap:      svi_overall (already 0-1)
-    //   env gap:         pm25 / 15 (capped)
-    //   infra gap:       mean(noBroadband/55, noVehicle/30)
-    // Weights: insurance 13, maternal 13, chronic 15, access 14, social 15, env 10, infra 13. Sum 93 → renorm to 90.
-    const insuranceGap = clamp(uninsuredRate / 30, 0, 1) * 13;
-    const maternalGap = (maternityCareDesert / 3) * 13;
-    const chronicGap = ((diabetesRate / 22 + hypertensionRate / 55 + obesityRate / 50) / 3) * 15;
+    // ------------------- HEALTH EQUITY GAP SCORE v2 (Phase 1f) -------------------
+    // Adds Phase 1b/1c/1d signals to the composite: behavioral health, perinatal
+    // outcomes, child poverty/uninsured, and environmental burden (lead + EJScreen).
+    // For nullable inputs (PLACES BH, NCHS perinatal, etc.) we fall back to the
+    // national pop-weighted mean so the gap score always renders — the underlying
+    // metric stays null in the table.
+    //
+    // Components (each 0–1), weights sum to 100, clamp 5–95:
+    //   insurance         (W=11): uninsured / 30
+    //   maternal-access   (W=11): mean(mcd/3, obProvidersDeficit, obUnitClosure, dist/30)
+    //   chronic-disease   (W=13): mean(diabetes/22, hyper/55, obesity/50)
+    //   provider-access   (W=12): mean(hpsa/25, max(0, (50-pcp)/50))
+    //   behavioral-health (W=10): mean(depression/30, fmd/22, drugOD/60, suicide/35)   [NEW]
+    //   perinatal         (W=10): mean(infMort/12, lbw/14, teenBirths/65)              [NEW]
+    //   child-poverty     (W= 8): mean(childPoverty/40, childUninsured/15)             [NEW]
+    //   social            (W=12): sviOverall
+    //   environmental     (W= 7): mean(pm25/15, leadExposure/40, ejScreen/100)
+    //   infrastructure    (W= 6): mean(noBroadband/55, noVehicle/30)
+    const insuranceGap = clamp(uninsuredRate / 30, 0, 1) * 11;
+    const obProvidersDeficit = clamp((6 - obProvidersPer10k) / 6, 0, 1);
+    const maternalAccessGap = (
+      (maternityCareDesert / 3) +
+      obProvidersDeficit +
+      obUnitClosure +
+      clamp(distanceToHospital / 30, 0, 1)
+    ) / 4 * 11;
+    const chronicGap = ((diabetesRate / 22 + hypertensionRate / 55 + obesityRate / 50) / 3) * 13;
     const pcpDeficit = Math.max(0, (50 - pcpPer100k) / 50);
-    const accessGap = ((hpsaScore / 25 + pcpDeficit) / 2) * 14;
-    const socialGap = sviOverall * 15;
-    const envGap = clamp(pm25 / 15, 0, 1) * 10;
-    const infraGap = ((noBroadbandRate / 55 + noVehicleRate / 30) / 2) * 13;
+    const providerAccessGap = ((hpsaScore / 25 + pcpDeficit) / 2) * 12;
+    const behavHealthGap = (
+      clamp((depressionRateRaw ?? NATIONAL_MEANS.depression) / 30, 0, 1) +
+      clamp((fmdRaw ?? NATIONAL_MEANS.fmd) / 22, 0, 1) +
+      clamp((drugOverdoseRaw ?? NATIONAL_MEANS.drugOverdose) / 60, 0, 1) +
+      clamp((suicideRaw ?? NATIONAL_MEANS.suicide) / 35, 0, 1)
+    ) / 4 * 10;
+    const perinatalGap = (
+      clamp((infantMortRaw ?? NATIONAL_MEANS.infantMort) / 12, 0, 1) +
+      clamp((lbwRaw ?? NATIONAL_MEANS.lbw) / 14, 0, 1) +
+      clamp((teenBirthsRaw ?? NATIONAL_MEANS.teenBirths) / 65, 0, 1)
+    ) / 3 * 10;
+    const childPovertyGap = (
+      clamp((childPovertyRaw ?? NATIONAL_MEANS.childPoverty) / 40, 0, 1) +
+      clamp((childUninsuredRaw ?? NATIONAL_MEANS.childUninsured) / 15, 0, 1)
+    ) / 2 * 8;
+    const socialGap = sviOverall * 12;
+    const environmentalGap = (
+      clamp(pm25 / 15, 0, 1) +
+      clamp(leadExposureRisk / 40, 0, 1) +
+      clamp(ejScreenIndex / 100, 0, 1)
+    ) / 3 * 7;
+    const infraGap = ((noBroadbandRate / 55 + noVehicleRate / 30) / 2) * 6;
     const healthEquityGapScore = clamp(
-      insuranceGap + maternalGap + chronicGap + accessGap + socialGap + envGap + infraGap,
+      insuranceGap + maternalAccessGap + chronicGap + providerAccessGap +
+      behavHealthGap + perinatalGap + childPovertyGap +
+      socialGap + environmentalGap + infraGap,
       5, 95
     );
 

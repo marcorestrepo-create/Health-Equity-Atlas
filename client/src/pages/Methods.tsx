@@ -493,14 +493,20 @@ const DATA_SOURCES = [
   },
 ];
 
+// HEG v2 (Phase 1f) — incorporates Phase 1b/1c/1d signals.
+// Weights sum to 100. Each component is a 0–1 normalized gap, then weighted.
+// Final score is clamped 5–95.
 const GAP_SCORE_COMPONENTS = [
-  { name: "Insurance Gap", weight: "13%", formula: "clamp(uninsuredRate / 30, 0, 1) × 13", description: "Normalized uninsured rate from Census SAHIE 2023, scaled against worst-case threshold of 30%." },
-  { name: "Maternal Gap", weight: "13%", formula: "(maternityCareDesert / 3) × 13", description: "March of Dimes 2024 Maternity Care Deserts ordinal: 0 = full access, 1 = moderate, 2 = low, 3 = desert. Replaces prior synthetic maternal mortality input." },
-  { name: "Chronic Disease Gap", weight: "15%", formula: "mean(diabetes/22, hypertension/55, obesity/50) × 15", description: "Average of three normalized CDC PLACES (BRFSS 2023) prevalences, each scaled against its observed maximum." },
-  { name: "Access Gap", weight: "14%", formula: "mean(hpsaScore/25, max(0, (50 − pcp)/50)) × 14", description: "Average of HRSA HPSA primary-care designation score (normalized to 25) and inverse PCP ratio, capturing both designation-based and raw provider shortages. PCP rate from CHR&R 2025." },
-  { name: "Social Gap", weight: "15%", formula: "sviOverall × 15", description: "CDC/ATSDR Social Vulnerability Index 2022 overall percentile (already 0–1 scaled) directly multiplied by weight." },
-  { name: "Environmental Gap", weight: "10%", formula: "clamp(pm25 / 15, 0, 1) × 10", description: "PM2.5 annual mean from CHR&R 2025 (county-weighted from EPA), scaled against the WHO interim Target 4 of 15 µg/m³." },
-  { name: "Infrastructure Gap", weight: "13%", formula: "mean(noBroadband/55, noVehicle/30) × 13", description: "Average of normalized broadband-access deficit (CHR&R 2025) and no-vehicle rate (ACS 5-year 2023)." },
+  { name: "Insurance Gap", weight: "11%", formula: "clamp(uninsuredRate / 30, 0, 1) × 11", description: "Normalized uninsured rate from Census SAHIE 2023, scaled against worst-case threshold of 30%." },
+  { name: "Maternal Access Gap", weight: "11%", formula: "mean(mcd/3, obProvidersDeficit, obUnitClosure, dist/30) × 11", description: "Average of four maternal-access dimensions: March of Dimes 2024 Maternity Care Desert designation (0–3), HRSA AHRF OB provider deficit relative to 6 per 10k women 15–44, CMS POS in-county OB unit closure flag, and population-weighted distance to nearest hospital (CMS POS) capped at 30 miles." },
+  { name: "Chronic Disease Gap", weight: "13%", formula: "mean(diabetes/22, hypertension/55, obesity/50) × 13", description: "Average of three normalized CDC PLACES (BRFSS 2023) prevalences, each scaled against its observed maximum." },
+  { name: "Provider Access Gap", weight: "12%", formula: "mean(hpsaScore/25, max(0, (50 − pcp)/50)) × 12", description: "Average of HRSA HPSA primary-care designation score (normalized to 25) and inverse PCP ratio, capturing both designation-based and raw provider shortages. PCP rate from CHR&R 2025." },
+  { name: "Behavioral Health Gap", weight: "10%", formula: "mean(depression/30, fmd/22, drugOverdose/60, suicide/35) × 10", description: "NEW in v2. Average of four behavioral-health signals: CDC PLACES depression and frequent mental distress (BRFSS 2023), CDC WONDER drug overdose deaths per 100k, and CHR&R suicide rate. Suppressed counties fall back to the national pop-weighted mean so the score always renders." },
+  { name: "Perinatal Outcomes Gap", weight: "10%", formula: "mean(infantMort/12, lbw/14, teenBirths/65) × 10", description: "NEW in v2. Average of three NCHS perinatal indicators (via CHR&R 2025, 2017–2023 pooled): infant mortality per 1k live births, low birth weight rate, and teen birth rate. Suppressed counties fall back to the national mean." },
+  { name: "Child Poverty Gap", weight: "8%", formula: "mean(childPoverty/40, childUninsured/15) × 8", description: "NEW in v2. Average of Census SAIPE 2023 child poverty rate (under 18) and Census SAHIE 2023 child uninsured rate (under 19), each normalized against worst-case thresholds." },
+  { name: "Social Gap", weight: "12%", formula: "sviOverall × 12", description: "CDC/ATSDR Social Vulnerability Index 2022 overall percentile (already 0–1 scaled) directly multiplied by weight." },
+  { name: "Environmental Gap", weight: "7%", formula: "mean(pm25/15, leadExposure/40, ejScreen/100) × 7", description: "Average of three environmental burdens: PM2.5 vs WHO interim Target 4 of 15 µg/m³ (CHR&R 2025), pre-1950 housing share as a lead exposure proxy (ACS B25034), and EPA EJScreen 2.3 composite percentile. Now broader than the v1 PM2.5-only definition." },
+  { name: "Infrastructure Gap", weight: "6%", formula: "mean(noBroadband/55, noVehicle/30) × 6", description: "Average of normalized broadband-access deficit (CHR&R 2025) and no-vehicle rate (ACS 5-year 2023)." },
 ];
 
 const INTERVENTION_METHODS = [
@@ -796,9 +802,16 @@ export default function Methods() {
                   maxWidth: 760,
                 }}
               >
-                The Health Equity Gap Score is a 0–100 composite. Components are
-                normalized against worst-case thresholds, then weighted and summed.
-                Higher scores indicate greater disparity.
+                The Health Equity Gap Score is a 0–100 composite of 10 weighted
+                components covering insurance access, maternal access, chronic
+                disease, provider access, behavioral health, perinatal outcomes,
+                child poverty, social vulnerability, environmental burden, and
+                infrastructure. Each component is a 0–1 normalized gap, multiplied
+                by its weight, summed, and clamped to 5–95. National pop-weighted
+                mean: 41.1, median: 45.9. Phase 1f (May 2026) re-weighted v1 to
+                fold in the new behavioral-health, perinatal, child-poverty, and
+                broader environmental signals from Phases 1b–1d. Higher scores
+                indicate greater disparity.
               </p>
               <div
                 style={{
