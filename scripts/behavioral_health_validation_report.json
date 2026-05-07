@@ -1,0 +1,70 @@
+{
+  "generated_at": "2026-05-07T20:22:49.828Z",
+  "methodology": {
+    "hypothesis": "If the behavioral health (BH) burden of a county is real, counties with higher BH burden should have higher rates of behavioral-health mortality outcomes (drug overdose, suicide).",
+    "bh_burden_index": "mean(depression/30, frequent_mental_distress/22, lack_emotional_support/25, loneliness/35), each clamped 0-1.",
+    "circularity_check": "drug_overdose and suicide are NOT inputs to bh_burden_index. They ARE inputs to HEG's behavHealthGap component, but bh_burden_index is constructed independently to keep the test clean.",
+    "bh_inputs": [
+      "depression_prevalence (CDC PLACES 2024)",
+      "frequent_mental_distress (CDC PLACES 2024)",
+      "lack_emotional_support_pct (CDC PLACES 2024)",
+      "loneliness_pct (CDC PLACES 2024)"
+    ],
+    "outcomes": [
+      "drug_overdose_deaths_per_100k (CHR&R 2025 / NCHS 2018-2022 pooled)",
+      "suicide_rate_per_100k (CHR&R 2025 / NCHS 2017-2021 pooled)"
+    ],
+    "stat_methods": [
+      "Pearson r (linear)",
+      "Spearman rho (rank)",
+      "1000-iteration bootstrap 95% CI",
+      "Top-vs-bottom-quartile delta"
+    ]
+  },
+  "drug_overdose": {
+    "outcome": "Drug overdose deaths per 100k (NCHS 2018-2022 pooled)",
+    "n": 1461,
+    "pearson_r": 0.4009958548723428,
+    "pearson_ci_lo": 0.3612853417916083,
+    "pearson_ci_hi": 0.4422058728028667,
+    "spearman_rho": 0.3711761658137103,
+    "x_mean": 0.8891261263263305,
+    "x_sd": 0.0553271047595397,
+    "y_mean": 32.179184353792245,
+    "y_sd": 18.841856765674162
+  },
+  "suicide": {
+    "outcome": "Suicide rate per 100k (NCHS 2017-2021 pooled)",
+    "n": 1796,
+    "pearson_r": 0.22744814864522447,
+    "pearson_ci_lo": 0.18704360762399996,
+    "pearson_ci_hi": 0.26915609736249957,
+    "spearman_rho": 0.2659595043076853,
+    "x_mean": 0.8871730276034278,
+    "x_sd": 0.056125699652918096,
+    "y_mean": 18.91199600386884,
+    "y_sd": 7.6836049086610405
+  },
+  "stratified": {
+    "drug_overdose": {
+      "outcome": "Drug overdose deaths/100k",
+      "unit": "deaths per 100k",
+      "low_burden_mean": 24.417393458916465,
+      "low_burden_n": 365,
+      "high_burden_mean": 42.199504870290156,
+      "high_burden_n": 365,
+      "delta": 17.78211141137369,
+      "delta_relative_pct": 72.82559230285173
+    },
+    "suicide": {
+      "outcome": "Suicide rate/100k",
+      "unit": "deaths per 100k",
+      "low_burden_mean": 16.727943375092654,
+      "low_burden_n": 449,
+      "high_burden_mean": 20.99431164686991,
+      "high_burden_n": 449,
+      "delta": 4.266368271777257,
+      "delta_relative_pct": 25.504439942866714
+    }
+  }
+}
