@@ -3,8 +3,8 @@
   "source": "Census ACS 5-year 2023 (B25044)",
   "source_url": "https://www.census.gov/programs-surveys/acs",
   "vintage": "2023",
-  "fetched_at": "2026-05-07T20:15:57.059Z",
-  "ingested_at": "2026-05-07T20:15:57.059Z",
+  "fetched_at": "2026-05-07T21:41:15.033Z",
+  "ingested_at": "2026-05-07T21:41:15.033Z",
   "calibration": {
     "metric": "no_vehicle_rate",
     "computed_weighted_mean": 8.116,

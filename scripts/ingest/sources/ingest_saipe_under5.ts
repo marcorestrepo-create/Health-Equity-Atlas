@@ -23,10 +23,17 @@
  */
 import { fetchAndCache, readCachedText } from "../lib/cache.js";
 import { normalizeFips, allFips } from "../lib/fips.js";
-import { available, suppressed, combineMoeSum, propagateMoeRatio, DEFAULT_MOE_THRESHOLD } from "../lib/suppression.js";
+import { available, suppressed, combineMoeSum, propagateMoeRatio, DEFAULT_MOE_THRESHOLD, evaluateMoeWithFloor, MOE_RATIO_HARD_CAP } from "../lib/suppression.js";
 import type { SuppressedValue } from "../lib/suppression.js";
 import { writeProcessed, type ProcessedMetric } from "../lib/processed.js";
 import { checkCalibration, assertCalibration } from "../lib/calibration.js";
+
+// Under-5 poverty is a small-share rate where strict MOE/estimate ratio over-
+// suppresses legitimately low values. Apply absolute MOE floor (±3pp on a small
+// poverty rate is usable at policy scale; ACS Handbook "Worked Examples" ±1-3pp).
+// Floor is wider than LEP because B17001 cells have larger absolute MOEs even
+// for substantively-similar share sizes.
+const UNDER5_MOE_FLOOR_PP = 3.0;
 
 const VINTAGE = "2023";
 const ACS_BASE = "https://api.census.gov/data/2023/acs/acs5";
@@ -164,13 +171,18 @@ export async function ingestSaipeUnder5(): Promise<void> {
       nUniverseSmall++;
     } else if (!Number.isFinite(r.rate)) {
       under5Poverty[r.fips] = suppressed("no_data", "ACS returned null/zero universe for under-5 age group");
-    } else if (Number.isFinite(r.rateMoe) && r.rate > 0 && r.rateMoe / r.rate > DEFAULT_MOE_THRESHOLD) {
-      // MOE-aware suppression — critical for under-5 because the universe is small
-      under5Poverty[r.fips] = suppressed(
-        "suppressed_quality",
-        `B17001 under-5 MOE/estimate=${(r.rateMoe / r.rate).toFixed(2)} > ${DEFAULT_MOE_THRESHOLD} (90% MOE=${r.rateMoe.toFixed(2)}pp, est=${r.rate.toFixed(2)}%, universe=${r.universe})`
-      );
-      nMoeFiltered++;
+    } else if (Number.isFinite(r.rateMoe) && r.rate > 0) {
+      // MOE-aware suppression with absolute floor
+      const decision = evaluateMoeWithFloor(r.rate, r.rateMoe, DEFAULT_MOE_THRESHOLD, UNDER5_MOE_FLOOR_PP);
+      if (decision.suppress) {
+        const reason = decision.exceedsHardCap
+          ? `B17001 under-5 MOE/est=${decision.ratio.toFixed(2)} exceeds hard cap ${MOE_RATIO_HARD_CAP} (90% MOE=${r.rateMoe.toFixed(2)}pp, est=${r.rate.toFixed(2)}%, universe=${r.universe})`
+          : `B17001 under-5 MOE/est=${decision.ratio.toFixed(2)} > ${DEFAULT_MOE_THRESHOLD} AND 90% MOE=${r.rateMoe.toFixed(2)}pp > floor ${UNDER5_MOE_FLOOR_PP}pp (est=${r.rate.toFixed(2)}%, universe=${r.universe})`;
+        under5Poverty[r.fips] = suppressed("suppressed_quality", reason);
+        nMoeFiltered++;
+      } else {
+        under5Poverty[r.fips] = available(Math.round(r.rate * 10) / 10);
+      }
     } else {
       under5Poverty[r.fips] = available(Math.round(r.rate * 10) / 10); // 1 decimal place
     }
@@ -209,7 +221,7 @@ export async function ingestSaipeUnder5(): Promise<void> {
       "Rate computed as: (B17001_004E + B17001_018E) / (B17001_004E + B17001_018E + B17001_033E + B17001_047E).",
       "Calibration reference: ACS national (for=us:1) under-5 poverty rate ≈ 17.58%.",
       "Source attribution maintained as 'Census SAIPE 2023' per atlas conventions for this metric series.",
-      `MOE-aware suppression: counties where 90% MOE/estimate > ${DEFAULT_MOE_THRESHOLD} are suppressed (${nMoeFiltered} counties filtered).`,
+      `MOE-aware suppression with absolute floor: counties suppressed only if MOE/estimate > ${DEFAULT_MOE_THRESHOLD} AND 90% MOE > ${UNDER5_MOE_FLOOR_PP}pp (or MOE/estimate exceeds hard cap ${MOE_RATIO_HARD_CAP}). ${nMoeFiltered} counties filtered.`,
     ],
     values: under5Poverty,
   };

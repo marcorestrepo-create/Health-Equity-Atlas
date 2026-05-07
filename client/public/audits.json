@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-07T21:01:27.504Z",
+  "generated_at": "2026-05-07T21:41:37.627Z",
   "calibration_summary": {
     "total_metrics": 49,
     "metrics_with_calibration": 46,
@@ -49,8 +49,8 @@
     },
     {
       "slug": "lep_rate",
-      "counties_filtered": 1144,
-      "note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (1144 counties filtered)."
+      "counties_filtered": 238,
+      "note": "MOE-aware suppression with absolute floor: counties suppressed only if MOE/estimate > 0.5 AND 90% MOE > 2pp (or MOE/estimate exceeds hard cap 2). 238 counties filtered."
     },
     {
       "slug": "no_vehicle_rate",
@@ -64,13 +64,13 @@
     },
     {
       "slug": "youth_under5_poverty_pct",
-      "counties_filtered": 1197,
-      "note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (1197 counties filtered)."
+      "counties_filtered": 1151,
+      "note": "MOE-aware suppression with absolute floor: counties suppressed only if MOE/estimate > 0.5 AND 90% MOE > 3pp (or MOE/estimate exceeds hard cap 2). 1151 counties filtered."
     }
   ],
   "suppression_totals": {
     "total_county_rows": 141478,
-    "suppressed": 13781
+    "suppressed": 12829
   },
   "validation_studies": [
     {
@@ -1012,17 +1012,17 @@
       "source": "Census ACS 5-year 2023 (S1601)",
       "source_url": "https://www.census.gov/programs-surveys/acs",
       "vintage": "2023",
-      "ingested_at": "2026-05-07T20:15:58.165Z",
+      "ingested_at": "2026-05-07T21:41:15.072Z",
       "calibration": {
         "metric": "lep_rate",
-        "computed_weighted_mean": 7.811,
+        "computed_weighted_mean": 7.449,
         "published": 8.2,
-        "delta": 0.389,
+        "delta": 0.751,
         "within_tolerance": true,
-        "counties_included": 2000,
-        "counties_suppressed": 1144
+        "counties_included": 2906,
+        "counties_suppressed": 238
       },
-      "moe_filtered_note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (1144 counties filtered)."
+      "moe_filtered_note": "MOE-aware suppression with absolute floor: counties suppressed only if MOE/estimate > 0.5 AND 90% MOE > 2pp (or MOE/estimate exceeds hard cap 2). 238 counties filtered."
     },
     {
       "slug": "life_expectancy",
@@ -1114,7 +1114,7 @@
       "source": "Census ACS 5-year 2023 (B25044)",
       "source_url": "https://www.census.gov/programs-surveys/acs",
       "vintage": "2023",
-      "ingested_at": "2026-05-07T20:15:57.059Z",
+      "ingested_at": "2026-05-07T21:41:15.033Z",
       "calibration": {
         "metric": "no_vehicle_rate",
         "computed_weighted_mean": 8.116,
@@ -1386,17 +1386,17 @@
       "source": "Census SAIPE 2023",
       "source_url": "https://www.census.gov/programs-surveys/saipe.html",
       "vintage": "2023",
-      "ingested_at": "2026-05-07T20:18:00.746Z",
+      "ingested_at": "2026-05-07T21:39:53.265Z",
       "calibration": {
         "metric": "youth_under5_poverty_pct",
-        "computed_weighted_mean": 17.385,
+        "computed_weighted_mean": 17.312,
         "published": 17.58,
-        "delta": 0.195,
+        "delta": 0.268,
         "within_tolerance": true,
-        "counties_included": 1941,
-        "counties_suppressed": 1203
+        "counties_included": 1987,
+        "counties_suppressed": 1157
       },
-      "moe_filtered_note": "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (1197 counties filtered)."
+      "moe_filtered_note": "MOE-aware suppression with absolute floor: counties suppressed only if MOE/estimate > 0.5 AND 90% MOE > 3pp (or MOE/estimate exceeds hard cap 2). 1151 counties filtered."
     }
   ]
 }

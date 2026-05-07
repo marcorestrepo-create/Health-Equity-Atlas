@@ -77,6 +77,15 @@ export function applyDeathThreshold<T>(
 
 export const DEFAULT_MOE_THRESHOLD = 0.5;
 
+/**
+ * Hard upper bound on MOE/estimate ratio. Above this, the estimate is
+ * unconditionally too noisy to publish, regardless of how small the absolute
+ * MOE is. Anchored to 2× the ACS Handbook's CV=40% "unreliable" threshold
+ * (CV=40% ≈ MOE/estimate=0.66; 2× ≈ 1.3, rounded up to 2.0 for a
+ * conservative cap).
+ */
+export const MOE_RATIO_HARD_CAP = 2.0;
+
 /** Combine independent MOEs by RSS (root-sum-of-squares). */
 export function combineMoeSum(...moes: number[]): number {
   let sum = 0;
@@ -124,4 +133,54 @@ export function applyMoeThreshold<T>(
     );
   }
   return available(computeValue());
+}
+
+/**
+ * Two-condition MOE filter for small-share rate metrics (e.g. LEP, under-5
+ * poverty) where a strict MOE/estimate ratio threshold over-suppresses
+ * legitimately small true values.
+ *
+ * Suppression rule:
+ *   - ALWAYS suppress if MOE/estimate > hardCap (truly unreliable)
+ *   - OTHERWISE suppress only if BOTH:
+ *       (a) MOE/estimate > ratioThreshold AND
+ *       (b) absolute MOE > absoluteFloor
+ *
+ * Rationale: when the true rate is small (e.g. 0.5% LEP), even a tight
+ * absolute MOE (±0.4pp) yields a high relative ratio (0.8). Suppressing
+ * those hides legitimate "this county has very low LEP" signal. The
+ * absolute floor recognizes that ±2pp on a 1% estimate is still useful at
+ * policy scale; the hard cap keeps out genuinely garbage data.
+ *
+ * Returns a triplet of booleans for caller telemetry: { suppress,
+ * exceedsHardCap, exceedsRatioOnly }.
+ */
+export interface MoeFloorDecision {
+  suppress: boolean;
+  exceedsHardCap: boolean;
+  exceedsRatioOnly: boolean;
+  ratio: number;
+}
+
+export function evaluateMoeWithFloor(
+  estimate: number,
+  moe: number,
+  ratioThreshold: number,
+  absoluteFloor: number,
+  hardCap: number = MOE_RATIO_HARD_CAP
+): MoeFloorDecision {
+  if (!Number.isFinite(estimate) || estimate <= 0 || !Number.isFinite(moe) || moe < 0) {
+    return { suppress: true, exceedsHardCap: false, exceedsRatioOnly: false, ratio: Infinity };
+  }
+  const ratio = moe / Math.abs(estimate);
+  const exceedsHardCap = ratio > hardCap;
+  const exceedsRatio = ratio > ratioThreshold;
+  const exceedsFloor = moe > absoluteFloor;
+  if (exceedsHardCap) {
+    return { suppress: true, exceedsHardCap: true, exceedsRatioOnly: false, ratio };
+  }
+  if (exceedsRatio && exceedsFloor) {
+    return { suppress: true, exceedsHardCap: false, exceedsRatioOnly: false, ratio };
+  }
+  return { suppress: false, exceedsHardCap: false, exceedsRatioOnly: exceedsRatio && !exceedsFloor, ratio };
 }
