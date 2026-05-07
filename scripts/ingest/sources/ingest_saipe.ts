@@ -20,7 +20,7 @@
  */
 import { fetchAndCache, readCachedText } from "../lib/cache.js";
 import { normalizeFips, allFips } from "../lib/fips.js";
-import { available, type SuppressedValue } from "../lib/suppression.js";
+import { available, suppressed, type SuppressedValue, DEFAULT_MOE_THRESHOLD } from "../lib/suppression.js";
 import { writeProcessed, type ProcessedMetric } from "../lib/processed.js";
 import { checkCalibration, assertCalibration } from "../lib/calibration.js";
 
@@ -30,14 +30,17 @@ const API_BASE = "https://api.census.gov/data/timeseries/poverty/saipe";
 interface SaipeRow {
   fips: string;
   povRateAll: number | null;
+  povRateAllMoe: number | null;
   povRateUnder18: number | null;
+  povRateUnder18Moe: number | null;
   medianHHI: number | null;
 }
 
 async function fetchSaipeCounties(): Promise<SaipeRow[]> {
-  // Single API call for all counties, all states
+  // Single API call for all counties, all states.
+  // _MOE = 90% margin of error (Census SAIPE convention; bounds are PT ± MOE).
   const params = new URLSearchParams({
-    get: "NAME,SAEPOVRTALL_PT,SAEPOVRT0_17_PT,SAEMHI_PT",
+    get: "NAME,SAEPOVRTALL_PT,SAEPOVRTALL_MOE,SAEPOVRT0_17_PT,SAEPOVRT0_17_MOE,SAEMHI_PT",
     "for": "county:*",
     "in": "state:*",
     YEAR: VINTAGE,
@@ -54,7 +57,9 @@ async function fetchSaipeCounties(): Promise<SaipeRow[]> {
   const idx = {
     name: header.indexOf("NAME"),
     povAll: header.indexOf("SAEPOVRTALL_PT"),
+    povAllMoe: header.indexOf("SAEPOVRTALL_MOE"),
     pov017: header.indexOf("SAEPOVRT0_17_PT"),
+    pov017Moe: header.indexOf("SAEPOVRT0_17_MOE"),
     mhi: header.indexOf("SAEMHI_PT"),
     state: header.indexOf("state"),
     county: header.indexOf("county"),
@@ -75,7 +80,9 @@ async function fetchSaipeCounties(): Promise<SaipeRow[]> {
     rows.push({
       fips: norm,
       povRateAll: parseNum(row[idx.povAll]),
+      povRateAllMoe: parseNum(row[idx.povAllMoe]),
       povRateUnder18: parseNum(row[idx.pov017]),
+      povRateUnder18Moe: parseNum(row[idx.pov017Moe]),
       medianHHI: parseNum(row[idx.mhi]),
     });
   }
@@ -89,16 +96,39 @@ export async function ingestSaipe(): Promise<void> {
   const allAtlasFips = new Set(allFips());
   const childPoverty: Record<string, SuppressedValue<number>> = {};
   const allPoverty: Record<string, SuppressedValue<number>> = {};
+  let nChildMoeFiltered = 0;
+  let nAllMoeFiltered = 0;
 
   for (const r of rows) {
     if (!allAtlasFips.has(r.fips)) continue; // skip PR / non-atlas
+
+    // Child poverty (0-17)
     if (r.povRateUnder18 != null) {
-      childPoverty[r.fips] = available(r.povRateUnder18);
+      if (r.povRateUnder18Moe != null && r.povRateUnder18 > 0 && r.povRateUnder18Moe / r.povRateUnder18 > DEFAULT_MOE_THRESHOLD) {
+        childPoverty[r.fips] = suppressed(
+          "suppressed_quality",
+          `SAIPE child poverty MOE/estimate=${(r.povRateUnder18Moe / r.povRateUnder18).toFixed(2)} > ${DEFAULT_MOE_THRESHOLD} (90% MOE=${r.povRateUnder18Moe.toFixed(2)}pp, est=${r.povRateUnder18.toFixed(2)}%)`
+        );
+        nChildMoeFiltered++;
+      } else {
+        childPoverty[r.fips] = available(r.povRateUnder18);
+      }
     }
+
+    // All-ages poverty
     if (r.povRateAll != null) {
-      allPoverty[r.fips] = available(r.povRateAll);
+      if (r.povRateAllMoe != null && r.povRateAll > 0 && r.povRateAllMoe / r.povRateAll > DEFAULT_MOE_THRESHOLD) {
+        allPoverty[r.fips] = suppressed(
+          "suppressed_quality",
+          `SAIPE all-ages poverty MOE/estimate=${(r.povRateAllMoe / r.povRateAll).toFixed(2)} > ${DEFAULT_MOE_THRESHOLD} (90% MOE=${r.povRateAllMoe.toFixed(2)}pp, est=${r.povRateAll.toFixed(2)}%)`
+        );
+        nAllMoeFiltered++;
+      } else {
+        allPoverty[r.fips] = available(r.povRateAll);
+      }
     }
   }
+  console.log(`[saipe] MOE-filtered: child=${nChildMoeFiltered}, all-ages=${nAllMoeFiltered}`);
 
   // ─── Calibration: child poverty under 18 ───
   const childCal = checkCalibration(childPoverty, {
@@ -133,8 +163,9 @@ export async function ingestSaipe(): Promise<void> {
     calibration: childCal,
     notes: [
       "SAIPE produces single-year, model-based estimates for all 3,143 US counties.",
-      "No federal suppression — SAIPE provides values for every county.",
+      "No federal hard suppression — SAIPE provides values for every county.",
       "Federal poverty level (OPM thresholds); child poverty defined as % of related children under 18 in families below 100% FPL.",
+      `MOE-aware suppression: counties where 90% MOE/estimate > ${DEFAULT_MOE_THRESHOLD} are suppressed (${nChildMoeFiltered} counties filtered).`,
     ],
     values: childPoverty,
   };
@@ -150,6 +181,7 @@ export async function ingestSaipe(): Promise<void> {
     notes: [
       "SAIPE all-ages poverty rate, model-based annual estimate.",
       "Used as a structural-driver context metric on the Pediatric Care tab.",
+      `MOE-aware suppression: counties where 90% MOE/estimate > ${DEFAULT_MOE_THRESHOLD} are suppressed (${nAllMoeFiltered} counties filtered).`,
     ],
     values: allPoverty,
   };

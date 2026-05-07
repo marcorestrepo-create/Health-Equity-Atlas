@@ -23,7 +23,7 @@
  */
 import { fetchAndCache, readCachedText } from "../lib/cache.js";
 import { normalizeFips, allFips } from "../lib/fips.js";
-import { available, suppressed } from "../lib/suppression.js";
+import { available, suppressed, combineMoeSum, propagateMoeRatio, DEFAULT_MOE_THRESHOLD } from "../lib/suppression.js";
 import type { SuppressedValue } from "../lib/suppression.js";
 import { writeProcessed, type ProcessedMetric } from "../lib/processed.js";
 import { checkCalibration, assertCalibration } from "../lib/calibration.js";
@@ -31,15 +31,19 @@ import { checkCalibration, assertCalibration } from "../lib/calibration.js";
 const VINTAGE = "2023";
 const ACS_BASE = "https://api.census.gov/data/2023/acs/acs5";
 
-// B17001 cells for under-5 poverty
-const VARS = "B17001_004E,B17001_018E,B17001_033E,B17001_047E";
+// B17001 cells for under-5 poverty (estimates + 90% MOEs)
+const VARS = "B17001_004E,B17001_004M,B17001_018E,B17001_018M,B17001_033E,B17001_033M,B17001_047E,B17001_047M";
 
 interface Under5Row {
   fips: string;
   belowPoverty: number;
+  belowPovertyMoe: number;
   abovePoverty: number;
+  abovePovertyMoe: number;
   universe: number;
+  universeMoe: number;
   rate: number; // percent
+  rateMoe: number; // percentage points (90% MOE on the derived rate)
 }
 
 async function fetchAcsNational(): Promise<number> {
@@ -80,9 +84,13 @@ async function fetchAcsCounties(): Promise<Under5Row[]> {
   const header = data[0];
   const idx = {
     m_below: header.indexOf("B17001_004E"),
+    m_belowMoe: header.indexOf("B17001_004M"),
     f_below: header.indexOf("B17001_018E"),
+    f_belowMoe: header.indexOf("B17001_018M"),
     m_above: header.indexOf("B17001_033E"),
+    m_aboveMoe: header.indexOf("B17001_033M"),
     f_above: header.indexOf("B17001_047E"),
+    f_aboveMoe: header.indexOf("B17001_047M"),
     state: header.indexOf("state"),
     county: header.indexOf("county"),
   };
@@ -98,13 +106,29 @@ async function fetchAcsCounties(): Promise<Under5Row[]> {
       const n = parseInt(v, 10);
       return Number.isFinite(n) ? Math.max(0, n) : 0;
     };
+    const parseMoe = (v: string): number => {
+      const n = parseFloat(v);
+      return Number.isFinite(n) && n >= 0 ? n : 0;
+    };
 
     const below = parseCount(row[idx.m_below]) + parseCount(row[idx.f_below]);
+    const belowMoe = combineMoeSum(parseMoe(row[idx.m_belowMoe]), parseMoe(row[idx.f_belowMoe]));
     const above = parseCount(row[idx.m_above]) + parseCount(row[idx.f_above]);
+    const aboveMoe = combineMoeSum(parseMoe(row[idx.m_aboveMoe]), parseMoe(row[idx.f_aboveMoe]));
     const universe = below + above;
+    const universeMoe = combineMoeSum(belowMoe, aboveMoe);
     const rate = universe > 0 ? (below / universe) * 100 : NaN;
+    const rateMoe = universe > 0
+      ? propagateMoeRatio(below, belowMoe, universe, universeMoe) * 100
+      : NaN;
 
-    rows.push({ fips: norm, belowPoverty: below, abovePoverty: above, universe, rate });
+    rows.push({
+      fips: norm,
+      belowPoverty: below, belowPovertyMoe: belowMoe,
+      abovePoverty: above, abovePovertyMoe: aboveMoe,
+      universe, universeMoe,
+      rate, rateMoe,
+    });
   }
   return rows;
 }
@@ -126,6 +150,8 @@ export async function ingestSaipeUnder5(): Promise<void> {
 
   const allAtlasFips = new Set(allFips());
   const under5Poverty: Record<string, SuppressedValue<number>> = {};
+  let nMoeFiltered = 0;
+  let nUniverseSmall = 0;
 
   for (const r of rows) {
     if (!allAtlasFips.has(r.fips)) continue; // skip PR / non-atlas
@@ -135,12 +161,21 @@ export async function ingestSaipeUnder5(): Promise<void> {
         "suppressed_quality",
         `Under-5 poverty universe too small (n=${r.universe}) for reliable rate estimate`
       );
+      nUniverseSmall++;
     } else if (!Number.isFinite(r.rate)) {
       under5Poverty[r.fips] = suppressed("no_data", "ACS returned null/zero universe for under-5 age group");
+    } else if (Number.isFinite(r.rateMoe) && r.rate > 0 && r.rateMoe / r.rate > DEFAULT_MOE_THRESHOLD) {
+      // MOE-aware suppression — critical for under-5 because the universe is small
+      under5Poverty[r.fips] = suppressed(
+        "suppressed_quality",
+        `B17001 under-5 MOE/estimate=${(r.rateMoe / r.rate).toFixed(2)} > ${DEFAULT_MOE_THRESHOLD} (90% MOE=${r.rateMoe.toFixed(2)}pp, est=${r.rate.toFixed(2)}%, universe=${r.universe})`
+      );
+      nMoeFiltered++;
     } else {
       under5Poverty[r.fips] = available(Math.round(r.rate * 10) / 10); // 1 decimal place
     }
   }
+  console.log(`[ingest] under-5 poverty: ${nMoeFiltered} MOE-filtered, ${nUniverseSmall} universe<10`);
 
   // Fill any atlas FIPS not present in ACS as no_data
   for (const fips of allAtlasFips) {
@@ -174,6 +209,7 @@ export async function ingestSaipeUnder5(): Promise<void> {
       "Rate computed as: (B17001_004E + B17001_018E) / (B17001_004E + B17001_018E + B17001_033E + B17001_047E).",
       "Calibration reference: ACS national (for=us:1) under-5 poverty rate ≈ 17.58%.",
       "Source attribution maintained as 'Census SAIPE 2023' per atlas conventions for this metric series.",
+      `MOE-aware suppression: counties where 90% MOE/estimate > ${DEFAULT_MOE_THRESHOLD} are suppressed (${nMoeFiltered} counties filtered).`,
     ],
     values: under5Poverty,
   };

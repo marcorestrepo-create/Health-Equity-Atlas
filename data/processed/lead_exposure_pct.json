@@ -3,23 +3,24 @@
   "source": "U.S. Census Bureau American Community Survey 5-year 2019-2023",
   "source_url": "https://www.census.gov/programs-surveys/acs",
   "vintage": "2023 (5-year 2019-2023)",
-  "fetched_at": "2026-05-07T17:57:31.861Z",
-  "ingested_at": "2026-05-07T17:57:31.861Z",
+  "fetched_at": "2026-05-07T20:14:46.953Z",
+  "ingested_at": "2026-05-07T20:14:46.953Z",
   "calibration": {
     "metric": "lead_exposure_pct",
-    "computed_weighted_mean": 15.875,
+    "computed_weighted_mean": 15.9,
     "published": 16,
-    "delta": 0.125,
+    "delta": 0.1,
     "within_tolerance": true,
-    "counties_included": 3144,
-    "counties_suppressed": 0
+    "counties_included": 3089,
+    "counties_suppressed": 55
   },
   "notes": [
     "Lead-paint exposure proxy: percent of housing units built before 1950.",
     "Computed: (B25034_010E + B25034_011E) / B25034_001E × 100.",
     "Federal lead-based paint ban: 1978 (residential). Lead paint was most heavily used pre-1950.",
     "Established academic and CDC/HUD ecological proxy for childhood lead-exposure risk (Sampson & Winter 2016; ATSDR ALERT).",
-    "STRUCTURAL proxy — does not capture personal exposure or lead-in-water (service-line) risk."
+    "STRUCTURAL proxy — does not capture personal exposure or lead-in-water (service-line) risk.",
+    "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (55 counties filtered)."
   ],
   "values": {
     "10001": {
@@ -43,8 +44,9 @@
       "suppression_status": "available"
     },
     "12003": {
-      "value": 3.69,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.58 > 0.5 (90% MOE=2.13pp, est=3.69%)"
     },
     "12005": {
       "value": 4.27,
@@ -103,8 +105,9 @@
       "suppression_status": "available"
     },
     "12035": {
-      "value": 0.4,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.60 > 0.5 (90% MOE=0.24pp, est=0.40%)"
     },
     "12037": {
       "value": 12.56,
@@ -119,8 +122,9 @@
       "suppression_status": "available"
     },
     "12043": {
-      "value": 1.51,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.62 > 0.5 (90% MOE=0.93pp, est=1.51%)"
     },
     "12045": {
       "value": 3.78,
@@ -135,8 +139,9 @@
       "suppression_status": "available"
     },
     "12051": {
-      "value": 2.24,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.53 > 0.5 (90% MOE=1.19pp, est=2.24%)"
     },
     "12053": {
       "value": 1.15,
@@ -187,8 +192,9 @@
       "suppression_status": "available"
     },
     "12077": {
-      "value": 4.27,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.55 > 0.5 (90% MOE=2.37pp, est=4.27%)"
     },
     "12079": {
       "value": 13.83,
@@ -223,8 +229,9 @@
       "suppression_status": "available"
     },
     "12093": {
-      "value": 1.55,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.51 > 0.5 (90% MOE=0.79pp, est=1.55%)"
     },
     "12095": {
       "value": 2.96,
@@ -471,8 +478,9 @@
       "suppression_status": "available"
     },
     "13085": {
-      "value": 2.39,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.50 > 0.5 (90% MOE=1.20pp, est=2.39%)"
     },
     "13087": {
       "value": 13.92,
@@ -503,8 +511,9 @@
       "suppression_status": "available"
     },
     "13101": {
-      "value": 1.22,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=1.34 > 0.5 (90% MOE=1.63pp, est=1.22%)"
     },
     "13103": {
       "value": 3.96,
@@ -655,8 +664,9 @@
       "suppression_status": "available"
     },
     "13177": {
-      "value": 1.85,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.55 > 0.5 (90% MOE=1.02pp, est=1.85%)"
     },
     "13179": {
       "value": 1.99,
@@ -667,8 +677,9 @@
       "suppression_status": "available"
     },
     "13183": {
-      "value": 4.78,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.52 > 0.5 (90% MOE=2.47pp, est=4.78%)"
     },
     "13185": {
       "value": 4.83,
@@ -695,8 +706,9 @@
       "suppression_status": "available"
     },
     "13197": {
-      "value": 3.16,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.53 > 0.5 (90% MOE=1.66pp, est=3.16%)"
     },
     "13199": {
       "value": 12.08,
@@ -775,8 +787,9 @@
       "suppression_status": "available"
     },
     "13239": {
-      "value": 6.41,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.53 > 0.5 (90% MOE=3.41pp, est=6.41%)"
     },
     "13241": {
       "value": 7.33,
@@ -795,8 +808,9 @@
       "suppression_status": "available"
     },
     "13249": {
-      "value": 7.15,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.52 > 0.5 (90% MOE=3.74pp, est=7.15%)"
     },
     "13251": {
       "value": 16.09,
@@ -911,8 +925,9 @@
       "suppression_status": "available"
     },
     "13307": {
-      "value": 6.53,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.63 > 0.5 (90% MOE=4.12pp, est=6.53%)"
     },
     "13309": {
       "value": 9.53,
@@ -3047,8 +3062,9 @@
       "suppression_status": "available"
     },
     "21159": {
-      "value": 2.08,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.66 > 0.5 (90% MOE=1.38pp, est=2.08%)"
     },
     "21161": {
       "value": 22.48,
@@ -3059,8 +3075,9 @@
       "suppression_status": "available"
     },
     "21165": {
-      "value": 3.75,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.63 > 0.5 (90% MOE=2.37pp, est=3.75%)"
     },
     "21167": {
       "value": 16.16,
@@ -3107,8 +3124,9 @@
       "suppression_status": "available"
     },
     "21189": {
-      "value": 10.33,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.51 > 0.5 (90% MOE=5.22pp, est=10.33%)"
     },
     "21191": {
       "value": 19.81,
@@ -3255,8 +3273,9 @@
       "suppression_status": "available"
     },
     "22023": {
-      "value": 0.35,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=1.12 > 0.5 (90% MOE=0.39pp, est=0.35%)"
     },
     "22025": {
       "value": 9.85,
@@ -3359,8 +3378,9 @@
       "suppression_status": "available"
     },
     "22075": {
-      "value": 1.55,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.69 > 0.5 (90% MOE=1.06pp, est=1.55%)"
     },
     "22077": {
       "value": 9.11,
@@ -4471,8 +4491,9 @@
       "suppression_status": "available"
     },
     "28055": {
-      "value": 5.94,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.83 > 0.5 (90% MOE=4.95pp, est=5.94%)"
     },
     "28057": {
       "value": 6.66,
@@ -4487,8 +4508,9 @@
       "suppression_status": "available"
     },
     "28063": {
-      "value": 4.73,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.56 > 0.5 (90% MOE=2.64pp, est=4.73%)"
     },
     "28065": {
       "value": 5.75,
@@ -4667,8 +4689,9 @@
       "suppression_status": "available"
     },
     "28153": {
-      "value": 5.29,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.52 > 0.5 (90% MOE=2.73pp, est=5.29%)"
     },
     "28155": {
       "value": 11.01,
@@ -5763,20 +5786,23 @@
       "suppression_status": "available"
     },
     "32009": {
-      "value": 10.45,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.76 > 0.5 (90% MOE=7.92pp, est=10.45%)"
     },
     "32011": {
-      "value": 11.18,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.62 > 0.5 (90% MOE=6.96pp, est=11.18%)"
     },
     "32013": {
       "value": 10.27,
       "suppression_status": "available"
     },
     "32015": {
-      "value": 5.33,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.63 > 0.5 (90% MOE=3.36pp, est=5.33%)"
     },
     "32017": {
       "value": 21.96,
@@ -5787,8 +5813,9 @@
       "suppression_status": "available"
     },
     "32021": {
-      "value": 12.67,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.52 > 0.5 (90% MOE=6.65pp, est=12.67%)"
     },
     "32023": {
       "value": 2.39,
@@ -5799,8 +5826,9 @@
       "suppression_status": "available"
     },
     "32029": {
-      "value": 15.81,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.51 > 0.5 (90% MOE=8.05pp, est=15.81%)"
     },
     "32031": {
       "value": 4.63,
@@ -8235,8 +8263,9 @@
       "suppression_status": "available"
     },
     "46017": {
-      "value": 6.59,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.60 > 0.5 (90% MOE=3.92pp, est=6.59%)"
     },
     "46019": {
       "value": 21.72,
@@ -8435,8 +8464,9 @@
       "suppression_status": "available"
     },
     "46117": {
-      "value": 10.51,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.54 > 0.5 (90% MOE=5.72pp, est=10.51%)"
     },
     "46119": {
       "value": 25.66,
@@ -8855,8 +8885,9 @@
       "suppression_status": "available"
     },
     "48003": {
-      "value": 3.43,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.65 > 0.5 (90% MOE=2.24pp, est=3.43%)"
     },
     "48005": {
       "value": 7.35,
@@ -8883,8 +8914,9 @@
       "suppression_status": "available"
     },
     "48017": {
-      "value": 8.08,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.53 > 0.5 (90% MOE=4.32pp, est=8.08%)"
     },
     "48019": {
       "value": 6.17,
@@ -8915,8 +8947,9 @@
       "suppression_status": "available"
     },
     "48033": {
-      "value": 10.51,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.64 > 0.5 (90% MOE=6.75pp, est=10.51%)"
     },
     "48035": {
       "value": 14.44,
@@ -9055,8 +9088,9 @@
       "suppression_status": "available"
     },
     "48103": {
-      "value": 7.05,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.68 > 0.5 (90% MOE=4.79pp, est=7.05%)"
     },
     "48105": {
       "value": 25.59,
@@ -9067,8 +9101,9 @@
       "suppression_status": "available"
     },
     "48109": {
-      "value": 9.07,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.84 > 0.5 (90% MOE=7.64pp, est=9.07%)"
     },
     "48111": {
       "value": 18.05,
@@ -9195,8 +9230,9 @@
       "suppression_status": "available"
     },
     "48173": {
-      "value": 7.34,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.92 > 0.5 (90% MOE=6.73pp, est=7.34%)"
     },
     "48175": {
       "value": 9.07,
@@ -9335,8 +9371,9 @@
       "suppression_status": "available"
     },
     "48243": {
-      "value": 13.89,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.55 > 0.5 (90% MOE=7.66pp, est=13.89%)"
     },
     "48245": {
       "value": 8.03,
@@ -9371,8 +9408,9 @@
       "suppression_status": "available"
     },
     "48261": {
-      "value": 31.88,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.81 > 0.5 (90% MOE=25.91pp, est=31.88%)"
     },
     "48263": {
       "value": 18.6,
@@ -9387,8 +9425,9 @@
       "suppression_status": "available"
     },
     "48269": {
-      "value": 19.59,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.60 > 0.5 (90% MOE=11.72pp, est=19.59%)"
     },
     "48271": {
       "value": 17.57,
@@ -9451,8 +9490,9 @@
       "suppression_status": "available"
     },
     "48301": {
-      "value": 31.91,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=2.05 > 0.5 (90% MOE=65.29pp, est=31.91%)"
     },
     "48303": {
       "value": 5.7,
@@ -9471,8 +9511,9 @@
       "suppression_status": "available"
     },
     "48311": {
-      "value": 10.12,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.63 > 0.5 (90% MOE=6.34pp, est=10.12%)"
     },
     "48313": {
       "value": 11.29,
@@ -9615,8 +9656,9 @@
       "suppression_status": "available"
     },
     "48383": {
-      "value": 2.9,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.93 > 0.5 (90% MOE=2.69pp, est=2.90%)"
     },
     "48385": {
       "value": 13.4,
@@ -9711,8 +9753,9 @@
       "suppression_status": "available"
     },
     "48431": {
-      "value": 7.09,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.65 > 0.5 (90% MOE=4.59pp, est=7.09%)"
     },
     "48433": {
       "value": 14.19,
@@ -9851,20 +9894,23 @@
       "suppression_status": "available"
     },
     "48501": {
-      "value": 8.36,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.51 > 0.5 (90% MOE=4.27pp, est=8.36%)"
     },
     "48503": {
       "value": 11.7,
       "suppression_status": "available"
     },
     "48505": {
-      "value": 0.58,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.91 > 0.5 (90% MOE=0.53pp, est=0.58%)"
     },
     "48507": {
-      "value": 16.53,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.54 > 0.5 (90% MOE=9.00pp, est=16.53%)"
     },
     "49001": {
       "value": 29.78,
@@ -9883,8 +9929,9 @@
       "suppression_status": "available"
     },
     "49009": {
-      "value": 3.72,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.52 > 0.5 (90% MOE=1.93pp, est=3.72%)"
     },
     "49011": {
       "value": 4.35,
@@ -9903,8 +9950,9 @@
       "suppression_status": "available"
     },
     "49019": {
-      "value": 5.64,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.52 > 0.5 (90% MOE=2.95pp, est=5.64%)"
     },
     "49021": {
       "value": 4.66,
@@ -10499,8 +10547,9 @@
       "suppression_status": "available"
     },
     "51685": {
-      "value": 1.52,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.73 > 0.5 (90% MOE=1.12pp, est=1.52%)"
     },
     "51690": {
       "value": 28.91,
@@ -11347,8 +11396,9 @@
       "suppression_status": "available"
     },
     "01011": {
-      "value": 5.67,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.56 > 0.5 (90% MOE=3.15pp, est=5.67%)"
     },
     "01013": {
       "value": 11.21,
@@ -11627,16 +11677,18 @@
       "suppression_status": "available"
     },
     "02070": {
-      "value": 3.19,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.71 > 0.5 (90% MOE=2.25pp, est=3.19%)"
     },
     "02090": {
       "value": 2.32,
       "suppression_status": "available"
     },
     "02100": {
-      "value": 9.92,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.52 > 0.5 (90% MOE=5.12pp, est=9.92%)"
     },
     "02105": {
       "value": 13.96,
@@ -11659,8 +11711,9 @@
       "suppression_status": "available"
     },
     "02158": {
-      "value": 0.38,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=1.06 > 0.5 (90% MOE=0.40pp, est=0.38%)"
     },
     "02164": {
       "value": 3.84,
@@ -11675,8 +11728,9 @@
       "suppression_status": "available"
     },
     "02185": {
-      "value": 2.61,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.78 > 0.5 (90% MOE=2.03pp, est=2.61%)"
     },
     "02188": {
       "value": 1.79,
@@ -11699,8 +11753,9 @@
       "suppression_status": "available"
     },
     "02240": {
-      "value": 1.34,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.57 > 0.5 (90% MOE=0.77pp, est=1.34%)"
     },
     "02275": {
       "value": 15.15,
@@ -12543,8 +12598,9 @@
       "suppression_status": "available"
     },
     "08117": {
-      "value": 1.05,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25034 MOE/estimate=0.52 > 0.5 (90% MOE=0.55pp, est=1.05%)"
     },
     "08119": {
       "value": 7.48,

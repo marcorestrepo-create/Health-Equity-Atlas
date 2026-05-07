@@ -3,8 +3,8 @@
   "source": "Census SAIPE",
   "source_url": "https://www.census.gov/programs-surveys/saipe.html",
   "vintage": "2024",
-  "fetched_at": "2026-05-07T15:17:39.902Z",
-  "ingested_at": "2026-05-07T15:17:39.902Z",
+  "fetched_at": "2026-05-07T20:17:10.256Z",
+  "ingested_at": "2026-05-07T20:17:10.256Z",
   "calibration": {
     "metric": "child_poverty_rate_u18",
     "computed_weighted_mean": 15.35,
@@ -16,8 +16,9 @@
   },
   "notes": [
     "SAIPE produces single-year, model-based estimates for all 3,143 US counties.",
-    "No federal suppression — SAIPE provides values for every county.",
-    "Federal poverty level (OPM thresholds); child poverty defined as % of related children under 18 in families below 100% FPL."
+    "No federal hard suppression — SAIPE provides values for every county.",
+    "Federal poverty level (OPM thresholds); child poverty defined as % of related children under 18 in families below 100% FPL.",
+    "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (0 counties filtered)."
   ],
   "values": {
     "10001": {

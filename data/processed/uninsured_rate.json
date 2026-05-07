@@ -3,8 +3,8 @@
   "source": "Census SAHIE",
   "source_url": "https://www.census.gov/data/datasets/time-series/demo/sahie/estimates-acs.html",
   "vintage": "2023",
-  "fetched_at": "2026-05-07T15:23:13.520Z",
-  "ingested_at": "2026-05-07T15:23:13.520Z",
+  "fetched_at": "2026-05-07T20:16:33.851Z",
+  "ingested_at": "2026-05-07T20:16:33.852Z",
   "calibration": {
     "metric": "uninsured_rate",
     "computed_weighted_mean": 9.435,
@@ -16,9 +16,10 @@
   },
   "notes": [
     "All ages (under 65) uninsured rate",
-    "Census SAHIE point estimate (PCTUI_PT). 90% confidence intervals available in raw cache.",
+    "Census SAHIE point estimate (PCTUI_PT). 90% confidence intervals (PCTUI_LB90 / PCTUI_UB90) used for MOE-aware suppression.",
     "AGECAT=0, IPRCAT=0 (all incomes), RACECAT=0 (all races), SEXCAT=0 (both sexes).",
-    "CT: SAHIE 2023 still publishes legacy 8-county FIPS — those legacy values are arithmetic-averaged into the atlas's 9 Planning Region codes. 0 CT regions affected."
+    "CT: SAHIE 2023 still publishes legacy 8-county FIPS — those legacy values are arithmetic-averaged into the atlas's 9 Planning Region codes. 0 CT regions affected.",
+    "MOE-aware suppression: counties where 90% CI half-width / estimate > 0.5 are suppressed (0 counties filtered)."
   ],
   "values": {
     "10001": {

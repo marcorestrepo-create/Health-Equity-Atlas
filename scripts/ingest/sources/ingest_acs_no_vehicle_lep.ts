@@ -28,7 +28,7 @@
  */
 import { fetchAndCache, readCachedText } from "../lib/cache.js";
 import { normalizeFips, allFips } from "../lib/fips.js";
-import { available, suppressed, type SuppressedValue } from "../lib/suppression.js";
+import { available, suppressed, type SuppressedValue, combineMoeSum, propagateMoeRatio, DEFAULT_MOE_THRESHOLD } from "../lib/suppression.js";
 import { writeProcessed, type ProcessedMetric } from "../lib/processed.js";
 import { checkCalibration, assertCalibration } from "../lib/calibration.js";
 
@@ -39,8 +39,8 @@ const SOURCE_URL = "https://www.census.gov/programs-surveys/acs";
 
 // ─── No Vehicle ──────────────────────────────────────────────────────────────
 
-async function fetchNoVehicle(): Promise<Record<string, SuppressedValue<number>>> {
-  const vars = ["NAME", "B25044_001E", "B25044_003E", "B25044_010E"].join(",");
+async function fetchNoVehicle(): Promise<{ values: Record<string, SuppressedValue<number>>; nMoeFiltered: number }> {
+  const vars = ["NAME", "B25044_001E", "B25044_001M", "B25044_003E", "B25044_003M", "B25044_010E", "B25044_010M"].join(",");
   const url = `${ACS_BASE}?get=${vars}&for=county:*&in=state:*`;
   const cacheKey = {
     source: "census_acs_b25044",
@@ -56,8 +56,11 @@ async function fetchNoVehicle(): Promise<Record<string, SuppressedValue<number>>
   const idx = {
     name: header.indexOf("NAME"),
     total: header.indexOf("B25044_001E"),
+    totalMoe: header.indexOf("B25044_001M"),
     ownerNoVeh: header.indexOf("B25044_003E"),
+    ownerNoVehMoe: header.indexOf("B25044_003M"),
     renterNoVeh: header.indexOf("B25044_010E"),
+    renterNoVehMoe: header.indexOf("B25044_010M"),
     state: header.indexOf("state"),
     county: header.indexOf("county"),
   };
@@ -69,6 +72,7 @@ async function fetchNoVehicle(): Promise<Record<string, SuppressedValue<number>>
   const result: Record<string, SuppressedValue<number>> = {};
   let nAvailable = 0;
   let nSuppressed = 0;
+  let nMoeFiltered = 0;
 
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
@@ -84,8 +88,11 @@ async function fetchNoVehicle(): Promise<Record<string, SuppressedValue<number>>
     };
 
     const total = parseVal(row[idx.total]);
+    const totalMoe = parseVal(row[idx.totalMoe]);
     const ownerNoVeh = parseVal(row[idx.ownerNoVeh]);
+    const ownerNoVehMoe = parseVal(row[idx.ownerNoVehMoe]);
     const renterNoVeh = parseVal(row[idx.renterNoVeh]);
+    const renterNoVehMoe = parseVal(row[idx.renterNoVehMoe]);
 
     if (total === null || ownerNoVeh === null || renterNoVeh === null) {
       result[norm] = suppressed("suppressed_quality", "ACS B25044 null estimate");
@@ -99,6 +106,22 @@ async function fetchNoVehicle(): Promise<Record<string, SuppressedValue<number>>
     }
 
     const rate = ((ownerNoVeh + renterNoVeh) / total) * 100;
+
+    // MOE-aware suppression
+    if (totalMoe !== null && ownerNoVehMoe !== null && renterNoVehMoe !== null) {
+      const numerator = ownerNoVeh + renterNoVeh;
+      const numeratorMoe = combineMoeSum(ownerNoVehMoe, renterNoVehMoe);
+      const rateMoe = propagateMoeRatio(numerator, numeratorMoe, total, totalMoe) * 100;
+      if (rate > 0 && rateMoe / rate > DEFAULT_MOE_THRESHOLD) {
+        result[norm] = suppressed(
+          "suppressed_quality",
+          `ACS B25044 MOE/estimate=${(rateMoe / rate).toFixed(2)} > ${DEFAULT_MOE_THRESHOLD} (90% MOE=${rateMoe.toFixed(2)}pp, est=${rate.toFixed(2)}%)`
+        );
+        nMoeFiltered++;
+        continue;
+      }
+    }
+
     result[norm] = available(rate);
     nAvailable++;
   }
@@ -110,14 +133,14 @@ async function fetchNoVehicle(): Promise<Record<string, SuppressedValue<number>>
     }
   }
 
-  console.log(`[no_vehicle] ${nAvailable} available, ${nSuppressed} suppressed`);
-  return result;
+  console.log(`[no_vehicle] ${nAvailable} available, ${nSuppressed} null-suppressed, ${nMoeFiltered} MOE-filtered`);
+  return { values: result, nMoeFiltered };
 }
 
 // ─── Limited English Proficiency (LEP) ───────────────────────────────────────
 
-async function fetchLep(): Promise<Record<string, SuppressedValue<number>>> {
-  const vars = ["NAME", "S1601_C01_001E", "S1601_C05_001E"].join(",");
+async function fetchLep(): Promise<{ values: Record<string, SuppressedValue<number>>; nMoeFiltered: number }> {
+  const vars = ["NAME", "S1601_C01_001E", "S1601_C01_001M", "S1601_C05_001E", "S1601_C05_001M"].join(",");
   const url = `${ACS_SUBJECT_BASE}?get=${vars}&for=county:*&in=state:*`;
   const cacheKey = {
     source: "census_acs_s1601",
@@ -133,7 +156,9 @@ async function fetchLep(): Promise<Record<string, SuppressedValue<number>>> {
   const idx = {
     name: header.indexOf("NAME"),
     total5plus: header.indexOf("S1601_C01_001E"),
+    total5plusMoe: header.indexOf("S1601_C01_001M"),
     lepCount: header.indexOf("S1601_C05_001E"),
+    lepCountMoe: header.indexOf("S1601_C05_001M"),
     state: header.indexOf("state"),
     county: header.indexOf("county"),
   };
@@ -145,6 +170,7 @@ async function fetchLep(): Promise<Record<string, SuppressedValue<number>>> {
   const result: Record<string, SuppressedValue<number>> = {};
   let nAvailable = 0;
   let nSuppressed = 0;
+  let nMoeFiltered = 0;
 
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
@@ -160,7 +186,9 @@ async function fetchLep(): Promise<Record<string, SuppressedValue<number>>> {
     };
 
     const total = parseVal(row[idx.total5plus]);
+    const totalMoe = parseVal(row[idx.total5plusMoe]);
     const lepCount = parseVal(row[idx.lepCount]);
+    const lepCountMoe = parseVal(row[idx.lepCountMoe]);
 
     if (total === null || lepCount === null) {
       result[norm] = suppressed("suppressed_quality", "ACS S1601 null estimate");
@@ -174,6 +202,20 @@ async function fetchLep(): Promise<Record<string, SuppressedValue<number>>> {
     }
 
     const rate = (lepCount / total) * 100;
+
+    // MOE-aware suppression
+    if (totalMoe !== null && lepCountMoe !== null) {
+      const rateMoe = propagateMoeRatio(lepCount, lepCountMoe, total, totalMoe) * 100;
+      if (rate > 0 && rateMoe / rate > DEFAULT_MOE_THRESHOLD) {
+        result[norm] = suppressed(
+          "suppressed_quality",
+          `ACS S1601 MOE/estimate=${(rateMoe / rate).toFixed(2)} > ${DEFAULT_MOE_THRESHOLD} (90% MOE=${rateMoe.toFixed(2)}pp, est=${rate.toFixed(2)}%)`
+        );
+        nMoeFiltered++;
+        continue;
+      }
+    }
+
     result[norm] = available(rate);
     nAvailable++;
   }
@@ -185,8 +227,8 @@ async function fetchLep(): Promise<Record<string, SuppressedValue<number>>> {
     }
   }
 
-  console.log(`[lep] ${nAvailable} available, ${nSuppressed} suppressed`);
-  return result;
+  console.log(`[lep] ${nAvailable} available, ${nSuppressed} null-suppressed, ${nMoeFiltered} MOE-filtered`);
+  return { values: result, nMoeFiltered };
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -196,7 +238,7 @@ async function main(): Promise<void> {
 
   // ── No Vehicle ──
   console.log("[ingest] Fetching B25044 (no vehicle available)...");
-  const noVehicleValues = await fetchNoVehicle();
+  const { values: noVehicleValues, nMoeFiltered: noVehMoeFiltered } = await fetchNoVehicle();
 
   const noVehicleCalSpec = {
     metric: "no_vehicle_rate",
@@ -221,6 +263,7 @@ async function main(): Promise<void> {
       "Numerator: B25044_003E (owner-occupied, 0 vehicles) + B25044_010E (renter-occupied, 0 vehicles).",
       "Denominator: B25044_001E (total occupied housing units).",
       "ACS 5-year 2019-2023 (published 2023 vintage). Single API call for all US counties.",
+      `MOE-aware suppression: counties where 90% MOE/estimate > ${DEFAULT_MOE_THRESHOLD} are suppressed (${noVehMoeFiltered} counties filtered).`,
     ],
     values: noVehicleValues,
   };
@@ -228,7 +271,7 @@ async function main(): Promise<void> {
 
   // ── LEP ──
   console.log("[ingest] Fetching S1601 (limited English proficiency)...");
-  const lepValues = await fetchLep();
+  const { values: lepValues, nMoeFiltered: lepMoeFiltered } = await fetchLep();
 
   const lepCalSpec = {
     metric: "lep_rate",
@@ -253,6 +296,7 @@ async function main(): Promise<void> {
       "Numerator: S1601_C05_001E (population 5+ that speaks English less than 'very well').",
       "Denominator: S1601_C01_001E (total population 5 years and over).",
       "ACS 5-year 2019-2023 (published 2023 vintage). Single API call for all US counties.",
+      `MOE-aware suppression: counties where 90% MOE/estimate > ${DEFAULT_MOE_THRESHOLD} are suppressed (${lepMoeFiltered} counties filtered).`,
     ],
     values: lepValues,
   };

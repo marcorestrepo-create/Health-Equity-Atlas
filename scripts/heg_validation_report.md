@@ -1,6 +1,6 @@
 # HEG v2 Validation Study
 
-Generated: 2026-05-07T19:21:44.120Z
+Generated: 2026-05-07T20:18:42.853Z
 
 ## 1. Construct Validity
 
@@ -11,15 +11,15 @@ that the score does not consume.
 
 ### Premature Death (YPLL75 per 100,000)
 
-- **Pearson r = 0.678** (95% CI [0.657, 0.702])
-- **Spearman ρ = 0.748**
+- **Pearson r = 0.677** (95% CI [0.655, 0.700])
+- **Spearman ρ = 0.746**
 - n = 3080 counties (suppressed/missing dropped)
 - Source: CHR&R 2025 — Premature Death (YPLL75 per 100,000) — NCHS underlying source
 
 ### Preventable Hospital Stays (per 100,000 Medicare)
 
-- **Pearson r = 0.333** (95% CI [0.302, 0.363])
-- **Spearman ρ = 0.346**
+- **Pearson r = 0.331** (95% CI [0.301, 0.362])
+- **Spearman ρ = 0.344**
 - n = 3061 counties
 - Source: CHR&R 2025 — Preventable Hospital Stays (per 100,000 Medicare enrollees) — CMS source
 
@@ -39,31 +39,31 @@ of one analyst's weight choice.
 
 - **Top decile size:** 314 counties (top 10%)
 - **Minimum Jaccard across all 20 perturbations:** 0.892
-- **Mean Jaccard:** 0.922
+- **Mean Jaccard:** 0.934
 - **Threshold (≥0.85):** **PASS**
 
 | Component | Perturbation | Top-Decile Jaccard | Median Rank Shift (within baseline top) |
 |---|---|---|---|
-| insurance | -20% | 0.920 | 10 |
-| insurance | +20% | 0.926 | 12 |
+| insurance | -20% | 0.932 | 11 |
+| insurance | +20% | 0.932 | 11 |
 | maternalAccess | -20% | 0.892 | 16 |
-| maternalAccess | +20% | 0.915 | 10 |
-| chronicDisease | -20% | 0.920 | 9 |
-| chronicDisease | +20% | 0.926 | 10 |
-| providerAccess | -20% | 0.920 | 13 |
-| providerAccess | +20% | 0.915 | 9 |
-| behavioralHealth | -20% | 0.944 | 9 |
-| behavioralHealth | +20% | 0.915 | 12 |
-| perinatal | -20% | 0.926 | 9 |
-| perinatal | +20% | 0.926 | 11 |
-| childPoverty | -20% | 0.926 | 8 |
-| childPoverty | +20% | 0.926 | 10 |
-| social | -20% | 0.903 | 12 |
+| maternalAccess | +20% | 0.926 | 10 |
+| chronicDisease | -20% | 0.938 | 9 |
+| chronicDisease | +20% | 0.938 | 10 |
+| providerAccess | -20% | 0.926 | 14 |
+| providerAccess | +20% | 0.938 | 9 |
+| behavioralHealth | -20% | 0.963 | 9 |
+| behavioralHealth | +20% | 0.926 | 12 |
+| perinatal | -20% | 0.950 | 8 |
+| perinatal | +20% | 0.938 | 11 |
+| childPoverty | -20% | 0.938 | 9 |
+| childPoverty | +20% | 0.938 | 10 |
+| social | -20% | 0.915 | 12 |
 | social | +20% | 0.932 | 9 |
-| environmental | -20% | 0.926 | 10 |
-| environmental | +20% | 0.926 | 10 |
-| infrastructure | -20% | 0.926 | 9 |
-| infrastructure | +20% | 0.920 | 10 |
+| environmental | -20% | 0.938 | 10 |
+| environmental | +20% | 0.938 | 9 |
+| infrastructure | -20% | 0.950 | 8 |
+| infrastructure | +20% | 0.938 | 11 |
 
 ## 3. Stress Tests
 
@@ -77,15 +77,15 @@ Top-decile Jaccard: **0.915**
 
 | Component Dropped | Top-Decile Jaccard vs Baseline |
 |---|---|
-| insurance | 0.769 |
+| insurance | 0.774 |
 | maternalAccess | 0.566 |
-| chronicDisease | 0.836 |
-| providerAccess | 0.716 |
+| chronicDisease | 0.831 |
+| providerAccess | 0.730 |
 | behavioralHealth | 0.880 |
-| perinatal | 0.853 |
-| childPoverty | 0.858 |
-| social | 0.693 |
-| environmental | 0.920 |
+| perinatal | 0.858 |
+| childPoverty | 0.853 |
+| social | 0.697 |
+| environmental | 0.915 |
 | infrastructure | 0.909 |
 
 If any single drop pulls Jaccard far below 0.7, the index is over-relying on

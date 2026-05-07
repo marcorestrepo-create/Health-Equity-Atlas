@@ -3,22 +3,23 @@
   "source": "Census ACS 5-year 2023 (B25044)",
   "source_url": "https://www.census.gov/programs-surveys/acs",
   "vintage": "2023",
-  "fetched_at": "2026-05-07T15:40:33.840Z",
-  "ingested_at": "2026-05-07T15:40:33.841Z",
+  "fetched_at": "2026-05-07T20:15:57.059Z",
+  "ingested_at": "2026-05-07T20:15:57.059Z",
   "calibration": {
     "metric": "no_vehicle_rate",
-    "computed_weighted_mean": 8.07,
+    "computed_weighted_mean": 8.116,
     "published": 8.3,
-    "delta": 0.23,
+    "delta": 0.184,
     "within_tolerance": true,
-    "counties_included": 3144,
-    "counties_suppressed": 0
+    "counties_included": 2668,
+    "counties_suppressed": 476
   },
   "notes": [
     "Percentage of occupied housing units with no vehicle available.",
     "Numerator: B25044_003E (owner-occupied, 0 vehicles) + B25044_010E (renter-occupied, 0 vehicles).",
     "Denominator: B25044_001E (total occupied housing units).",
-    "ACS 5-year 2019-2023 (published 2023 vintage). Single API call for all US counties."
+    "ACS 5-year 2019-2023 (published 2023 vintage). Single API call for all US counties.",
+    "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (476 counties filtered)."
   ],
   "values": {
     "10001": {
@@ -118,12 +119,14 @@
       "suppression_status": "available"
     },
     "12043": {
-      "value": 2.0394736842105265,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=1.76pp, est=2.04%)"
     },
     "12045": {
-      "value": 2.793103448275862,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.67 > 0.5 (90% MOE=1.87pp, est=2.79%)"
     },
     "12047": {
       "value": 3.669724770642202,
@@ -166,8 +169,9 @@
       "suppression_status": "available"
     },
     "12067": {
-      "value": 3.4746086292478044,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.80 > 0.5 (90% MOE=2.80pp, est=3.47%)"
     },
     "12069": {
       "value": 3.993754467812935,
@@ -310,16 +314,18 @@
       "suppression_status": "available"
     },
     "13003": {
-      "value": 3.512072750078395,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.93pp, est=3.51%)"
     },
     "13005": {
       "value": 6.852728631946175,
       "suppression_status": "available"
     },
     "13007": {
-      "value": 6.912028725314183,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=3.95pp, est=6.91%)"
     },
     "13009": {
       "value": 7.452566096423017,
@@ -350,12 +356,14 @@
       "suppression_status": "available"
     },
     "13023": {
-      "value": 6.49077749241186,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=3.33pp, est=6.49%)"
     },
     "13025": {
-      "value": 4.481546572934974,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=2.25pp, est=4.48%)"
     },
     "13027": {
       "value": 8.208208208208207,
@@ -386,8 +394,9 @@
       "suppression_status": "available"
     },
     "13043": {
-      "value": 3.6337556777432467,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=2.38pp, est=3.63%)"
     },
     "13045": {
       "value": 4.0896371393183175,
@@ -406,8 +415,9 @@
       "suppression_status": "available"
     },
     "13053": {
-      "value": 1.1597258829731154,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.23 > 0.5 (90% MOE=1.42pp, est=1.16%)"
     },
     "13055": {
       "value": 5.9833734412601185,
@@ -422,8 +432,9 @@
       "suppression_status": "available"
     },
     "13061": {
-      "value": 7.463952502120441,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.64 > 0.5 (90% MOE=4.79pp, est=7.46%)"
     },
     "13063": {
       "value": 7.497207127033118,
@@ -466,12 +477,14 @@
       "suppression_status": "available"
     },
     "13083": {
-      "value": 1.7319520880543866,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=0.87pp, est=1.73%)"
     },
     "13085": {
-      "value": 1.9826632239026187,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=1.10pp, est=1.98%)"
     },
     "13087": {
       "value": 9.156005346572465,
@@ -502,8 +515,9 @@
       "suppression_status": "available"
     },
     "13101": {
-      "value": 0.7444168734491315,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.98 > 0.5 (90% MOE=1.47pp, est=0.74%)"
     },
     "13103": {
       "value": 2.4156230099766507,
@@ -518,8 +532,9 @@
       "suppression_status": "available"
     },
     "13109": {
-      "value": 4.618163054695562,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=2.61pp, est=4.62%)"
     },
     "13111": {
       "value": 3.4944107032831613,
@@ -550,8 +565,9 @@
       "suppression_status": "available"
     },
     "13125": {
-      "value": 9.596928982725528,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=6.22pp, est=9.60%)"
     },
     "13127": {
       "value": 5.553790613718411,
@@ -590,8 +606,9 @@
       "suppression_status": "available"
     },
     "13145": {
-      "value": 1.9229247447970246,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=1.03pp, est=1.92%)"
     },
     "13147": {
       "value": 7.360333870814759,
@@ -610,8 +627,9 @@
       "suppression_status": "available"
     },
     "13155": {
-      "value": 4.402684563758389,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=2.45pp, est=4.40%)"
     },
     "13157": {
       "value": 2.9693060498220643,
@@ -630,8 +648,9 @@
       "suppression_status": "available"
     },
     "13165": {
-      "value": 6.097163351809586,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.68 > 0.5 (90% MOE=4.12pp, est=6.10%)"
     },
     "13167": {
       "value": 6.120556414219474,
@@ -642,12 +661,14 @@
       "suppression_status": "available"
     },
     "13171": {
-      "value": 3.357142857142857,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=1.99pp, est=3.36%)"
     },
     "13173": {
-      "value": 6.5368971528181286,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=4.04pp, est=6.54%)"
     },
     "13175": {
       "value": 6.540561407378812,
@@ -666,20 +687,23 @@
       "suppression_status": "available"
     },
     "13183": {
-      "value": 5.980123372172721,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=3.26pp, est=5.98%)"
     },
     "13185": {
       "value": 6.868767806267806,
       "suppression_status": "available"
     },
     "13187": {
-      "value": 2.2859152452962896,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=1.19pp, est=2.29%)"
     },
     "13189": {
-      "value": 3.5912268016389493,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=1.84pp, est=3.59%)"
     },
     "13191": {
       "value": 7.545986622073579,
@@ -710,8 +734,9 @@
       "suppression_status": "available"
     },
     "13207": {
-      "value": 2.1299050177492083,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=1.12pp, est=2.13%)"
     },
     "13209": {
       "value": 4.1377027474346235,
@@ -734,8 +759,9 @@
       "suppression_status": "available"
     },
     "13219": {
-      "value": 0.6725086610963928,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=0.40pp, est=0.67%)"
     },
     "13221": {
       "value": 3.31934376192293,
@@ -766,24 +792,27 @@
       "suppression_status": "available"
     },
     "13235": {
-      "value": 7.277710109622412,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=4.33pp, est=7.28%)"
     },
     "13237": {
       "value": 4.489836194987172,
       "suppression_status": "available"
     },
     "13239": {
-      "value": 16.898395721925134,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=9.24pp, est=16.90%)"
     },
     "13241": {
       "value": 4.006748207507381,
       "suppression_status": "available"
     },
     "13243": {
-      "value": 21.104387291981848,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=11.85pp, est=21.10%)"
     },
     "13245": {
       "value": 10.107567012782747,
@@ -814,8 +843,9 @@
       "suppression_status": "available"
     },
     "13259": {
-      "value": 14.066059225512529,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=8.50pp, est=14.07%)"
     },
     "13261": {
       "value": 11.089601769911503,
@@ -826,8 +856,9 @@
       "suppression_status": "available"
     },
     "13265": {
-      "value": 8.385093167701864,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=4.64pp, est=8.39%)"
     },
     "13267": {
       "value": 5.721096543504172,
@@ -910,12 +941,14 @@
       "suppression_status": "available"
     },
     "13307": {
-      "value": 6.713780918727916,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.95 > 0.5 (90% MOE=6.34pp, est=6.71%)"
     },
     "13309": {
-      "value": 9.902912621359224,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=5.06pp, est=9.90%)"
     },
     "13311": {
       "value": 3.8380349261178273,
@@ -950,8 +983,9 @@
       "suppression_status": "available"
     },
     "15005": {
-      "value": 18.181818181818183,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=3.33 > 0.5 (90% MOE=60.55pp, est=18.18%)"
     },
     "15007": {
       "value": 3.950564670786277,
@@ -966,16 +1000,18 @@
       "suppression_status": "available"
     },
     "16003": {
-      "value": 1.0844748858447488,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.81 > 0.5 (90% MOE=0.87pp, est=1.08%)"
     },
     "16005": {
       "value": 5.458908218356329,
       "suppression_status": "available"
     },
     "16007": {
-      "value": 2.4263431542461005,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.66 > 0.5 (90% MOE=1.60pp, est=2.43%)"
     },
     "16009": {
       "value": 2.212166918049271,
@@ -986,12 +1022,14 @@
       "suppression_status": "available"
     },
     "16013": {
-      "value": 1.0588474852372225,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.74 > 0.5 (90% MOE=0.78pp, est=1.06%)"
     },
     "16015": {
-      "value": 2.894438138479001,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=1.75pp, est=2.89%)"
     },
     "16017": {
       "value": 4.842083779784683,
@@ -1002,24 +1040,28 @@
       "suppression_status": "available"
     },
     "16021": {
-      "value": 1.5511892450879008,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.66 > 0.5 (90% MOE=1.03pp, est=1.55%)"
     },
     "16023": {
-      "value": 7.571288102261553,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.61 > 0.5 (90% MOE=4.59pp, est=7.57%)"
     },
     "16025": {
-      "value": 5.3097345132743365,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.97 > 0.5 (90% MOE=5.13pp, est=5.31%)"
     },
     "16027": {
       "value": 3.371789920834138,
       "suppression_status": "available"
     },
     "16029": {
-      "value": 3.168724279835391,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=1.80pp, est=3.17%)"
     },
     "16031": {
       "value": 3.848021364408837,
@@ -1034,20 +1076,23 @@
       "suppression_status": "available"
     },
     "16037": {
-      "value": 3.673047077082255,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.71 > 0.5 (90% MOE=2.60pp, est=3.67%)"
     },
     "16039": {
       "value": 4.7105457227138645,
       "suppression_status": "available"
     },
     "16041": {
-      "value": 2.42299794661191,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.72 > 0.5 (90% MOE=1.75pp, est=2.42%)"
     },
     "16043": {
-      "value": 1.3759431868619618,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=0.89pp, est=1.38%)"
     },
     "16045": {
       "value": 4.415338914393735,
@@ -1062,8 +1107,9 @@
       "suppression_status": "available"
     },
     "16051": {
-      "value": 1.3738761491059703,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=0.72pp, est=1.37%)"
     },
     "16053": {
       "value": 3.464259575506221,
@@ -1078,16 +1124,18 @@
       "suppression_status": "available"
     },
     "16059": {
-      "value": 4.835820895522388,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.72 > 0.5 (90% MOE=3.49pp, est=4.84%)"
     },
     "16061": {
       "value": 3.428201811125485,
       "suppression_status": "available"
     },
     "16063": {
-      "value": 0.8169934640522877,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.84 > 0.5 (90% MOE=0.68pp, est=0.82%)"
     },
     "16065": {
       "value": 3.1225543903584283,
@@ -1102,8 +1150,9 @@
       "suppression_status": "available"
     },
     "16071": {
-      "value": 2.070393374741201,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.91 > 0.5 (90% MOE=1.89pp, est=2.07%)"
     },
     "16073": {
       "value": 3.3192090395480225,
@@ -1114,28 +1163,32 @@
       "suppression_status": "available"
     },
     "16077": {
-      "value": 3.323485967503693,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.04 > 0.5 (90% MOE=3.47pp, est=3.32%)"
     },
     "16079": {
       "value": 4.349357281211481,
       "suppression_status": "available"
     },
     "16081": {
-      "value": 1.0933741526350318,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.88 > 0.5 (90% MOE=0.96pp, est=1.09%)"
     },
     "16083": {
       "value": 3.2820240622788392,
       "suppression_status": "available"
     },
     "16085": {
-      "value": 3.9438856537850717,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.74 > 0.5 (90% MOE=2.93pp, est=3.94%)"
     },
     "16087": {
-      "value": 4.964539007092199,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=2.91pp, est=4.96%)"
     },
     "17001": {
       "value": 7.043572200216061,
@@ -1162,8 +1215,9 @@
       "suppression_status": "available"
     },
     "17013": {
-      "value": 2.9459901800327333,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=1.65pp, est=2.95%)"
     },
     "17015": {
       "value": 4.49212719975301,
@@ -1266,16 +1320,18 @@
       "suppression_status": "available"
     },
     "17065": {
-      "value": 5.791044776119403,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.61 > 0.5 (90% MOE=3.54pp, est=5.79%)"
     },
     "17067": {
       "value": 4.763805721889555,
       "suppression_status": "available"
     },
     "17069": {
-      "value": 9.568733153638814,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.63 > 0.5 (90% MOE=6.06pp, est=9.57%)"
     },
     "17071": {
       "value": 3.606311044327573,
@@ -1294,8 +1350,9 @@
       "suppression_status": "available"
     },
     "17079": {
-      "value": 3.3722782793414763,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=1.77pp, est=3.37%)"
     },
     "17081": {
       "value": 5.903411009793989,
@@ -1430,8 +1487,9 @@
       "suppression_status": "available"
     },
     "17147": {
-      "value": 1.5618157933148447,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=0.81pp, est=1.56%)"
     },
     "17149": {
       "value": 3.4565778159931213,
@@ -1474,8 +1532,9 @@
       "suppression_status": "available"
     },
     "17169": {
-      "value": 5.014641288433382,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=2.86pp, est=5.01%)"
     },
     "17171": {
       "value": 3.789370078740158,
@@ -1746,8 +1805,9 @@
       "suppression_status": "available"
     },
     "18101": {
-      "value": 4.047861507128309,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=2.26pp, est=4.05%)"
     },
     "18103": {
       "value": 5.546345139412208,
@@ -1862,12 +1922,14 @@
       "suppression_status": "available"
     },
     "18159": {
-      "value": 1.2769353551476457,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=0.72pp, est=1.28%)"
     },
     "18161": {
-      "value": 3.260869565217391,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.67 > 0.5 (90% MOE=2.20pp, est=3.26%)"
     },
     "18163": {
       "value": 7.97429985232778,
@@ -1954,8 +2016,9 @@
       "suppression_status": "available"
     },
     "19021": {
-      "value": 3.022670025188917,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.65pp, est=3.02%)"
     },
     "19023": {
       "value": 3.2953966366570406,
@@ -2182,8 +2245,9 @@
       "suppression_status": "available"
     },
     "19135": {
-      "value": 4.914744232698094,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=3.04pp, est=4.91%)"
     },
     "19137": {
       "value": 4.252549359947928,
@@ -2198,8 +2262,9 @@
       "suppression_status": "available"
     },
     "19143": {
-      "value": 2.762854950115119,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=1.57pp, est=2.76%)"
     },
     "19145": {
       "value": 6.865768544067522,
@@ -2330,8 +2395,9 @@
       "suppression_status": "available"
     },
     "20011": {
-      "value": 4.211438474870017,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=2.29pp, est=4.21%)"
     },
     "20013": {
       "value": 5.6466792148427,
@@ -2342,24 +2408,28 @@
       "suppression_status": "available"
     },
     "20017": {
-      "value": 3.056768558951965,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=1.81pp, est=3.06%)"
     },
     "20019": {
-      "value": 2.9657794676806084,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.63pp, est=2.97%)"
     },
     "20021": {
       "value": 6.600232949398214,
       "suppression_status": "available"
     },
     "20023": {
-      "value": 3.288364249578415,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.74 > 0.5 (90% MOE=2.44pp, est=3.29%)"
     },
     "20025": {
-      "value": 4.305043050430505,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=2.56pp, est=4.31%)"
     },
     "20027": {
       "value": 7.7156241388812346,
@@ -2374,8 +2444,9 @@
       "suppression_status": "available"
     },
     "20033": {
-      "value": 3.8976857490864796,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.68 > 0.5 (90% MOE=2.66pp, est=3.90%)"
     },
     "20035": {
       "value": 5.720068970687458,
@@ -2386,8 +2457,9 @@
       "suppression_status": "available"
     },
     "20039": {
-      "value": 2.112163146394756,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.72 > 0.5 (90% MOE=1.52pp, est=2.11%)"
     },
     "20041": {
       "value": 5.202312138728324,
@@ -2402,8 +2474,9 @@
       "suppression_status": "available"
     },
     "20047": {
-      "value": 5.223251895534962,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=2.77pp, est=5.22%)"
     },
     "20049": {
       "value": 4.739776951672862,
@@ -2434,32 +2507,37 @@
       "suppression_status": "available"
     },
     "20063": {
-      "value": 1.5371477369769428,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=0.91pp, est=1.54%)"
     },
     "20065": {
       "value": 3.4716342082980525,
       "suppression_status": "available"
     },
     "20067": {
-      "value": 3.2393773664282706,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.10 > 0.5 (90% MOE=3.56pp, est=3.24%)"
     },
     "20069": {
-      "value": 1.5880654475457172,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.82 > 0.5 (90% MOE=1.31pp, est=1.59%)"
     },
     "20071": {
-      "value": 4.3893129770992365,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.81 > 0.5 (90% MOE=3.53pp, est=4.39%)"
     },
     "20073": {
       "value": 5.990783410138248,
       "suppression_status": "available"
     },
     "20075": {
-      "value": 1.5584415584415585,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.22 > 0.5 (90% MOE=1.91pp, est=1.56%)"
     },
     "20077": {
       "value": 3.0839002267573696,
@@ -2470,12 +2548,14 @@
       "suppression_status": "available"
     },
     "20081": {
-      "value": 3.8294797687861273,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.75 > 0.5 (90% MOE=2.87pp, est=3.83%)"
     },
     "20083": {
-      "value": 0.9009009009009009,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.49 > 0.5 (90% MOE=1.35pp, est=0.90%)"
     },
     "20085": {
       "value": 4,
@@ -2486,16 +2566,18 @@
       "suppression_status": "available"
     },
     "20089": {
-      "value": 2.365930599369085,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=1.35pp, est=2.37%)"
     },
     "20091": {
       "value": 3.3320124031261105,
       "suppression_status": "available"
     },
     "20093": {
-      "value": 1.3186813186813187,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.20 > 0.5 (90% MOE=1.58pp, est=1.32%)"
     },
     "20095": {
       "value": 5.213730569948186,
@@ -2510,24 +2592,27 @@
       "suppression_status": "available"
     },
     "20101": {
-      "value": 4.9655172413793105,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.05 > 0.5 (90% MOE=5.22pp, est=4.97%)"
     },
     "20103": {
       "value": 4.426295624117765,
       "suppression_status": "available"
     },
     "20105": {
-      "value": 3.43980343980344,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.88pp, est=3.44%)"
     },
     "20107": {
       "value": 4.908118167015585,
       "suppression_status": "available"
     },
     "20109": {
-      "value": 5.654281098546042,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=3.49pp, est=5.65%)"
     },
     "20111": {
       "value": 5.3520492418555765,
@@ -2546,8 +2631,9 @@
       "suppression_status": "available"
     },
     "20119": {
-      "value": 3.074866310160428,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.66 > 0.5 (90% MOE=2.02pp, est=3.07%)"
     },
     "20121": {
       "value": 2.9781259237363287,
@@ -2562,12 +2648,14 @@
       "suppression_status": "available"
     },
     "20127": {
-      "value": 4.321728691476591,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=2.34pp, est=4.32%)"
     },
     "20129": {
-      "value": 3.263157894736842,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.89 > 0.5 (90% MOE=2.89pp, est=3.26%)"
     },
     "20131": {
       "value": 3.5829009142574746,
@@ -2578,24 +2666,28 @@
       "suppression_status": "available"
     },
     "20135": {
-      "value": 2.407566638005159,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=1.43pp, est=2.41%)"
     },
     "20137": {
-      "value": 1.0954616588419406,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.07 > 0.5 (90% MOE=1.18pp, est=1.10%)"
     },
     "20139": {
       "value": 2.452059100911663,
       "suppression_status": "available"
     },
     "20141": {
-      "value": 3.045369794903667,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=1.65pp, est=3.05%)"
     },
     "20143": {
-      "value": 3.0710980227177114,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=1.71pp, est=3.07%)"
     },
     "20145": {
       "value": 7.039337474120083,
@@ -2614,8 +2706,9 @@
       "suppression_status": "available"
     },
     "20153": {
-      "value": 4.030874785591767,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=2.22pp, est=4.03%)"
     },
     "20155": {
       "value": 4.719065656565657,
@@ -2638,20 +2731,23 @@
       "suppression_status": "available"
     },
     "20165": {
-      "value": 3.400868306801737,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.72 > 0.5 (90% MOE=2.44pp, est=3.40%)"
     },
     "20167": {
-      "value": 6.098741529525654,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=3.05pp, est=6.10%)"
     },
     "20169": {
       "value": 6.820933674155792,
       "suppression_status": "available"
     },
     "20171": {
-      "value": 2.7853881278538815,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.92 > 0.5 (90% MOE=2.57pp, est=2.79%)"
     },
     "20173": {
       "value": 5.683237084438895,
@@ -2666,52 +2762,61 @@
       "suppression_status": "available"
     },
     "20179": {
-      "value": 2.73972602739726,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.69 > 0.5 (90% MOE=1.89pp, est=2.74%)"
     },
     "20181": {
-      "value": 3.1806615776081424,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=2.23pp, est=3.18%)"
     },
     "20183": {
       "value": 3.2319391634980987,
       "suppression_status": "available"
     },
     "20185": {
-      "value": 2.816020025031289,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.63 > 0.5 (90% MOE=1.77pp, est=2.82%)"
     },
     "20187": {
-      "value": 2.18978102189781,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.13 > 0.5 (90% MOE=2.48pp, est=2.19%)"
     },
     "20189": {
-      "value": 3.4097261039686972,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.76 > 0.5 (90% MOE=2.59pp, est=3.41%)"
     },
     "20191": {
       "value": 5.404501894361489,
       "suppression_status": "available"
     },
     "20193": {
-      "value": 3.1925185424056757,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.64 > 0.5 (90% MOE=2.06pp, est=3.19%)"
     },
     "20195": {
-      "value": 2.74888558692422,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.64 > 0.5 (90% MOE=1.77pp, est=2.75%)"
     },
     "20197": {
       "value": 3.0198776758409784,
       "suppression_status": "available"
     },
     "20199": {
-      "value": 3.4848484848484853,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=2.27pp, est=3.48%)"
     },
     "20201": {
-      "value": 2.825811893715732,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=1.42pp, est=2.83%)"
     },
     "20203": {
       "value": 0,
@@ -2774,8 +2879,9 @@
       "suppression_status": "available"
     },
     "21023": {
-      "value": 3.0646644192460926,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=1.62pp, est=3.06%)"
     },
     "21025": {
       "value": 12.346348517715112,
@@ -2806,8 +2912,9 @@
       "suppression_status": "available"
     },
     "21039": {
-      "value": 3.518123667377399,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=2.02pp, est=3.52%)"
     },
     "21041": {
       "value": 7.487154391974553,
@@ -2854,8 +2961,9 @@
       "suppression_status": "available"
     },
     "21063": {
-      "value": 8.300567933595456,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=4.71pp, est=8.30%)"
     },
     "21065": {
       "value": 7.745762711864407,
@@ -2938,8 +3046,9 @@
       "suppression_status": "available"
     },
     "21105": {
-      "value": 6.951219512195123,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.63 > 0.5 (90% MOE=4.35pp, est=6.95%)"
     },
     "21107": {
       "value": 5.569926798392867,
@@ -3006,16 +3115,18 @@
       "suppression_status": "available"
     },
     "21139": {
-      "value": 3.198172472872644,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.63 > 0.5 (90% MOE=2.02pp, est=3.20%)"
     },
     "21141": {
       "value": 5.392785204175059,
       "suppression_status": "available"
     },
     "21143": {
-      "value": 4.464555052790347,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=2.68pp, est=4.46%)"
     },
     "21145": {
       "value": 6.706490270091985,
@@ -3102,8 +3213,9 @@
       "suppression_status": "available"
     },
     "21187": {
-      "value": 3.754987092231871,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=2.00pp, est=3.75%)"
     },
     "21189": {
       "value": 14.807436918990705,
@@ -3130,8 +3242,9 @@
       "suppression_status": "available"
     },
     "21201": {
-      "value": 3.034134007585335,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.01 > 0.5 (90% MOE=3.06pp, est=3.03%)"
     },
     "21203": {
       "value": 7.451773490976976,
@@ -3174,8 +3287,9 @@
       "suppression_status": "available"
     },
     "21223": {
-      "value": 4.150137320720171,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.61 > 0.5 (90% MOE=2.52pp, est=4.15%)"
     },
     "21225": {
       "value": 5.4212168486739465,
@@ -3250,12 +3364,14 @@
       "suppression_status": "available"
     },
     "22021": {
-      "value": 8.437330439500814,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=4.35pp, est=8.44%)"
     },
     "22023": {
-      "value": 1.0816125860373649,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.98 > 0.5 (90% MOE=1.06pp, est=1.08%)"
     },
     "22025": {
       "value": 11.31339401820546,
@@ -3326,8 +3442,9 @@
       "suppression_status": "available"
     },
     "22059": {
-      "value": 4.9969281179602705,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=2.79pp, est=5.00%)"
     },
     "22061": {
       "value": 8.532795376478926,
@@ -3458,8 +3575,9 @@
       "suppression_status": "available"
     },
     "22125": {
-      "value": 3.8864740475581696,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=2.23pp, est=3.89%)"
     },
     "22127": {
       "value": 8.294081507270121,
@@ -3638,8 +3756,9 @@
       "suppression_status": "available"
     },
     "25007": {
-      "value": 5.148057593045368,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.63 > 0.5 (90% MOE=3.26pp, est=5.15%)"
     },
     "25009": {
       "value": 9.584632759660673,
@@ -3846,8 +3965,9 @@
       "suppression_status": "available"
     },
     "26083": {
-      "value": 2.6605504587155964,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=1.53pp, est=2.66%)"
     },
     "26085": {
       "value": 7.544108700060839,
@@ -4166,8 +4286,9 @@
       "suppression_status": "available"
     },
     "27077": {
-      "value": 2.6426426426426426,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=1.59pp, est=2.64%)"
     },
     "27079": {
       "value": 3.3220280024349944,
@@ -4390,16 +4511,18 @@
       "suppression_status": "available"
     },
     "28015": {
-      "value": 3.804994054696789,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=2.37pp, est=3.80%)"
     },
     "28017": {
       "value": 10.417602155365962,
       "suppression_status": "available"
     },
     "28019": {
-      "value": 5.217391304347826,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=2.84pp, est=5.22%)"
     },
     "28021": {
       "value": 10.754583921015515,
@@ -4422,8 +4545,9 @@
       "suppression_status": "available"
     },
     "28031": {
-      "value": 7.402175448509676,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.63 > 0.5 (90% MOE=4.66pp, est=7.40%)"
     },
     "28033": {
       "value": 3.6205230285458767,
@@ -4434,16 +4558,18 @@
       "suppression_status": "available"
     },
     "28037": {
-      "value": 3.8657171922685656,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=2.06pp, est=3.87%)"
     },
     "28039": {
       "value": 5.9053833605220225,
       "suppression_status": "available"
     },
     "28041": {
-      "value": 6.6526977475117866,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=3.55pp, est=6.65%)"
     },
     "28043": {
       "value": 7.9906268306971295,
@@ -4470,12 +4596,14 @@
       "suppression_status": "available"
     },
     "28055": {
-      "value": 17.819148936170212,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.61 > 0.5 (90% MOE=10.93pp, est=17.82%)"
     },
     "28057": {
-      "value": 3.2090199479618384,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=1.63pp, est=3.21%)"
     },
     "28059": {
       "value": 4.859101828958213,
@@ -4486,8 +4614,9 @@
       "suppression_status": "available"
     },
     "28063": {
-      "value": 4.1315345699831365,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=2.50pp, est=4.13%)"
     },
     "28065": {
       "value": 6.639288158795345,
@@ -4498,8 +4627,9 @@
       "suppression_status": "available"
     },
     "28069": {
-      "value": 4.799002804612028,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=2.55pp, est=4.80%)"
     },
     "28071": {
       "value": 6.1642355483522415,
@@ -4638,8 +4768,9 @@
       "suppression_status": "available"
     },
     "28139": {
-      "value": 2.9635258358662613,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=1.57pp, est=2.96%)"
     },
     "28141": {
       "value": 5.7685624927603385,
@@ -4694,8 +4825,9 @@
       "suppression_status": "available"
     },
     "29003": {
-      "value": 2.881720430107527,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=1.69pp, est=2.88%)"
     },
     "29005": {
       "value": 3.485838779956427,
@@ -4722,8 +4854,9 @@
       "suppression_status": "available"
     },
     "29017": {
-      "value": 4.116285052739902,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=2.29pp, est=4.12%)"
     },
     "29019": {
       "value": 6.00394225134516,
@@ -4814,8 +4947,9 @@
       "suppression_status": "available"
     },
     "29063": {
-      "value": 3.496688741721855,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=1.76pp, est=3.50%)"
     },
     "29065": {
       "value": 5.973568281938326,
@@ -4894,8 +5028,9 @@
       "suppression_status": "available"
     },
     "29103": {
-      "value": 1.8121911037891267,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=1.13pp, est=1.81%)"
     },
     "29105": {
       "value": 7.617795613367467,
@@ -5034,8 +5169,9 @@
       "suppression_status": "available"
     },
     "29173": {
-      "value": 2.8542561252841625,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=1.43pp, est=2.85%)"
     },
     "29175": {
       "value": 5.188067444876784,
@@ -5082,8 +5218,9 @@
       "suppression_status": "available"
     },
     "29199": {
-      "value": 2.657161373946857,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.66 > 0.5 (90% MOE=1.75pp, est=2.66%)"
     },
     "29201": {
       "value": 6.812636021895403,
@@ -5138,8 +5275,9 @@
       "suppression_status": "available"
     },
     "29227": {
-      "value": 6.7669172932330826,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=4.19pp, est=6.77%)"
     },
     "29229": {
       "value": 7.337736932797243,
@@ -5150,8 +5288,9 @@
       "suppression_status": "available"
     },
     "30001": {
-      "value": 0.5823829167677749,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.04 > 0.5 (90% MOE=0.61pp, est=0.58%)"
     },
     "30003": {
       "value": 5.4185857491194795,
@@ -5162,16 +5301,18 @@
       "suppression_status": "available"
     },
     "30007": {
-      "value": 2.042936288088643,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.66 > 0.5 (90% MOE=1.35pp, est=2.04%)"
     },
     "30009": {
       "value": 3.64715860899067,
       "suppression_status": "available"
     },
     "30011": {
-      "value": 6.67779632721202,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=4.65pp, est=6.68%)"
     },
     "30013": {
       "value": 5.823713082586153,
@@ -5186,20 +5327,23 @@
       "suppression_status": "available"
     },
     "30019": {
-      "value": 2.653631284916201,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.71 > 0.5 (90% MOE=1.89pp, est=2.65%)"
     },
     "30021": {
-      "value": 5.013477088948787,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=2.81pp, est=5.01%)"
     },
     "30023": {
       "value": 8.267543859649122,
       "suppression_status": "available"
     },
     "30025": {
-      "value": 6.462882096069869,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=3.70pp, est=6.46%)"
     },
     "30027": {
       "value": 8.423076923076923,
@@ -5214,20 +5358,23 @@
       "suppression_status": "available"
     },
     "30033": {
-      "value": 1.9656019656019657,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.70 > 0.5 (90% MOE=3.35pp, est=1.97%)"
     },
     "30035": {
       "value": 5.05510301868711,
       "suppression_status": "available"
     },
     "30037": {
-      "value": 2.7624309392265194,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.68 > 0.5 (90% MOE=1.88pp, est=2.76%)"
     },
     "30039": {
-      "value": 2.909090909090909,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.85 > 0.5 (90% MOE=2.48pp, est=2.91%)"
     },
     "30041": {
       "value": 5.9910054609701255,
@@ -5238,8 +5385,9 @@
       "suppression_status": "available"
     },
     "30045": {
-      "value": 2.0948180815876514,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.75 > 0.5 (90% MOE=1.57pp, est=2.09%)"
     },
     "30047": {
       "value": 4.394250513347023,
@@ -5258,28 +5406,33 @@
       "suppression_status": "available"
     },
     "30055": {
-      "value": 0.24449877750611246,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=5.85 > 0.5 (90% MOE=1.43pp, est=0.24%)"
     },
     "30057": {
-      "value": 1.7823386443424252,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=1.07pp, est=1.78%)"
     },
     "30059": {
-      "value": 0.11148272017837235,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=11.40 > 0.5 (90% MOE=1.27pp, est=0.11%)"
     },
     "30061": {
-      "value": 2.1575984990619137,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.75 > 0.5 (90% MOE=1.63pp, est=2.16%)"
     },
     "30063": {
       "value": 5.292204019983735,
       "suppression_status": "available"
     },
     "30065": {
-      "value": 5.537306428906617,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=3.02pp, est=5.54%)"
     },
     "30067": {
       "value": 3.5000605546808767,
@@ -5290,32 +5443,37 @@
       "suppression_status": "available"
     },
     "30071": {
-      "value": 1.0740531373657434,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.01 > 0.5 (90% MOE=1.09pp, est=1.07%)"
     },
     "30073": {
       "value": 6.5625,
       "suppression_status": "available"
     },
     "30075": {
-      "value": 4.628330995792426,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.64 > 0.5 (90% MOE=2.97pp, est=4.63%)"
     },
     "30077": {
-      "value": 4.557069846678024,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.73 > 0.5 (90% MOE=3.31pp, est=4.56%)"
     },
     "30079": {
-      "value": 6.538461538461539,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.92 > 0.5 (90% MOE=6.02pp, est=6.54%)"
     },
     "30081": {
       "value": 3.9299217210714095,
       "suppression_status": "available"
     },
     "30083": {
-      "value": 5.422222222222222,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=2.73pp, est=5.42%)"
     },
     "30085": {
       "value": 10.37483266398929,
@@ -5330,20 +5488,23 @@
       "suppression_status": "available"
     },
     "30091": {
-      "value": 3.8095238095238098,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=2.10pp, est=3.81%)"
     },
     "30093": {
       "value": 6.939466996807194,
       "suppression_status": "available"
     },
     "30095": {
-      "value": 2.9206513310933055,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=1.51pp, est=2.92%)"
     },
     "30097": {
-      "value": 3.674014696058784,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=2.59pp, est=3.67%)"
     },
     "30099": {
       "value": 5.831973898858075,
@@ -5354,20 +5515,23 @@
       "suppression_status": "available"
     },
     "30103": {
-      "value": 5.2356020942408374,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.98 > 0.5 (90% MOE=5.11pp, est=5.24%)"
     },
     "30105": {
       "value": 5.172413793103448,
       "suppression_status": "available"
     },
     "30107": {
-      "value": 2.6589595375722546,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.96 > 0.5 (90% MOE=2.55pp, est=2.66%)"
     },
     "30109": {
-      "value": 1.9230769230769231,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.00 > 0.5 (90% MOE=1.93pp, est=1.92%)"
     },
     "30111": {
       "value": 4.365400161681487,
@@ -5382,32 +5546,38 @@
       "suppression_status": "available"
     },
     "31005": {
-      "value": 3.260869565217391,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.43 > 0.5 (90% MOE=4.67pp, est=3.26%)"
     },
     "31007": {
-      "value": 1.1627906976744187,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=3.59 > 0.5 (90% MOE=4.18pp, est=1.16%)"
     },
     "31009": {
-      "value": 2.604166666666667,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.87 > 0.5 (90% MOE=2.25pp, est=2.60%)"
     },
     "31011": {
       "value": 4.132606721162579,
       "suppression_status": "available"
     },
     "31013": {
-      "value": 4.628609213136434,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=2.34pp, est=4.63%)"
     },
     "31015": {
-      "value": 1.2755102040816326,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.71 > 0.5 (90% MOE=0.91pp, est=1.28%)"
     },
     "31017": {
-      "value": 4.5529801324503305,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=3.19pp, est=4.55%)"
     },
     "31019": {
       "value": 4.333231614281355,
@@ -5430,12 +5600,14 @@
       "suppression_status": "available"
     },
     "31029": {
-      "value": 2.0180932498260264,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.81 > 0.5 (90% MOE=1.63pp, est=2.02%)"
     },
     "31031": {
-      "value": 7.357559443696725,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=3.84pp, est=7.36%)"
     },
     "31033": {
       "value": 4.205929671339922,
@@ -5446,12 +5618,14 @@
       "suppression_status": "available"
     },
     "31037": {
-      "value": 1.291563616378126,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.61 > 0.5 (90% MOE=0.79pp, est=1.29%)"
     },
     "31039": {
-      "value": 2.168164992067689,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=1.28pp, est=2.17%)"
     },
     "31041": {
       "value": 4.780071813285458,
@@ -5462,20 +5636,23 @@
       "suppression_status": "available"
     },
     "31045": {
-      "value": 3.2830523513753325,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.81pp, est=3.28%)"
     },
     "31047": {
       "value": 5.633489200623469,
       "suppression_status": "available"
     },
     "31049": {
-      "value": 2.0606060606060606,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.69 > 0.5 (90% MOE=1.42pp, est=2.06%)"
     },
     "31051": {
-      "value": 2.950379973178364,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=1.53pp, est=2.95%)"
     },
     "31053": {
       "value": 4.245441700867928,
@@ -5486,20 +5663,24 @@
       "suppression_status": "available"
     },
     "31057": {
-      "value": 2.8606965174129355,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.69 > 0.5 (90% MOE=1.98pp, est=2.86%)"
     },
     "31059": {
-      "value": 3.4844668345927787,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=1.76pp, est=3.48%)"
     },
     "31061": {
-      "value": 3.7209302325581395,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=2.03pp, est=3.72%)"
     },
     "31063": {
-      "value": 2.4691358024691357,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=1.73pp, est=2.47%)"
     },
     "31065": {
       "value": 4.087736789631107,
@@ -5510,40 +5691,48 @@
       "suppression_status": "available"
     },
     "31069": {
-      "value": 1.8137847642079807,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.67 > 0.5 (90% MOE=1.22pp, est=1.81%)"
     },
     "31071": {
-      "value": 5.466666666666667,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=3.57pp, est=5.47%)"
     },
     "31073": {
-      "value": 0.6435006435006435,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=0.55pp, est=0.64%)"
     },
     "31075": {
-      "value": 4.406779661016949,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.33 > 0.5 (90% MOE=5.88pp, est=4.41%)"
     },
     "31077": {
-      "value": 2.1253985122210417,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.68 > 0.5 (90% MOE=1.45pp, est=2.13%)"
     },
     "31079": {
       "value": 5.527329345242974,
       "suppression_status": "available"
     },
     "31081": {
-      "value": 1.4861388968276652,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.66 > 0.5 (90% MOE=0.98pp, est=1.49%)"
     },
     "31083": {
-      "value": 1.9166666666666665,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=1.19pp, est=1.92%)"
     },
     "31085": {
-      "value": 3.361344537815126,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.73 > 0.5 (90% MOE=2.44pp, est=3.36%)"
     },
     "31087": {
       "value": 4.177777777777777,
@@ -5554,8 +5743,9 @@
       "suppression_status": "available"
     },
     "31091": {
-      "value": 5.7324840764331215,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.92 > 0.5 (90% MOE=5.25pp, est=5.73%)"
     },
     "31093": {
       "value": 4.931836407377706,
@@ -5570,20 +5760,23 @@
       "suppression_status": "available"
     },
     "31099": {
-      "value": 1.8315018315018317,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.71 > 0.5 (90% MOE=1.30pp, est=1.83%)"
     },
     "31101": {
       "value": 6.1074505828687276,
       "suppression_status": "available"
     },
     "31103": {
-      "value": 1.529051987767584,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=2.16 > 0.5 (90% MOE=3.30pp, est=1.53%)"
     },
     "31105": {
-      "value": 2.4167210973220117,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.64 > 0.5 (90% MOE=1.55pp, est=2.42%)"
     },
     "31107": {
       "value": 3.833075734157651,
@@ -5602,44 +5795,51 @@
       "suppression_status": "available"
     },
     "31115": {
-      "value": 1.2048192771084338,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=3.59 > 0.5 (90% MOE=4.33pp, est=1.20%)"
     },
     "31117": {
-      "value": 4.591836734693878,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.74 > 0.5 (90% MOE=8.00pp, est=4.59%)"
     },
     "31119": {
       "value": 5.10175240248728,
       "suppression_status": "available"
     },
     "31121": {
-      "value": 2.1183800623052957,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=1.25pp, est=2.12%)"
     },
     "31123": {
       "value": 4.391534391534392,
       "suppression_status": "available"
     },
     "31125": {
-      "value": 2.674591381872214,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=1.59pp, est=2.67%)"
     },
     "31127": {
-      "value": 5.263157894736842,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=2.89pp, est=5.26%)"
     },
     "31129": {
-      "value": 3.4634414513468936,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=2.43pp, est=3.46%)"
     },
     "31131": {
       "value": 4.094659816285224,
       "suppression_status": "available"
     },
     "31133": {
-      "value": 5.10677808727948,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.78 > 0.5 (90% MOE=3.97pp, est=5.11%)"
     },
     "31135": {
       "value": 3.356282271944923,
@@ -5658,8 +5858,9 @@
       "suppression_status": "available"
     },
     "31143": {
-      "value": 1.6034985422740524,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.61 > 0.5 (90% MOE=0.97pp, est=1.60%)"
     },
     "31145": {
       "value": 9.410175596578119,
@@ -5670,12 +5871,14 @@
       "suppression_status": "available"
     },
     "31149": {
-      "value": 3.7800687285223367,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.72 > 0.5 (90% MOE=2.73pp, est=3.78%)"
     },
     "31151": {
-      "value": 1.9938056523422378,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.09pp, est=1.99%)"
     },
     "31153": {
       "value": 2.8364597239234253,
@@ -5694,28 +5897,32 @@
       "suppression_status": "available"
     },
     "31161": {
-      "value": 2.9688972667295004,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=1.50pp, est=2.97%)"
     },
     "31163": {
       "value": 5.486862442040186,
       "suppression_status": "available"
     },
     "31165": {
-      "value": 4.595185995623632,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.74 > 0.5 (90% MOE=3.40pp, est=4.60%)"
     },
     "31167": {
-      "value": 1.834862385321101,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=1.19pp, est=1.83%)"
     },
     "31169": {
       "value": 5.091258405379443,
       "suppression_status": "available"
     },
     "31171": {
-      "value": 1.8867924528301887,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.43 > 0.5 (90% MOE=2.70pp, est=1.89%)"
     },
     "31173": {
       "value": 8.27029752899647,
@@ -5730,16 +5937,18 @@
       "suppression_status": "available"
     },
     "31179": {
-      "value": 4.040404040404041,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.67 > 0.5 (90% MOE=2.73pp, est=4.04%)"
     },
     "31181": {
       "value": 3.8589487691284097,
       "suppression_status": "available"
     },
     "31183": {
-      "value": 1.6713091922005572,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.98 > 0.5 (90% MOE=1.64pp, est=1.67%)"
     },
     "31185": {
       "value": 5.475040257648954,
@@ -5762,32 +5971,37 @@
       "suppression_status": "available"
     },
     "32009": {
-      "value": 31.44016227180527,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.90 > 0.5 (90% MOE=28.40pp, est=31.44%)"
     },
     "32011": {
-      "value": 8.571428571428571,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=7.37pp, est=8.57%)"
     },
     "32013": {
       "value": 3.4586251250535947,
       "suppression_status": "available"
     },
     "32015": {
-      "value": 2.35191637630662,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.03 > 0.5 (90% MOE=2.43pp, est=2.35%)"
     },
     "32017": {
-      "value": 3.136531365313653,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.76 > 0.5 (90% MOE=2.38pp, est=3.14%)"
     },
     "32019": {
       "value": 2.4633906843700637,
       "suppression_status": "available"
     },
     "32021": {
-      "value": 1.558891454965358,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=1.34pp, est=1.56%)"
     },
     "32023": {
       "value": 5.149706056601194,
@@ -5798,16 +6012,18 @@
       "suppression_status": "available"
     },
     "32029": {
-      "value": 0.8537886872998933,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.48 > 0.5 (90% MOE=1.26pp, est=0.85%)"
     },
     "32031": {
       "value": 6.522416656022481,
       "suppression_status": "available"
     },
     "32033": {
-      "value": 1.2914587613736423,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.89 > 0.5 (90% MOE=1.15pp, est=1.29%)"
     },
     "32510": {
       "value": 6.1897513952308465,
@@ -5942,8 +6158,9 @@
       "suppression_status": "available"
     },
     "35003": {
-      "value": 6.990881458966565,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.93 > 0.5 (90% MOE=6.50pp, est=6.99%)"
     },
     "35005": {
       "value": 5.7530184282990895,
@@ -5962,8 +6179,9 @@
       "suppression_status": "available"
     },
     "35011": {
-      "value": 4.53920220082531,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.23 > 0.5 (90% MOE=5.57pp, est=4.54%)"
     },
     "35013": {
       "value": 5.762001676044535,
@@ -5978,16 +6196,19 @@
       "suppression_status": "available"
     },
     "35019": {
-      "value": 3.790489317711923,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=2.21pp, est=3.79%)"
     },
     "35021": {
-      "value": 8.865248226950355,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.85 > 0.5 (90% MOE=7.57pp, est=8.87%)"
     },
     "35023": {
-      "value": 6.862091938707528,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=3.75pp, est=6.86%)"
     },
     "35025": {
       "value": 4.302344513187887,
@@ -5998,8 +6219,9 @@
       "suppression_status": "available"
     },
     "35028": {
-      "value": 1.6441359152356596,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=0.95pp, est=1.64%)"
     },
     "35029": {
       "value": 5.450341334507818,
@@ -6010,8 +6232,9 @@
       "suppression_status": "available"
     },
     "35033": {
-      "value": 3.7669512807634358,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.84 > 0.5 (90% MOE=3.15pp, est=3.77%)"
     },
     "35035": {
       "value": 5.015441630636195,
@@ -6062,8 +6285,9 @@
       "suppression_status": "available"
     },
     "35059": {
-      "value": 6.449468085106383,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.61 > 0.5 (90% MOE=3.91pp, est=6.45%)"
     },
     "35061": {
       "value": 2.9572100664625496,
@@ -6374,8 +6598,9 @@
       "suppression_status": "available"
     },
     "37029": {
-      "value": 1.5450861195542045,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.12 > 0.5 (90% MOE=1.73pp, est=1.55%)"
     },
     "37031": {
       "value": 3.5450990448105646,
@@ -6402,8 +6627,9 @@
       "suppression_status": "available"
     },
     "37043": {
-      "value": 7.280301527474707,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=4.10pp, est=7.28%)"
     },
     "37045": {
       "value": 5.911118276102961,
@@ -6462,8 +6688,9 @@
       "suppression_status": "available"
     },
     "37073": {
-      "value": 3.1050011851149564,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=1.94pp, est=3.11%)"
     },
     "37075": {
       "value": 8.967391304347826,
@@ -6506,8 +6733,9 @@
       "suppression_status": "available"
     },
     "37095": {
-      "value": 8.652482269503546,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.82 > 0.5 (90% MOE=7.07pp, est=8.65%)"
     },
     "37097": {
       "value": 3.4987079404164354,
@@ -6670,8 +6898,9 @@
       "suppression_status": "available"
     },
     "37177": {
-      "value": 7.924263674614306,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.61 > 0.5 (90% MOE=4.84pp, est=7.92%)"
     },
     "37179": {
       "value": 2.3458306478092203,
@@ -6718,8 +6947,9 @@
       "suppression_status": "available"
     },
     "38001": {
-      "value": 9.421000981354268,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=5.03pp, est=9.42%)"
     },
     "38003": {
       "value": 4.802143446001648,
@@ -6730,20 +6960,24 @@
       "suppression_status": "available"
     },
     "38007": {
-      "value": 1.6129032258064515,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.22 > 0.5 (90% MOE=1.97pp, est=1.61%)"
     },
     "38009": {
-      "value": 1.9294990723562153,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=1.04pp, est=1.93%)"
     },
     "38011": {
-      "value": 3.5569927243330643,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.74 > 0.5 (90% MOE=2.64pp, est=3.56%)"
     },
     "38013": {
-      "value": 2.7926960257787328,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.80 > 0.5 (90% MOE=2.22pp, est=2.79%)"
     },
     "38015": {
       "value": 5.725824434478829,
@@ -6754,24 +6988,29 @@
       "suppression_status": "available"
     },
     "38019": {
-      "value": 4.093567251461988,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.72 > 0.5 (90% MOE=2.95pp, est=4.09%)"
     },
     "38021": {
-      "value": 0.9216589861751152,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=0.53pp, est=0.92%)"
     },
     "38023": {
-      "value": 3.6363636363636362,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.90 > 0.5 (90% MOE=3.26pp, est=3.64%)"
     },
     "38025": {
-      "value": 1.3218770654329148,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.75 > 0.5 (90% MOE=0.99pp, est=1.32%)"
     },
     "38027": {
-      "value": 6.304728546409807,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=3.28pp, est=6.30%)"
     },
     "38029": {
       "value": 4.353562005277045,
@@ -6782,36 +7021,41 @@
       "suppression_status": "available"
     },
     "38033": {
-      "value": 3.469079939668175,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.71 > 0.5 (90% MOE=2.45pp, est=3.47%)"
     },
     "38035": {
       "value": 6.43904010307618,
       "suppression_status": "available"
     },
     "38037": {
-      "value": 4.104477611940299,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=2.44pp, est=4.10%)"
     },
     "38039": {
       "value": 5.2854122621564485,
       "suppression_status": "available"
     },
     "38041": {
-      "value": 2.5293586269196027,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.74 > 0.5 (90% MOE=1.87pp, est=2.53%)"
     },
     "38043": {
-      "value": 0.44286979627989376,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.13 > 0.5 (90% MOE=0.50pp, est=0.44%)"
     },
     "38045": {
       "value": 3.387850467289719,
       "suppression_status": "available"
     },
     "38047": {
-      "value": 3.2341526520051747,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.63 > 0.5 (90% MOE=2.04pp, est=3.23%)"
     },
     "38049": {
       "value": 4.7240618101545255,
@@ -6830,12 +7074,14 @@
       "suppression_status": "available"
     },
     "38057": {
-      "value": 2.476349471341124,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.80 > 0.5 (90% MOE=1.97pp, est=2.48%)"
     },
     "38059": {
-      "value": 2.727474314435657,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=1.40pp, est=2.73%)"
     },
     "38061": {
       "value": 5.00130242250586,
@@ -6846,16 +7092,18 @@
       "suppression_status": "available"
     },
     "38065": {
-      "value": 2.8885832187070153,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.98 > 0.5 (90% MOE=2.84pp, est=2.89%)"
     },
     "38067": {
       "value": 3.0077728962487327,
       "suppression_status": "available"
     },
     "38069": {
-      "value": 2.0652173913043477,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.67 > 0.5 (90% MOE=1.38pp, est=2.07%)"
     },
     "38071": {
       "value": 12.671166827386692,
@@ -6866,8 +7114,9 @@
       "suppression_status": "available"
     },
     "38075": {
-      "value": 2.711496746203905,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=1.69pp, est=2.71%)"
     },
     "38077": {
       "value": 6.741573033707865,
@@ -6882,32 +7131,36 @@
       "suppression_status": "available"
     },
     "38083": {
-      "value": 3.106508875739645,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=1.94pp, est=3.11%)"
     },
     "38085": {
       "value": 13.964386129334583,
       "suppression_status": "available"
     },
     "38087": {
-      "value": 0.8823529411764706,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=3.59 > 0.5 (90% MOE=3.17pp, est=0.88%)"
     },
     "38089": {
       "value": 6.26465915109329,
       "suppression_status": "available"
     },
     "38091": {
-      "value": 0.957592339261286,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.67 > 0.5 (90% MOE=1.60pp, est=0.96%)"
     },
     "38093": {
       "value": 5.680473372781065,
       "suppression_status": "available"
     },
     "38095": {
-      "value": 2.9227557411273484,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.69 > 0.5 (90% MOE=2.02pp, est=2.92%)"
     },
     "38097": {
       "value": 5.217129071170085,
@@ -7294,8 +7547,9 @@
       "suppression_status": "available"
     },
     "40007": {
-      "value": 2.0648967551622417,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.63 > 0.5 (90% MOE=1.30pp, est=2.06%)"
     },
     "40009": {
       "value": 4.1748046875,
@@ -7330,8 +7584,9 @@
       "suppression_status": "available"
     },
     "40025": {
-      "value": 5.84045584045584,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.69 > 0.5 (90% MOE=4.03pp, est=5.84%)"
     },
     "40027": {
       "value": 4.106927567154988,
@@ -7394,12 +7649,14 @@
       "suppression_status": "available"
     },
     "40057": {
-      "value": 4.842105263157895,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=2.74pp, est=4.84%)"
     },
     "40059": {
-      "value": 1.4342629482071714,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.06 > 0.5 (90% MOE=1.52pp, est=1.43%)"
     },
     "40061": {
       "value": 5.0569176882662,
@@ -7426,8 +7683,9 @@
       "suppression_status": "available"
     },
     "40073": {
-      "value": 3.6531299875864516,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=2.00pp, est=3.65%)"
     },
     "40075": {
       "value": 4.723467862481315,
@@ -7486,8 +7744,9 @@
       "suppression_status": "available"
     },
     "40103": {
-      "value": 3.402331667856293,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.69 > 0.5 (90% MOE=2.35pp, est=3.40%)"
     },
     "40105": {
       "value": 4.656796769851952,
@@ -7558,12 +7817,14 @@
       "suppression_status": "available"
     },
     "40139": {
-      "value": 5.152838427947598,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=2.58pp, est=5.15%)"
     },
     "40141": {
-      "value": 7.269303201506591,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=3.63pp, est=7.27%)"
     },
     "40143": {
       "value": 6.1628123487133655,
@@ -7630,12 +7891,14 @@
       "suppression_status": "available"
     },
     "41021": {
-      "value": 4.7180667433832,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.67 > 0.5 (90% MOE=3.16pp, est=4.72%)"
     },
     "41023": {
-      "value": 2.7446300715990453,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=1.48pp, est=2.74%)"
     },
     "41025": {
       "value": 7.099649793059536,
@@ -7686,8 +7949,9 @@
       "suppression_status": "available"
     },
     "41049": {
-      "value": 2.244331328088848,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.23pp, est=2.24%)"
     },
     "41051": {
       "value": 12.694017133382463,
@@ -7726,8 +7990,9 @@
       "suppression_status": "available"
     },
     "41069": {
-      "value": 3.0165912518853695,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=2.60pp, est=3.02%)"
     },
     "41071": {
       "value": 5.8373673910804404,
@@ -8206,16 +8471,18 @@
       "suppression_status": "available"
     },
     "46003": {
-      "value": 2.495201535508637,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=1.44pp, est=2.50%)"
     },
     "46005": {
       "value": 8.817635270541082,
       "suppression_status": "available"
     },
     "46007": {
-      "value": 7.8125,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=5.09pp, est=7.81%)"
     },
     "46009": {
       "value": 3.8746908491343777,
@@ -8230,28 +8497,32 @@
       "suppression_status": "available"
     },
     "46015": {
-      "value": 4.968944099378882,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=2.88pp, est=4.97%)"
     },
     "46017": {
       "value": 16.33064516129032,
       "suppression_status": "available"
     },
     "46019": {
-      "value": 4.491725768321513,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=2.44pp, est=4.49%)"
     },
     "46021": {
-      "value": 3.977272727272727,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.97 > 0.5 (90% MOE=3.86pp, est=3.98%)"
     },
     "46023": {
       "value": 4.624085163007319,
       "suppression_status": "available"
     },
     "46025": {
-      "value": 3.479576399394856,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=1.80pp, est=3.48%)"
     },
     "46027": {
       "value": 6.725409099082899,
@@ -8266,8 +8537,9 @@
       "suppression_status": "available"
     },
     "46033": {
-      "value": 0.6446813786263328,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.94 > 0.5 (90% MOE=0.61pp, est=0.64%)"
     },
     "46035": {
       "value": 7.459260959375717,
@@ -8278,40 +8550,46 @@
       "suppression_status": "available"
     },
     "46039": {
-      "value": 2.2222222222222223,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=1.27pp, est=2.22%)"
     },
     "46041": {
       "value": 8.328375966686497,
       "suppression_status": "available"
     },
     "46043": {
-      "value": 2.685765443151298,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=1.49pp, est=2.69%)"
     },
     "46045": {
-      "value": 0.881057268722467,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.77 > 0.5 (90% MOE=0.68pp, est=0.88%)"
     },
     "46047": {
       "value": 6.9997095556200986,
       "suppression_status": "available"
     },
     "46049": {
-      "value": 8.014354066985646,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.82 > 0.5 (90% MOE=6.59pp, est=8.01%)"
     },
     "46051": {
-      "value": 4.951488792238207,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=2.62pp, est=4.95%)"
     },
     "46053": {
       "value": 3.730886850152905,
       "suppression_status": "available"
     },
     "46055": {
-      "value": 5.044510385756676,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.76 > 0.5 (90% MOE=3.81pp, est=5.04%)"
     },
     "46057": {
       "value": 1.3755158184319118,
@@ -8322,12 +8600,14 @@
       "suppression_status": "available"
     },
     "46061": {
-      "value": 1.4991181657848323,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.82 > 0.5 (90% MOE=1.23pp, est=1.50%)"
     },
     "46063": {
-      "value": 1.6227180527383367,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.16 > 0.5 (90% MOE=1.88pp, est=1.62%)"
     },
     "46065": {
       "value": 5.617823947512301,
@@ -8338,28 +8618,33 @@
       "suppression_status": "available"
     },
     "46069": {
-      "value": 1.6822429906542056,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.10 > 0.5 (90% MOE=1.85pp, est=1.68%)"
     },
     "46071": {
-      "value": 12.432432432432433,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=6.85pp, est=12.43%)"
     },
     "46073": {
-      "value": 5.199516324062878,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=2.65pp, est=5.20%)"
     },
     "46075": {
-      "value": 2.8169014084507045,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.31 > 0.5 (90% MOE=3.68pp, est=2.82%)"
     },
     "46077": {
       "value": 4.529788281634663,
       "suppression_status": "available"
     },
     "46079": {
-      "value": 3.842832469775475,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=2.27pp, est=3.84%)"
     },
     "46081": {
       "value": 4.165255672197765,
@@ -8378,24 +8663,28 @@
       "suppression_status": "available"
     },
     "46089": {
-      "value": 3.013392857142857,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=2.59pp, est=3.01%)"
     },
     "46091": {
-      "value": 1.8226002430133657,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=1.56pp, est=1.82%)"
     },
     "46093": {
       "value": 3.1692229472078637,
       "suppression_status": "available"
     },
     "46095": {
-      "value": 6.8181818181818175,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=3.88pp, est=6.82%)"
     },
     "46097": {
-      "value": 3.2751091703056767,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.73 > 0.5 (90% MOE=2.41pp, est=3.28%)"
     },
     "46099": {
       "value": 5.31713474282108,
@@ -8434,32 +8723,37 @@
       "suppression_status": "available"
     },
     "46117": {
-      "value": 2.8301886792452833,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.80 > 0.5 (90% MOE=2.27pp, est=2.83%)"
     },
     "46119": {
-      "value": 2.564102564102564,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.02 > 0.5 (90% MOE=2.62pp, est=2.56%)"
     },
     "46121": {
       "value": 14.995957962813259,
       "suppression_status": "available"
     },
     "46123": {
-      "value": 6.357615894039735,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=3.27pp, est=6.36%)"
     },
     "46125": {
       "value": 3.7340876944837342,
       "suppression_status": "available"
     },
     "46127": {
-      "value": 3.172375070185289,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=1.61pp, est=3.17%)"
     },
     "46129": {
-      "value": 4.465776293823039,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=2.26pp, est=4.47%)"
     },
     "46135": {
       "value": 5.259395424836601,
@@ -8634,12 +8928,14 @@
       "suppression_status": "available"
     },
     "47083": {
-      "value": 2.3824451410658307,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.30pp, est=2.38%)"
     },
     "47085": {
-      "value": 2.797202797202797,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=1.57pp, est=2.80%)"
     },
     "47087": {
       "value": 6.070287539936102,
@@ -8670,8 +8966,9 @@
       "suppression_status": "available"
     },
     "47101": {
-      "value": 3.7647972055113526,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=2.19pp, est=3.76%)"
     },
     "47103": {
       "value": 4.1606689971896635,
@@ -8722,8 +9019,9 @@
       "suppression_status": "available"
     },
     "47127": {
-      "value": 4.7384382107657315,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=2.45pp, est=4.74%)"
     },
     "47129": {
       "value": 5.119643850862548,
@@ -8738,8 +9036,9 @@
       "suppression_status": "available"
     },
     "47135": {
-      "value": 3.914473684210526,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=2.03pp, est=3.91%)"
     },
     "47137": {
       "value": 7.027540360873694,
@@ -8806,12 +9105,14 @@
       "suppression_status": "available"
     },
     "47169": {
-      "value": 4.0185893931109895,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=2.79pp, est=4.02%)"
     },
     "47171": {
-      "value": 3.94719979495066,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=2.15pp, est=3.95%)"
     },
     "47173": {
       "value": 2.8953802599408056,
@@ -8866,8 +9167,9 @@
       "suppression_status": "available"
     },
     "48009": {
-      "value": 2.064553649316662,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=1.28pp, est=2.06%)"
     },
     "48011": {
       "value": 0,
@@ -8882,20 +9184,23 @@
       "suppression_status": "available"
     },
     "48017": {
-      "value": 13.644444444444446,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=7.88pp, est=13.64%)"
     },
     "48019": {
-      "value": 1.677289500167729,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=0.86pp, est=1.68%)"
     },
     "48021": {
       "value": 3.298828347173245,
       "suppression_status": "available"
     },
     "48023": {
-      "value": 6.782945736434108,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.66 > 0.5 (90% MOE=4.45pp, est=6.78%)"
     },
     "48025": {
       "value": 6.0482461251602375,
@@ -8910,12 +9215,14 @@
       "suppression_status": "available"
     },
     "48031": {
-      "value": 1.219756048790242,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=0.79pp, est=1.22%)"
     },
     "48033": {
-      "value": 1.6736401673640167,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=3.96 > 0.5 (90% MOE=6.63pp, est=1.67%)"
     },
     "48035": {
       "value": 2.450783447167537,
@@ -8938,8 +9245,9 @@
       "suppression_status": "available"
     },
     "48045": {
-      "value": 2.5225225225225225,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.03 > 0.5 (90% MOE=2.60pp, est=2.52%)"
     },
     "48047": {
       "value": 13.973647711511788,
@@ -8978,40 +9286,46 @@
       "suppression_status": "available"
     },
     "48065": {
-      "value": 4.21372719374457,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=2.47pp, est=4.21%)"
     },
     "48067": {
       "value": 7.13375796178344,
       "suppression_status": "available"
     },
     "48069": {
-      "value": 3.7494849608570253,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=2.34pp, est=3.75%)"
     },
     "48071": {
-      "value": 2.059427467085397,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=1.08pp, est=2.06%)"
     },
     "48073": {
       "value": 5.922034835499032,
       "suppression_status": "available"
     },
     "48075": {
-      "value": 5.243790248390065,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.09 > 0.5 (90% MOE=5.73pp, est=5.24%)"
     },
     "48077": {
       "value": 3.19375443577005,
       "suppression_status": "available"
     },
     "48079": {
-      "value": 5.795574288724974,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=3.08pp, est=5.80%)"
     },
     "48081": {
-      "value": 3.022162525184688,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.84 > 0.5 (90% MOE=2.55pp, est=3.02%)"
     },
     "48083": {
       "value": 7.120743034055728,
@@ -9022,8 +9336,9 @@
       "suppression_status": "available"
     },
     "48087": {
-      "value": 1.9007391763463568,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=1.63pp, est=1.90%)"
     },
     "48089": {
       "value": 3.7613831331661607,
@@ -9038,8 +9353,9 @@
       "suppression_status": "available"
     },
     "48095": {
-      "value": 3.651354534746761,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.97 > 0.5 (90% MOE=3.56pp, est=3.65%)"
     },
     "48097": {
       "value": 4.817868570022151,
@@ -9050,12 +9366,14 @@
       "suppression_status": "available"
     },
     "48101": {
-      "value": 2.9772329246935203,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.08 > 0.5 (90% MOE=3.21pp, est=2.98%)"
     },
     "48103": {
-      "value": 9.84984984984985,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.85 > 0.5 (90% MOE=8.42pp, est=9.85%)"
     },
     "48105": {
       "value": 0,
@@ -9066,12 +9384,14 @@
       "suppression_status": "available"
     },
     "48109": {
-      "value": 5.270655270655271,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.25 > 0.5 (90% MOE=6.59pp, est=5.27%)"
     },
     "48111": {
-      "value": 2.107037505267594,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.09 > 0.5 (90% MOE=2.30pp, est=2.11%)"
     },
     "48113": {
       "value": 6.776235219051344,
@@ -9082,12 +9402,14 @@
       "suppression_status": "available"
     },
     "48117": {
-      "value": 3.9678553490708186,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=2.07pp, est=3.97%)"
     },
     "48119": {
-      "value": 5.155131264916467,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=2.87pp, est=5.16%)"
     },
     "48121": {
       "value": 3.3935105490341946,
@@ -9098,16 +9420,18 @@
       "suppression_status": "available"
     },
     "48125": {
-      "value": 6.140350877192982,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=3.43pp, est=6.14%)"
     },
     "48127": {
       "value": 14.219269102990035,
       "suppression_status": "available"
     },
     "48129": {
-      "value": 3.2418952618453867,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=2.28pp, est=3.24%)"
     },
     "48131": {
       "value": 8.723262032085561,
@@ -9122,8 +9446,9 @@
       "suppression_status": "available"
     },
     "48137": {
-      "value": 6.962025316455696,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.26 > 0.5 (90% MOE=8.74pp, est=6.96%)"
     },
     "48139": {
       "value": 3.1531400685528377,
@@ -9150,24 +9475,28 @@
       "suppression_status": "available"
     },
     "48151": {
-      "value": 4.40251572327044,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=2.28pp, est=4.40%)"
     },
     "48153": {
-      "value": 7.890665291387313,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=4.10pp, est=7.89%)"
     },
     "48155": {
-      "value": 6.88836104513064,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.99 > 0.5 (90% MOE=6.79pp, est=6.89%)"
     },
     "48157": {
       "value": 2.931106204601453,
       "suppression_status": "available"
     },
     "48159": {
-      "value": 2.207001522070015,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=1.25pp, est=2.21%)"
     },
     "48161": {
       "value": 3.058103975535168,
@@ -9178,28 +9507,32 @@
       "suppression_status": "available"
     },
     "48165": {
-      "value": 4.66203769307071,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=2.50pp, est=4.66%)"
     },
     "48167": {
       "value": 5.4764686368684465,
       "suppression_status": "available"
     },
     "48169": {
-      "value": 7.18771807397069,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=4.66pp, est=7.19%)"
     },
     "48171": {
       "value": 5.47374024130589,
       "suppression_status": "available"
     },
     "48173": {
-      "value": 3.4013605442176873,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.57 > 0.5 (90% MOE=5.33pp, est=3.40%)"
     },
     "48175": {
-      "value": 8.25,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=4.29pp, est=8.25%)"
     },
     "48177": {
       "value": 10.632183908045976,
@@ -9230,20 +9563,24 @@
       "suppression_status": "available"
     },
     "48191": {
-      "value": 3.1951640759930915,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.74 > 0.5 (90% MOE=2.36pp, est=3.20%)"
     },
     "48193": {
-      "value": 4.435226547543076,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=2.55pp, est=4.44%)"
     },
     "48195": {
-      "value": 4.926108374384237,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.67 > 0.5 (90% MOE=3.31pp, est=4.93%)"
     },
     "48197": {
-      "value": 3.5439137134052388,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.75 > 0.5 (90% MOE=2.64pp, est=3.54%)"
     },
     "48199": {
       "value": 3.75632183908046,
@@ -9258,8 +9595,9 @@
       "suppression_status": "available"
     },
     "48205": {
-      "value": 3.058103975535168,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.09 > 0.5 (90% MOE=3.32pp, est=3.06%)"
     },
     "48207": {
       "value": 5.834914611005693,
@@ -9270,8 +9608,9 @@
       "suppression_status": "available"
     },
     "48211": {
-      "value": 4.166666666666666,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.66 > 0.5 (90% MOE=2.77pp, est=4.17%)"
     },
     "48213": {
       "value": 5.252017056784367,
@@ -9306,8 +9645,9 @@
       "suppression_status": "available"
     },
     "48229": {
-      "value": 4.4864226682408495,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=3.87pp, est=4.49%)"
     },
     "48231": {
       "value": 3.9788010333164667,
@@ -9318,8 +9658,9 @@
       "suppression_status": "available"
     },
     "48235": {
-      "value": 1.3201320132013201,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.36 > 0.5 (90% MOE=1.79pp, est=1.32%)"
     },
     "48237": {
       "value": 11.423670668953688,
@@ -9334,16 +9675,18 @@
       "suppression_status": "available"
     },
     "48243": {
-      "value": 2.2432113341204247,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.55 > 0.5 (90% MOE=3.49pp, est=2.24%)"
     },
     "48245": {
       "value": 7.640475834525767,
       "suppression_status": "available"
     },
     "48247": {
-      "value": 4.995904995904995,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.11 > 0.5 (90% MOE=5.53pp, est=5.00%)"
     },
     "48249": {
       "value": 6.7228154609715745,
@@ -9370,36 +9713,41 @@
       "suppression_status": "available"
     },
     "48261": {
-      "value": 5.88235294117647,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=15.32 > 0.5 (90% MOE=90.11pp, est=5.88%)"
     },
     "48263": {
-      "value": 2.18978102189781,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=3.01 > 0.5 (90% MOE=6.60pp, est=2.19%)"
     },
     "48265": {
       "value": 5.178066196613823,
       "suppression_status": "available"
     },
     "48267": {
-      "value": 5.27448869752422,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=2.93pp, est=5.27%)"
     },
     "48269": {
       "value": 0,
       "suppression_status": "available"
     },
     "48271": {
-      "value": 8.559322033898304,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.85 > 0.5 (90% MOE=7.30pp, est=8.56%)"
     },
     "48273": {
       "value": 5.1551636425301,
       "suppression_status": "available"
     },
     "48275": {
-      "value": 3.9808917197452227,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=2.10pp, est=3.98%)"
     },
     "48277": {
       "value": 7.199840446749102,
@@ -9414,8 +9762,9 @@
       "suppression_status": "available"
     },
     "48283": {
-      "value": 3.2679738562091507,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.87 > 0.5 (90% MOE=2.84pp, est=3.27%)"
     },
     "48285": {
       "value": 3.130227001194743,
@@ -9438,8 +9787,9 @@
       "suppression_status": "available"
     },
     "48295": {
-      "value": 3.5422343324250685,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=2.09pp, est=3.54%)"
     },
     "48297": {
       "value": 8.693586698337292,
@@ -9450,28 +9800,32 @@
       "suppression_status": "available"
     },
     "48301": {
-      "value": 13.88888888888889,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=3.41 > 0.5 (90% MOE=47.32pp, est=13.89%)"
     },
     "48303": {
       "value": 5.866419444556411,
       "suppression_status": "available"
     },
     "48305": {
-      "value": 4.404646660212972,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=2.64pp, est=4.40%)"
     },
     "48307": {
-      "value": 5.696614583333334,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.61 > 0.5 (90% MOE=3.49pp, est=5.70%)"
     },
     "48309": {
       "value": 5.324802534230874,
       "suppression_status": "available"
     },
     "48311": {
-      "value": 4.761904761904762,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=2.34 > 0.5 (90% MOE=11.16pp, est=4.76%)"
     },
     "48313": {
       "value": 7.922705314009662,
@@ -9486,8 +9840,9 @@
       "suppression_status": "available"
     },
     "48319": {
-      "value": 3.8064516129032255,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.77 > 0.5 (90% MOE=2.95pp, est=3.81%)"
     },
     "48321": {
       "value": 5.956556934700485,
@@ -9502,8 +9857,9 @@
       "suppression_status": "available"
     },
     "48327": {
-      "value": 1.680672268907563,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.63 > 0.5 (90% MOE=2.74pp, est=1.68%)"
     },
     "48329": {
       "value": 5.343215473403224,
@@ -9514,12 +9870,14 @@
       "suppression_status": "available"
     },
     "48333": {
-      "value": 1.788617886178862,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=1.17pp, est=1.79%)"
     },
     "48335": {
-      "value": 2.850449043342444,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.63 > 0.5 (90% MOE=1.80pp, est=2.85%)"
     },
     "48337": {
       "value": 5.183001719479243,
@@ -9538,8 +9896,9 @@
       "suppression_status": "available"
     },
     "48345": {
-      "value": 2.5210084033613445,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.06 > 0.5 (90% MOE=2.68pp, est=2.52%)"
     },
     "48347": {
       "value": 6.223620291470892,
@@ -9562,12 +9921,14 @@
       "suppression_status": "available"
     },
     "48357": {
-      "value": 5.082490686535391,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.73 > 0.5 (90% MOE=3.70pp, est=5.08%)"
     },
     "48359": {
-      "value": 1.109350237717908,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.09 > 0.5 (90% MOE=1.21pp, est=1.11%)"
     },
     "48361": {
       "value": 5.460482934028323,
@@ -9586,8 +9947,9 @@
       "suppression_status": "available"
     },
     "48369": {
-      "value": 2.4819352811812756,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.85 > 0.5 (90% MOE=2.12pp, est=2.48%)"
     },
     "48371": {
       "value": 8.202819107282695,
@@ -9602,24 +9964,28 @@
       "suppression_status": "available"
     },
     "48377": {
-      "value": 7.948717948717948,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=6.82pp, est=7.95%)"
     },
     "48379": {
-      "value": 2.96421765826805,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=1.65pp, est=2.96%)"
     },
     "48381": {
       "value": 3.369920011478174,
       "suppression_status": "available"
     },
     "48383": {
-      "value": 0.9560229445506693,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.99 > 0.5 (90% MOE=1.90pp, est=0.96%)"
     },
     "48385": {
-      "value": 3.9177277179236047,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.04 > 0.5 (90% MOE=4.09pp, est=3.92%)"
     },
     "48387": {
       "value": 3.2845984378129383,
@@ -9634,8 +10000,9 @@
       "suppression_status": "available"
     },
     "48393": {
-      "value": 5.6105610561056105,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.38 > 0.5 (90% MOE=7.77pp, est=5.61%)"
     },
     "48395": {
       "value": 9.475308641975309,
@@ -9670,36 +10037,42 @@
       "suppression_status": "available"
     },
     "48411": {
-      "value": 3.1980906921241052,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.92 > 0.5 (90% MOE=2.93pp, est=3.20%)"
     },
     "48413": {
-      "value": 3.808487486398259,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.79 > 0.5 (90% MOE=3.01pp, est=3.81%)"
     },
     "48415": {
-      "value": 3.372112628561794,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.67 > 0.5 (90% MOE=2.25pp, est=3.37%)"
     },
     "48417": {
-      "value": 6.320541760722348,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.60 > 0.5 (90% MOE=3.77pp, est=6.32%)"
     },
     "48419": {
       "value": 6.995750245178163,
       "suppression_status": "available"
     },
     "48421": {
-      "value": 0.35629453681710216,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=5.27 > 0.5 (90% MOE=1.88pp, est=0.36%)"
     },
     "48423": {
       "value": 4.459542171624434,
       "suppression_status": "available"
     },
     "48425": {
-      "value": 2.8916339135317237,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.82 > 0.5 (90% MOE=2.37pp, est=2.89%)"
     },
     "48427": {
       "value": 10.485769313075112,
@@ -9714,16 +10087,19 @@
       "suppression_status": "available"
     },
     "48433": {
-      "value": 3.571428571428571,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.14 > 0.5 (90% MOE=4.08pp, est=3.57%)"
     },
     "48435": {
-      "value": 1.9417475728155338,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.13 > 0.5 (90% MOE=2.19pp, est=1.94%)"
     },
     "48437": {
-      "value": 5.788830004076641,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=3.01pp, est=5.79%)"
     },
     "48439": {
       "value": 4.4229381828581085,
@@ -9734,16 +10110,19 @@
       "suppression_status": "available"
     },
     "48443": {
-      "value": 3.9735099337748347,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.64 > 0.5 (90% MOE=6.52pp, est=3.97%)"
     },
     "48445": {
-      "value": 5.853430110044486,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=2.96pp, est=5.85%)"
     },
     "48447": {
-      "value": 3.6443148688046647,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.66 > 0.5 (90% MOE=2.40pp, est=3.64%)"
     },
     "48449": {
       "value": 5.10398692216874,
@@ -9770,8 +10149,9 @@
       "suppression_status": "available"
     },
     "48461": {
-      "value": 5.283018867924529,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.64 > 0.5 (90% MOE=3.40pp, est=5.28%)"
     },
     "48463": {
       "value": 6.198052719069104,
@@ -9814,8 +10194,9 @@
       "suppression_status": "available"
     },
     "48483": {
-      "value": 6.814494321254733,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.67 > 0.5 (90% MOE=4.55pp, est=6.81%)"
     },
     "48485": {
       "value": 6.608766731378359,
@@ -9838,8 +10219,9 @@
       "suppression_status": "available"
     },
     "48495": {
-      "value": 4.890327220424308,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.69 > 0.5 (90% MOE=3.35pp, est=4.89%)"
     },
     "48497": {
       "value": 1.56625035596599,
@@ -9850,8 +10232,9 @@
       "suppression_status": "available"
     },
     "48501": {
-      "value": 4.8547400611620795,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.87 > 0.5 (90% MOE=4.20pp, est=4.85%)"
     },
     "48503": {
       "value": 5.3587530593842585,
@@ -9862,12 +10245,14 @@
       "suppression_status": "available"
     },
     "48507": {
-      "value": 4.895924948695398,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=2.68pp, est=4.90%)"
     },
     "49001": {
-      "value": 2.4308466051969826,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.83 > 0.5 (90% MOE=2.03pp, est=2.43%)"
     },
     "49003": {
       "value": 3.519582245430809,
@@ -9882,8 +10267,9 @@
       "suppression_status": "available"
     },
     "49009": {
-      "value": 3.0534351145038165,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.89 > 0.5 (90% MOE=5.76pp, est=3.05%)"
     },
     "49011": {
       "value": 2.5908226799448872,
@@ -9894,40 +10280,48 @@
       "suppression_status": "available"
     },
     "49015": {
-      "value": 2.4795799299883314,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=1.29pp, est=2.48%)"
     },
     "49017": {
-      "value": 2.4173655648741983,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.80 > 0.5 (90% MOE=1.94pp, est=2.42%)"
     },
     "49019": {
-      "value": 1.6569637259292433,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.23 > 0.5 (90% MOE=2.03pp, est=1.66%)"
     },
     "49021": {
       "value": 3.1132363414386,
       "suppression_status": "available"
     },
     "49023": {
-      "value": 3.3546325878594248,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=1.88pp, est=3.35%)"
     },
     "49025": {
-      "value": 2.6942355889724308,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.80 > 0.5 (90% MOE=2.17pp, est=2.69%)"
     },
     "49027": {
-      "value": 3.163815326927584,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=1.67pp, est=3.16%)"
     },
     "49029": {
-      "value": 0.7489597780859917,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.28 > 0.5 (90% MOE=0.96pp, est=0.75%)"
     },
     "49031": {
-      "value": 4.232804232804233,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.21 > 0.5 (90% MOE=5.13pp, est=4.23%)"
     },
     "49033": {
       "value": 0,
@@ -9974,8 +10368,9 @@
       "suppression_status": "available"
     },
     "49055": {
-      "value": 3.410138248847926,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=1.92pp, est=3.41%)"
     },
     "49057": {
       "value": 4.49471051292324,
@@ -10050,8 +10445,9 @@
       "suppression_status": "available"
     },
     "51007": {
-      "value": 2.403027436140019,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.72 > 0.5 (90% MOE=1.72pp, est=2.40%)"
     },
     "51009": {
       "value": 4.692174460714848,
@@ -10070,16 +10466,18 @@
       "suppression_status": "available"
     },
     "51017": {
-      "value": 1.6844469399213924,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.88 > 0.5 (90% MOE=1.49pp, est=1.68%)"
     },
     "51019": {
       "value": 3.5659673374518324,
       "suppression_status": "available"
     },
     "51021": {
-      "value": 5.074626865671641,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=2.60pp, est=5.07%)"
     },
     "51023": {
       "value": 3.8458603586417395,
@@ -10126,16 +10524,18 @@
       "suppression_status": "available"
     },
     "51045": {
-      "value": 6.506849315068493,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=4.52pp, est=6.51%)"
     },
     "51047": {
       "value": 3.0510116229014206,
       "suppression_status": "available"
     },
     "51049": {
-      "value": 5.748502994011976,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=3.00pp, est=5.75%)"
     },
     "51051": {
       "value": 6.821759664159524,
@@ -10146,8 +10546,9 @@
       "suppression_status": "available"
     },
     "51057": {
-      "value": 6.02820746132848,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=3.50pp, est=6.03%)"
     },
     "51059": {
       "value": 4.5860665967145104,
@@ -10158,8 +10559,9 @@
       "suppression_status": "available"
     },
     "51063": {
-      "value": 6.422018348623854,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=3.76pp, est=6.42%)"
     },
     "51065": {
       "value": 2.6826651058433324,
@@ -10190,8 +10592,9 @@
       "suppression_status": "available"
     },
     "51079": {
-      "value": 2.8690596562184023,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=1.70pp, est=2.87%)"
     },
     "51081": {
       "value": 8.926261319534282,
@@ -10214,8 +10617,9 @@
       "suppression_status": "available"
     },
     "51091": {
-      "value": 5.18444666001994,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.86 > 0.5 (90% MOE=4.48pp, est=5.18%)"
     },
     "51093": {
       "value": 4.109944249967587,
@@ -10226,16 +10630,18 @@
       "suppression_status": "available"
     },
     "51097": {
-      "value": 2.523098791755508,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.69 > 0.5 (90% MOE=1.75pp, est=2.52%)"
     },
     "51099": {
       "value": 2.2476460463703556,
       "suppression_status": "available"
     },
     "51101": {
-      "value": 3.1763879128601546,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=1.67pp, est=3.18%)"
     },
     "51103": {
       "value": 4.1514264813460136,
@@ -10258,20 +10664,23 @@
       "suppression_status": "available"
     },
     "51113": {
-      "value": 3.0786350148367956,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=1.65pp, est=3.08%)"
     },
     "51115": {
-      "value": 2.0706132200690206,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.13 > 0.5 (90% MOE=2.35pp, est=2.07%)"
     },
     "51117": {
       "value": 6.091825307950728,
       "suppression_status": "available"
     },
     "51119": {
-      "value": 2.4508768223114306,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=1.26pp, est=2.45%)"
     },
     "51121": {
       "value": 5.722686559037325,
@@ -10282,16 +10691,18 @@
       "suppression_status": "available"
     },
     "51127": {
-      "value": 1.4168696037192827,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=0.80pp, est=1.42%)"
     },
     "51131": {
       "value": 9.441738478831024,
       "suppression_status": "available"
     },
     "51133": {
-      "value": 3.7527593818984544,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=1.91pp, est=3.75%)"
     },
     "51135": {
       "value": 8.211944646758921,
@@ -10314,8 +10725,9 @@
       "suppression_status": "available"
     },
     "51145": {
-      "value": 1.5424625594117118,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=0.82pp, est=1.54%)"
     },
     "51147": {
       "value": 8.783068783068783,
@@ -10334,8 +10746,9 @@
       "suppression_status": "available"
     },
     "51157": {
-      "value": 1.8175463124781546,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.98 > 0.5 (90% MOE=1.79pp, est=1.82%)"
     },
     "51159": {
       "value": 7.744796997611737,
@@ -10382,8 +10795,9 @@
       "suppression_status": "available"
     },
     "51181": {
-      "value": 5.226860254083484,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=2.99pp, est=5.23%)"
     },
     "51183": {
       "value": 10.95816464237517,
@@ -10426,8 +10840,9 @@
       "suppression_status": "available"
     },
     "51530": {
-      "value": 5.017234775947912,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=3.24pp, est=5.02%)"
     },
     "51540": {
       "value": 10.655363216406924,
@@ -10486,8 +10901,9 @@
       "suppression_status": "available"
     },
     "51678": {
-      "value": 11.935953420669577,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.56 > 0.5 (90% MOE=6.68pp, est=11.94%)"
     },
     "51680": {
       "value": 10.719141074354237,
@@ -10498,8 +10914,9 @@
       "suppression_status": "available"
     },
     "51685": {
-      "value": 5.6727976766698935,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=3.26pp, est=5.67%)"
     },
     "51690": {
       "value": 11.496707599216943,
@@ -10514,16 +10931,18 @@
       "suppression_status": "available"
     },
     "51720": {
-      "value": 10.367031551835158,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=5.60pp, est=10.37%)"
     },
     "51730": {
       "value": 16.339033257035144,
       "suppression_status": "available"
     },
     "51735": {
-      "value": 1.2239639252737813,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.15 > 0.5 (90% MOE=1.41pp, est=1.22%)"
     },
     "51740": {
       "value": 11.462271283834871,
@@ -10594,8 +11013,9 @@
       "suppression_status": "available"
     },
     "53013": {
-      "value": 6.289640591966174,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=3.17pp, est=6.29%)"
     },
     "53015": {
       "value": 6.413416572600152,
@@ -10614,8 +11034,9 @@
       "suppression_status": "available"
     },
     "53023": {
-      "value": 0.8555133079847909,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=2.13 > 0.5 (90% MOE=1.82pp, est=0.86%)"
     },
     "53025": {
       "value": 4.796823372558113,
@@ -10706,8 +11127,9 @@
       "suppression_status": "available"
     },
     "53069": {
-      "value": 3.998025666337611,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=2.48pp, est=4.00%)"
     },
     "53071": {
       "value": 5.138948268490808,
@@ -10750,16 +11172,18 @@
       "suppression_status": "available"
     },
     "54013": {
-      "value": 8.573818485989126,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=4.39pp, est=8.57%)"
     },
     "54015": {
       "value": 8.783783783783784,
       "suppression_status": "available"
     },
     "54017": {
-      "value": 2.857142857142857,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.65 > 0.5 (90% MOE=1.85pp, est=2.86%)"
     },
     "54019": {
       "value": 9.91371283133652,
@@ -10870,8 +11294,9 @@
       "suppression_status": "available"
     },
     "54073": {
-      "value": 3.346527527887729,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=1.94pp, est=3.35%)"
     },
     "54075": {
       "value": 7.535575679172057,
@@ -11102,8 +11527,9 @@
       "suppression_status": "available"
     },
     "55078": {
-      "value": 2.9191616766467066,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.62pp, est=2.92%)"
     },
     "55079": {
       "value": 12.509060625221696,
@@ -11250,12 +11676,14 @@
       "suppression_status": "available"
     },
     "56009": {
-      "value": 3.43437883301209,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=2.40pp, est=3.43%)"
     },
     "56011": {
-      "value": 1.3836042891732965,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.80 > 0.5 (90% MOE=1.10pp, est=1.38%)"
     },
     "56013": {
       "value": 5.138419986495611,
@@ -11266,64 +11694,74 @@
       "suppression_status": "available"
     },
     "56017": {
-      "value": 4.184704184704184,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=2.41pp, est=4.18%)"
     },
     "56019": {
-      "value": 2.194437356468487,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.66 > 0.5 (90% MOE=1.45pp, est=2.19%)"
     },
     "56021": {
       "value": 5.232571818459873,
       "suppression_status": "available"
     },
     "56023": {
-      "value": 3.6585365853658534,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=1.94pp, est=3.66%)"
     },
     "56025": {
       "value": 4.323268739672525,
       "suppression_status": "available"
     },
     "56027": {
-      "value": 2.0157756354075373,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.29 > 0.5 (90% MOE=2.60pp, est=2.02%)"
     },
     "56029": {
       "value": 2.450868806434479,
       "suppression_status": "available"
     },
     "56031": {
-      "value": 2.0376579829765284,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.04 > 0.5 (90% MOE=2.11pp, est=2.04%)"
     },
     "56033": {
       "value": 3.8327783943766187,
       "suppression_status": "available"
     },
     "56035": {
-      "value": 1.8284485076633505,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.89 > 0.5 (90% MOE=1.63pp, est=1.83%)"
     },
     "56037": {
       "value": 2.466939453240823,
       "suppression_status": "available"
     },
     "56039": {
-      "value": 1.2362783757859959,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.93 > 0.5 (90% MOE=1.15pp, est=1.24%)"
     },
     "56041": {
-      "value": 3.476400588313946,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.90pp, est=3.48%)"
     },
     "56043": {
-      "value": 4.0678958150424345,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=2.14pp, est=4.07%)"
     },
     "56045": {
-      "value": 2.3238925199709515,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.80 > 0.5 (90% MOE=1.86pp, est=2.32%)"
     },
     "01001": {
       "value": 3.7650401811481595,
@@ -11394,8 +11832,9 @@
       "suppression_status": "available"
     },
     "01035": {
-      "value": 7.663427561837456,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=4.76pp, est=7.66%)"
     },
     "01037": {
       "value": 4.998809807188764,
@@ -11610,8 +12049,9 @@
       "suppression_status": "available"
     },
     "02060": {
-      "value": 10.60070671378092,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=5.68pp, est=10.60%)"
     },
     "02063": {
       "value": 5.375139977603583,
@@ -11622,8 +12062,9 @@
       "suppression_status": "available"
     },
     "02068": {
-      "value": 7.129455909943714,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.71 > 0.5 (90% MOE=5.06pp, est=7.13%)"
     },
     "02070": {
       "value": 38.033261026753436,
@@ -11634,8 +12075,9 @@
       "suppression_status": "available"
     },
     "02100": {
-      "value": 9.010011123470523,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=5.60pp, est=9.01%)"
     },
     "02105": {
       "value": 28.850325379609544,
@@ -11694,8 +12136,9 @@
       "suppression_status": "available"
     },
     "02230": {
-      "value": 9.090909090909092,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=4.72pp, est=9.09%)"
     },
     "02240": {
       "value": 5.279099956728689,
@@ -11734,8 +12177,9 @@
       "suppression_status": "available"
     },
     "04011": {
-      "value": 2.148664343786295,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.82 > 0.5 (90% MOE=1.75pp, est=2.15%)"
     },
     "04012": {
       "value": 3.645774727129515,
@@ -11798,8 +12242,9 @@
       "suppression_status": "available"
     },
     "05013": {
-      "value": 1.7676767676767675,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.75 > 0.5 (90% MOE=1.32pp, est=1.77%)"
     },
     "05015": {
       "value": 5.051323608860075,
@@ -11878,8 +12323,9 @@
       "suppression_status": "available"
     },
     "05053": {
-      "value": 3.0625449317038105,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.51 > 0.5 (90% MOE=1.57pp, est=3.06%)"
     },
     "05055": {
       "value": 4.858864219569341,
@@ -11970,8 +12416,9 @@
       "suppression_status": "available"
     },
     "05099": {
-      "value": 2.3515579071134627,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.74 > 0.5 (90% MOE=1.75pp, est=2.35%)"
     },
     "05101": {
       "value": 3.050180387012135,
@@ -12078,8 +12525,9 @@
       "suppression_status": "available"
     },
     "06003": {
-      "value": 5.2854122621564485,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.91 > 0.5 (90% MOE=4.80pp, est=5.29%)"
     },
     "06005": {
       "value": 3.8092866923938753,
@@ -12170,8 +12618,9 @@
       "suppression_status": "available"
     },
     "06049": {
-      "value": 5.575980392156863,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=3.05pp, est=5.58%)"
     },
     "06051": {
       "value": 4.600615830465495,
@@ -12254,8 +12703,9 @@
       "suppression_status": "available"
     },
     "06091": {
-      "value": 8.043117744610282,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.87 > 0.5 (90% MOE=6.99pp, est=8.04%)"
     },
     "06093": {
       "value": 5.770349605966044,
@@ -12282,8 +12732,9 @@
       "suppression_status": "available"
     },
     "06105": {
-      "value": 4.1131583845151685,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.50 > 0.5 (90% MOE=2.07pp, est=4.11%)"
     },
     "06107": {
       "value": 4.65900609747511,
@@ -12318,16 +12769,18 @@
       "suppression_status": "available"
     },
     "08007": {
-      "value": 3.2350948509485096,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=1.67pp, est=3.24%)"
     },
     "08009": {
       "value": 5.586942875078468,
       "suppression_status": "available"
     },
     "08011": {
-      "value": 6.88,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.59 > 0.5 (90% MOE=4.08pp, est=6.88%)"
     },
     "08013": {
       "value": 5.061746653848998,
@@ -12338,16 +12791,19 @@
       "suppression_status": "available"
     },
     "08015": {
-      "value": 2.2185970636215333,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.53 > 0.5 (90% MOE=1.17pp, est=2.22%)"
     },
     "08017": {
-      "value": 0.3994673768308922,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=4.64 > 0.5 (90% MOE=1.86pp, est=0.40%)"
     },
     "08019": {
-      "value": 3.8785460992907796,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.54 > 0.5 (90% MOE=2.08pp, est=3.88%)"
     },
     "08021": {
       "value": 6.394601542416452,
@@ -12374,8 +12830,9 @@
       "suppression_status": "available"
     },
     "08033": {
-      "value": 6.8659127625201934,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.74 > 0.5 (90% MOE=5.06pp, est=6.87%)"
     },
     "08035": {
       "value": 2.3470212297068977,
@@ -12386,8 +12843,9 @@
       "suppression_status": "available"
     },
     "08039": {
-      "value": 0.9216112664388527,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=0.48pp, est=0.92%)"
     },
     "08041": {
       "value": 3.687485432984667,
@@ -12402,44 +12860,52 @@
       "suppression_status": "available"
     },
     "08047": {
-      "value": 5.526657997399219,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.15 > 0.5 (90% MOE=6.33pp, est=5.53%)"
     },
     "08049": {
-      "value": 2.2291021671826625,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=1.27pp, est=2.23%)"
     },
     "08051": {
-      "value": 2.973554346450715,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.55 > 0.5 (90% MOE=1.63pp, est=2.97%)"
     },
     "08053": {
-      "value": 1.9027484143763214,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.76 > 0.5 (90% MOE=3.35pp, est=1.90%)"
     },
     "08055": {
-      "value": 3.8434414668547254,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.63 > 0.5 (90% MOE=2.43pp, est=3.84%)"
     },
     "08057": {
-      "value": 3.3123028391167195,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.09 > 0.5 (90% MOE=3.60pp, est=3.31%)"
     },
     "08059": {
       "value": 3.892830509392537,
       "suppression_status": "available"
     },
     "08061": {
-      "value": 2.6132404181184667,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.38 > 0.5 (90% MOE=3.60pp, est=2.61%)"
     },
     "08063": {
       "value": 7.927247769389156,
       "suppression_status": "available"
     },
     "08065": {
-      "value": 4.4271713416694825,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.69 > 0.5 (90% MOE=3.06pp, est=4.43%)"
     },
     "08067": {
       "value": 2.0689655172413794,
@@ -12466,8 +12932,9 @@
       "suppression_status": "available"
     },
     "08079": {
-      "value": 2.5345622119815667,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.61 > 0.5 (90% MOE=4.09pp, est=2.53%)"
     },
     "08081": {
       "value": 5.487459928342448,
@@ -12490,20 +12957,24 @@
       "suppression_status": "available"
     },
     "08091": {
-      "value": 1.6308671439936355,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=1.00 > 0.5 (90% MOE=1.63pp, est=1.63%)"
     },
     "08093": {
-      "value": 1.9296791760388305,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.78 > 0.5 (90% MOE=1.50pp, est=1.93%)"
     },
     "08095": {
-      "value": 5.755782678859602,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.70 > 0.5 (90% MOE=4.01pp, est=5.76%)"
     },
     "08097": {
-      "value": 4.838888273723841,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=2.81pp, est=4.84%)"
     },
     "08099": {
       "value": 6.792287467134093,
@@ -12514,8 +12985,9 @@
       "suppression_status": "available"
     },
     "08103": {
-      "value": 4.67723231542327,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.58 > 0.5 (90% MOE=2.71pp, est=4.68%)"
     },
     "08105": {
       "value": 8.286963434022256,
@@ -12526,24 +12998,28 @@
       "suppression_status": "available"
     },
     "08109": {
-      "value": 1.4719411223551058,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.67 > 0.5 (90% MOE=0.99pp, est=1.47%)"
     },
     "08111": {
-      "value": 2.4861878453038675,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=2.13 > 0.5 (90% MOE=5.29pp, est=2.49%)"
     },
     "08113": {
       "value": 7.553776888444222,
       "suppression_status": "available"
     },
     "08115": {
-      "value": 4.3999999999999995,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.62 > 0.5 (90% MOE=2.71pp, est=4.40%)"
     },
     "08117": {
-      "value": 2.7132096865635376,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.52 > 0.5 (90% MOE=1.41pp, est=2.71%)"
     },
     "08119": {
       "value": 2.5682040344796944,
@@ -12558,8 +13034,9 @@
       "suppression_status": "available"
     },
     "08125": {
-      "value": 2.5271670457417237,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "ACS B25044 MOE/estimate=0.57 > 0.5 (90% MOE=1.45pp, est=2.53%)"
     },
     "09110": {
       "value": 9.520774327526563,

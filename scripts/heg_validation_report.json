@@ -1,23 +1,23 @@
 {
-  "generated_at": "2026-05-07T19:21:44.120Z",
+  "generated_at": "2026-05-07T20:18:42.853Z",
   "sample_sizes": {
     "premature_death": 3080,
     "preventable_stays": 3061
   },
   "construct_validity": {
     "premature_death": {
-      "pearson_r": 0.6784046090075024,
-      "pearson_ci_lo": 0.656557300576841,
-      "pearson_ci_hi": 0.7020736813669494,
-      "spearman_rho": 0.7484061114971494,
+      "pearson_r": 0.6766408344977486,
+      "pearson_ci_lo": 0.6549263852104602,
+      "pearson_ci_hi": 0.7001563910711455,
+      "spearman_rho": 0.7461551985504669,
       "n": 3080,
       "source": "CHR&R 2025 — Premature Death (YPLL75 per 100,000) — NCHS underlying source"
     },
     "preventable_stays": {
-      "pearson_r": 0.33276461885146075,
-      "pearson_ci_lo": 0.30229942903731166,
-      "pearson_ci_hi": 0.36313297743764483,
-      "spearman_rho": 0.3457393737838035,
+      "pearson_r": 0.3311588972676571,
+      "pearson_ci_lo": 0.30061509797849867,
+      "pearson_ci_hi": 0.36174091577452117,
+      "spearman_rho": 0.3437423470758004,
       "n": 3061,
       "source": "CHR&R 2025 — Preventable Hospital Stays (per 100,000 Medicare enrollees) — CMS source"
     }
@@ -29,14 +29,14 @@
       {
         "component": "insurance",
         "deltaPct": -20,
-        "jaccard": 0.9204892966360856,
-        "rankShift": 10
+        "jaccard": 0.9323076923076923,
+        "rankShift": 11
       },
       {
         "component": "insurance",
         "deltaPct": 20,
-        "jaccard": 0.9263803680981595,
-        "rankShift": 12
+        "jaccard": 0.9323076923076923,
+        "rankShift": 11
       },
       {
         "component": "maternalAccess",
@@ -47,73 +47,73 @@
       {
         "component": "maternalAccess",
         "deltaPct": 20,
-        "jaccard": 0.9146341463414634,
-        "rankShift": 10
-      },
-      {
-        "component": "chronicDisease",
-        "deltaPct": -20,
-        "jaccard": 0.9204892966360856,
-        "rankShift": 9
-      },
-      {
-        "component": "chronicDisease",
-        "deltaPct": 20,
         "jaccard": 0.9263803680981595,
         "rankShift": 10
       },
       {
+        "component": "chronicDisease",
+        "deltaPct": -20,
+        "jaccard": 0.9382716049382716,
+        "rankShift": 9
+      },
+      {
+        "component": "chronicDisease",
+        "deltaPct": 20,
+        "jaccard": 0.9382716049382716,
+        "rankShift": 10
+      },
+      {
         "component": "providerAccess",
         "deltaPct": -20,
-        "jaccard": 0.9204892966360856,
-        "rankShift": 13
+        "jaccard": 0.9263803680981595,
+        "rankShift": 14
       },
       {
         "component": "providerAccess",
         "deltaPct": 20,
-        "jaccard": 0.9146341463414634,
+        "jaccard": 0.9382716049382716,
         "rankShift": 9
       },
       {
         "component": "behavioralHealth",
         "deltaPct": -20,
-        "jaccard": 0.9442724458204335,
+        "jaccard": 0.9625,
         "rankShift": 9
       },
       {
         "component": "behavioralHealth",
         "deltaPct": 20,
-        "jaccard": 0.9146341463414634,
+        "jaccard": 0.9263803680981595,
         "rankShift": 12
       },
       {
         "component": "perinatal",
         "deltaPct": -20,
-        "jaccard": 0.9263803680981595,
-        "rankShift": 9
+        "jaccard": 0.9503105590062112,
+        "rankShift": 8
       },
       {
         "component": "perinatal",
         "deltaPct": 20,
-        "jaccard": 0.9263803680981595,
+        "jaccard": 0.9382716049382716,
         "rankShift": 11
       },
       {
         "component": "childPoverty",
         "deltaPct": -20,
-        "jaccard": 0.9263803680981595,
-        "rankShift": 8
+        "jaccard": 0.9382716049382716,
+        "rankShift": 9
       },
       {
         "component": "childPoverty",
         "deltaPct": 20,
-        "jaccard": 0.9263803680981595,
+        "jaccard": 0.9382716049382716,
         "rankShift": 10
       },
       {
         "component": "social",
         "deltaPct": -20,
-        "jaccard": 0.9030303030303031,
+        "jaccard": 0.9146341463414634,
         "rankShift": 12
       },
       {
@@ -125,30 +125,30 @@
       {
         "component": "environmental",
         "deltaPct": -20,
-        "jaccard": 0.9263803680981595,
+        "jaccard": 0.9382716049382716,
         "rankShift": 10
       },
       {
         "component": "environmental",
         "deltaPct": 20,
-        "jaccard": 0.9263803680981595,
-        "rankShift": 10
-      },
-      {
-        "component": "infrastructure",
-        "deltaPct": -20,
-        "jaccard": 0.9263803680981595,
+        "jaccard": 0.9382716049382716,
         "rankShift": 9
       },
       {
         "component": "infrastructure",
+        "deltaPct": -20,
+        "jaccard": 0.9503105590062112,
+        "rankShift": 8
+      },
+      {
+        "component": "infrastructure",
         "deltaPct": 20,
-        "jaccard": 0.9204892966360856,
-        "rankShift": 10
+        "jaccard": 0.9382716049382716,
+        "rankShift": 11
       }
     ],
     "min_jaccard": 0.891566265060241,
-    "mean_jaccard": 0.9217229822335418,
+    "mean_jaccard": 0.9344915077538065,
     "threshold_pass": true
   },
   "stress": {
@@ -156,7 +156,7 @@
     "drop_component": [
       {
         "component": "insurance",
-        "jaccard": 0.7690140845070422
+        "jaccard": 0.7740112994350282
       },
       {
         "component": "maternalAccess",
@@ -164,11 +164,11 @@
       },
       {
         "component": "chronicDisease",
-        "jaccard": 0.8362573099415205
+        "jaccard": 0.8309037900874635
       },
       {
         "component": "providerAccess",
-        "jaccard": 0.7158469945355191
+        "jaccard": 0.7300275482093664
       },
       {
         "component": "behavioralHealth",
@@ -176,19 +176,19 @@
       },
       {
         "component": "perinatal",
-        "jaccard": 0.8525073746312685
-      },
-      {
-        "component": "childPoverty",
         "jaccard": 0.8579881656804734
       },
       {
+        "component": "childPoverty",
+        "jaccard": 0.8525073746312685
+      },
+      {
         "component": "social",
-        "jaccard": 0.692722371967655
+        "jaccard": 0.6972972972972973
       },
       {
         "component": "environmental",
-        "jaccard": 0.9204892966360856
+        "jaccard": 0.9146341463414634
       },
       {
         "component": "infrastructure",

@@ -28,7 +28,7 @@
  */
 import { fetchAndCache, readCachedText } from "../lib/cache.js";
 import { normalizeFips, inAtlas, allFips } from "../lib/fips.js";
-import { available, suppressed, type SuppressedValue } from "../lib/suppression.js";
+import { available, suppressed, type SuppressedValue, DEFAULT_MOE_THRESHOLD } from "../lib/suppression.js";
 import { writeProcessed, type ProcessedMetric } from "../lib/processed.js";
 import { checkCalibration, assertCalibration, type CalibrationCheck } from "../lib/calibration.js";
 
@@ -104,12 +104,15 @@ async function ingestAge(spec: AgeSpec): Promise<void> {
   const header = data[0];
   const idx = {
     pctui: header.indexOf("PCTUI_PT"),
+    lb90: header.indexOf("PCTUI_LB90"),
+    ub90: header.indexOf("PCTUI_UB90"),
     state: header.indexOf("state"),
     county: header.indexOf("county"),
   };
 
   // First aggregate raw responses by atlas-canonical FIPS (handles CT translation)
-  const buckets = new Map<string, number[]>();
+  // Track point estimate AND CI half-width so we can MOE-filter post-merge.
+  const buckets = new Map<string, { pt: number; halfWidth: number }[]>();
   let parseErrors = 0;
   let droppedNotInAtlas = 0;
 
@@ -123,15 +126,31 @@ async function ingestAge(spec: AgeSpec): Promise<void> {
     const v = parseFloat(row[idx.pctui]);
     if (!Number.isFinite(v) || v < 0) { parseErrors++; continue; }
 
+    const lb = parseFloat(row[idx.lb90]);
+    const ub = parseFloat(row[idx.ub90]);
+    const halfWidth = (Number.isFinite(lb) && Number.isFinite(ub)) ? (ub - lb) / 2 : NaN;
+
     if (!buckets.has(fips)) buckets.set(fips, []);
-    buckets.get(fips)!.push(v);
+    buckets.get(fips)!.push({ pt: v, halfWidth });
   }
 
   const values: Record<string, SuppressedValue<number>> = {};
   let ctMerged = 0;
+  let nMoeFiltered = 0;
   for (const [fips, arr] of buckets.entries()) {
     if (arr.length > 1) ctMerged++;
-    const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+    const mean = arr.reduce((a, b) => a + b.pt, 0) / arr.length;
+    // Conservative: take the MAX CI half-width across legacy CT subcounties (worst case)
+    const halfWidths = arr.map((x) => x.halfWidth).filter((x) => Number.isFinite(x));
+    const maxHw = halfWidths.length > 0 ? Math.max(...halfWidths) : NaN;
+    if (Number.isFinite(maxHw) && mean > 0 && maxHw / mean > DEFAULT_MOE_THRESHOLD) {
+      values[fips] = suppressed(
+        "suppressed_quality",
+        `SAHIE 90% CI half-width / estimate = ${(maxHw / mean).toFixed(2)} > ${DEFAULT_MOE_THRESHOLD} (CI=±${maxHw.toFixed(2)}pp, est=${mean.toFixed(2)}%)`
+      );
+      nMoeFiltered++;
+      continue;
+    }
     values[fips] = available(mean);
   }
 
@@ -144,7 +163,8 @@ async function ingestAge(spec: AgeSpec): Promise<void> {
     }
   }
 
-  console.log(`[sahie] ${spec.slug}: ${Object.keys(values).length - missing} counties with values, ` +
+  console.log(`[sahie] ${spec.slug}: ${Object.keys(values).length - missing - nMoeFiltered} counties with values, ` +
+    `${nMoeFiltered} MOE-filtered, ` +
     `${ctMerged} CT planning regions averaged from legacy counties, ` +
     `${missing} missing, ${droppedNotInAtlas} dropped (not in atlas), ${parseErrors} parse errors`);
 
@@ -161,9 +181,10 @@ async function ingestAge(spec: AgeSpec): Promise<void> {
     calibration,
     notes: [
       spec.label,
-      `Census SAHIE point estimate (PCTUI_PT). 90% confidence intervals available in raw cache.`,
+      `Census SAHIE point estimate (PCTUI_PT). 90% confidence intervals (PCTUI_LB90 / PCTUI_UB90) used for MOE-aware suppression.`,
       `AGECAT=${spec.agecat}, IPRCAT=0 (all incomes), RACECAT=0 (all races), SEXCAT=0 (both sexes).`,
       `CT: SAHIE 2023 still publishes legacy 8-county FIPS — those legacy values are arithmetic-averaged into the atlas's 9 Planning Region codes. ${ctMerged} CT regions affected.`,
+      `MOE-aware suppression: counties where 90% CI half-width / estimate > ${DEFAULT_MOE_THRESHOLD} are suppressed (${nMoeFiltered} counties filtered).`,
     ],
     values,
   };

@@ -2,7 +2,7 @@
   "source": "census_saipe",
   "vintage": "2024",
   "filename": "saipe_counties.json",
-  "url": "https://api.census.gov/data/timeseries/poverty/saipe?get=NAME%2CSAEPOVRTALL_PT%2CSAEPOVRT0_17_PT%2CSAEMHI_PT&for=county%3A*&in=state%3A*&YEAR=2024",
-  "fetched_at": "2026-05-07T15:17:39.819Z",
-  "bytes": 188014
+  "url": "https://api.census.gov/data/timeseries/poverty/saipe?get=NAME%2CSAEPOVRTALL_PT%2CSAEPOVRTALL_MOE%2CSAEPOVRT0_17_PT%2CSAEPOVRT0_17_MOE%2CSAEMHI_PT&for=county%3A*&in=state%3A*&YEAR=2024",
+  "fetched_at": "2026-05-07T20:17:10.170Z",
+  "bytes": 232249
 }

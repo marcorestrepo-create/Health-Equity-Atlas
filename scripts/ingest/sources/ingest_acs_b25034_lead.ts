@@ -35,7 +35,7 @@
  */
 import { fetchAndCache, readCachedText } from "../lib/cache.js";
 import { normalizeFips, allFips } from "../lib/fips.js";
-import { available, suppressed, type SuppressedValue } from "../lib/suppression.js";
+import { available, suppressed, type SuppressedValue, combineMoeSum, propagateMoeRatio, DEFAULT_MOE_THRESHOLD } from "../lib/suppression.js";
 import { writeProcessed, type ProcessedMetric } from "../lib/processed.js";
 import { checkCalibration, assertCalibration } from "../lib/calibration.js";
 
@@ -56,7 +56,8 @@ const PUBLISHED_TOLERANCE = 2.0;
 async function main(): Promise<void> {
   console.log(`[acs_lead] ACS 5-year 2023 B25034 → ${SLUG}`);
 
-  const vars = ["NAME", "B25034_001E", "B25034_010E", "B25034_011E"].join(",");
+  // Pull MOE (_M) variables alongside estimates (_E) for MOE-aware suppression
+  const vars = ["NAME", "B25034_001E", "B25034_001M", "B25034_010E", "B25034_010M", "B25034_011E", "B25034_011M"].join(",");
   const url = `${ACS_BASE}?get=${vars}&for=county:*&in=state:*`;
   const cacheKey = {
     source: "census_acs_b25034",
@@ -72,8 +73,11 @@ async function main(): Promise<void> {
   const header = data[0];
   const idx = {
     total: header.indexOf("B25034_001E"),
+    totalMoe: header.indexOf("B25034_001M"),
     pre1950_a: header.indexOf("B25034_010E"),  // 1940-1949
+    pre1950_aMoe: header.indexOf("B25034_010M"),
     pre1950_b: header.indexOf("B25034_011E"),  // 1939 or earlier
+    pre1950_bMoe: header.indexOf("B25034_011M"),
     state: header.indexOf("state"),
     county: header.indexOf("county"),
   };
@@ -85,6 +89,7 @@ async function main(): Promise<void> {
   const result: Record<string, SuppressedValue<number>> = {};
   let nAvailable = 0;
   let nSuppressed = 0;
+  let nMoeFiltered = 0;
   let nDropped = 0;
 
   const parseVal = (v: string): number | null => {
@@ -101,8 +106,11 @@ async function main(): Promise<void> {
     if (norm in result) continue; // CT planning region dedupe
 
     const total = parseVal(row[idx.total]);
+    const totalMoe = parseVal(row[idx.totalMoe]);
     const a = parseVal(row[idx.pre1950_a]);
+    const aMoe = parseVal(row[idx.pre1950_aMoe]);
     const b = parseVal(row[idx.pre1950_b]);
+    const bMoe = parseVal(row[idx.pre1950_bMoe]);
 
     if (total === null || a === null || b === null) {
       result[norm] = suppressed("suppressed_quality", "ACS B25034 null estimate");
@@ -121,6 +129,24 @@ async function main(): Promise<void> {
       nSuppressed++;
       continue;
     }
+
+    // MOE-aware suppression: propagate MOE on numerator (sum of two cells),
+    // then on the ratio (numerator/denominator), then check MOE/estimate.
+    if (totalMoe !== null && aMoe !== null && bMoe !== null) {
+      const numerator = a + b;
+      const numeratorMoe = combineMoeSum(aMoe, bMoe);
+      const rateMoe = propagateMoeRatio(numerator, numeratorMoe, total, totalMoe) * 100; // ×100 to match pct units
+      const rate = Math.round(pct * 100) / 100;
+      if (rate > 0 && rateMoe / rate > DEFAULT_MOE_THRESHOLD) {
+        result[norm] = suppressed(
+          "suppressed_quality",
+          `ACS B25034 MOE/estimate=${(rateMoe / rate).toFixed(2)} > ${DEFAULT_MOE_THRESHOLD} (90% MOE=${rateMoe.toFixed(2)}pp, est=${rate.toFixed(2)}%)`
+        );
+        nMoeFiltered++;
+        continue;
+      }
+    }
+
     result[norm] = available(Math.round(pct * 100) / 100);
     nAvailable++;
   }
@@ -131,7 +157,7 @@ async function main(): Promise<void> {
       result[fips] = suppressed("no_data", "ACS B25034: county not present in 2023 5-year file");
     }
   }
-  console.log(`[acs_lead]   parsed ${nAvailable} / suppressed ${nSuppressed} / dropped (not in atlas) ${nDropped}`);
+  console.log(`[acs_lead]   parsed ${nAvailable} / null-suppressed ${nSuppressed} / MOE-filtered ${nMoeFiltered} / dropped (not in atlas) ${nDropped}`);
 
   const calibration = checkCalibration(result, {
     metric: SLUG,
@@ -162,6 +188,7 @@ async function main(): Promise<void> {
       "Federal lead-based paint ban: 1978 (residential). Lead paint was most heavily used pre-1950.",
       "Established academic and CDC/HUD ecological proxy for childhood lead-exposure risk (Sampson & Winter 2016; ATSDR ALERT).",
       "STRUCTURAL proxy — does not capture personal exposure or lead-in-water (service-line) risk.",
+      `MOE-aware suppression: counties where 90% MOE/estimate > ${DEFAULT_MOE_THRESHOLD} are suppressed (${nMoeFiltered} counties filtered).`,
     ],
     values: result,
   };

@@ -2,7 +2,7 @@
   "source": "census_acs_s1601",
   "vintage": "2023",
   "filename": "s1601_county_2023.json",
-  "url": "https://api.census.gov/data/2023/acs/acs5/subject?get=NAME,S1601_C01_001E,S1601_C05_001E&for=county:*&in=state:*",
-  "fetched_at": "2026-05-07T15:40:35.146Z",
-  "bytes": 178813
+  "url": "https://api.census.gov/data/2023/acs/acs5/subject?get=NAME,S1601_C01_001E,S1601_C01_001M,S1601_C05_001E,S1601_C05_001M&for=county:*&in=state:*",
+  "fetched_at": "2026-05-07T20:15:58.134Z",
+  "bytes": 215350
 }

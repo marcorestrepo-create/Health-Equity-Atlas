@@ -3,8 +3,8 @@
   "source": "Census SAIPE",
   "source_url": "https://www.census.gov/programs-surveys/saipe.html",
   "vintage": "2024",
-  "fetched_at": "2026-05-07T15:17:39.902Z",
-  "ingested_at": "2026-05-07T15:17:39.902Z",
+  "fetched_at": "2026-05-07T20:17:10.256Z",
+  "ingested_at": "2026-05-07T20:17:10.256Z",
   "calibration": {
     "metric": "all_ages_poverty_rate",
     "computed_weighted_mean": 12.188,
@@ -16,7 +16,8 @@
   },
   "notes": [
     "SAIPE all-ages poverty rate, model-based annual estimate.",
-    "Used as a structural-driver context metric on the Pediatric Care tab."
+    "Used as a structural-driver context metric on the Pediatric Care tab.",
+    "MOE-aware suppression: counties where 90% MOE/estimate > 0.5 are suppressed (0 counties filtered)."
   ],
   "values": {
     "10001": {

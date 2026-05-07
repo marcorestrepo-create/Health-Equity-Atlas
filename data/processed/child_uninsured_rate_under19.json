@@ -3,22 +3,23 @@
   "source": "Census SAHIE",
   "source_url": "https://www.census.gov/data/datasets/time-series/demo/sahie/estimates-acs.html",
   "vintage": "2023",
-  "fetched_at": "2026-05-07T15:23:14.566Z",
-  "ingested_at": "2026-05-07T15:23:14.566Z",
+  "fetched_at": "2026-05-07T20:16:33.893Z",
+  "ingested_at": "2026-05-07T20:16:33.893Z",
   "calibration": {
     "metric": "child_uninsured_rate_under19",
     "computed_weighted_mean": 5.232,
     "published": 5.3,
     "delta": 0.068,
     "within_tolerance": true,
-    "counties_included": 3143,
-    "counties_suppressed": 1
+    "counties_included": 3139,
+    "counties_suppressed": 5
   },
   "notes": [
     "Under 19 (children) uninsured rate",
-    "Census SAHIE point estimate (PCTUI_PT). 90% confidence intervals available in raw cache.",
+    "Census SAHIE point estimate (PCTUI_PT). 90% confidence intervals (PCTUI_LB90 / PCTUI_UB90) used for MOE-aware suppression.",
     "AGECAT=4, IPRCAT=0 (all incomes), RACECAT=0 (all races), SEXCAT=0 (both sexes).",
-    "CT: SAHIE 2023 still publishes legacy 8-county FIPS — those legacy values are arithmetic-averaged into the atlas's 9 Planning Region codes. 0 CT regions affected."
+    "CT: SAHIE 2023 still publishes legacy 8-county FIPS — those legacy values are arithmetic-averaged into the atlas's 9 Planning Region codes. 0 CT regions affected.",
+    "MOE-aware suppression: counties where 90% CI half-width / estimate > 0.5 are suppressed (4 counties filtered)."
   ],
   "values": {
     "10001": {
@@ -5287,8 +5288,9 @@
       "suppression_status": "available"
     },
     "30069": {
-      "value": 6.2,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "SAHIE 90% CI half-width / estimate = 0.50 > 0.5 (CI=±3.10pp, est=6.20%)"
     },
     "30071": {
       "value": 6.7,
@@ -5523,8 +5525,9 @@
       "suppression_status": "available"
     },
     "31075": {
-      "value": 3.5,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "SAHIE 90% CI half-width / estimate = 0.60 > 0.5 (CI=±2.10pp, est=3.50%)"
     },
     "31077": {
       "value": 5.3,
@@ -5603,8 +5606,9 @@
       "suppression_status": "available"
     },
     "31115": {
-      "value": 4.5,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "SAHIE 90% CI half-width / estimate = 0.60 > 0.5 (CI=±2.70pp, est=4.50%)"
     },
     "31117": {
       "value": 7,
@@ -12515,8 +12519,9 @@
       "suppression_status": "available"
     },
     "08079": {
-      "value": 3.1,
-      "suppression_status": "available"
+      "value": null,
+      "suppression_status": "suppressed_quality",
+      "suppression_note": "SAHIE 90% CI half-width / estimate = 0.52 > 0.5 (CI=±1.60pp, est=3.10%)"
     },
     "08083": {
       "value": 5.3,

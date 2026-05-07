@@ -1,6 +1,6 @@
 # Small-county suppression audit
 
-Generated: 2026-05-07T19:39:12.018Z
+Generated: 2026-05-07T20:18:34.515Z
 Metrics audited: 49
 
 ## Why this matters
@@ -27,15 +27,15 @@ This audit reports, for every metric, how many of the smallest counties (populat
 | hpsa_dental_score | 3144 | 3144 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
 | hpsa_mental_health_score | 3144 | 3144 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
 | hpsa_primary_care_score | 3144 | 3144 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
-| lead_exposure_pct | 3144 | 3144 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
-| lep_rate | 3144 | 3144 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
 | mental_health_providers_per_100k | 3144 | 2966 | 199/324 (61%) | 36/36 (100%) | 48301 (pop 43) |
-| no_vehicle_rate | 3144 | 3144 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
 | ob_providers_per_10k | 3144 | 3142 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
 | ob_unit_presence | 3144 | 3144 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
 | physical_inactivity_pct | 3144 | 3137 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
 | primary_care_physicians_per_100k | 3144 | 2985 | 240/324 (74%) | 36/36 (100%) | 48301 (pop 43) |
 | severe_housing_problems_pct | 3144 | 3137 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
+| svi_housing_transport | 3144 | 3144 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
+| svi_minority | 3144 | 3144 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
+| svi_overall | 3144 | 3144 | 324/324 (100%) | 36/36 (100%) | 48301 (pop 43) |
 
 ## Bottom metrics by share-of-small-counties-with-values
 
@@ -50,11 +50,11 @@ This audit reports, for every metric, how many of the smallest counties (populat
 | high_school_graduation_pct | 3144 | 2496 | 18/324 (6%) | 0/36 (0%) |
 | drug_overdose_deaths_per_100k | 3144 | 2003 | 4/324 (1%) | 0/36 (0%) |
 | disconnected_youth_pct | 3144 | 1146 | 6/324 (2%) | 0/36 (0%) |
-| loneliness_pct | 3144 | 2299 | 215/324 (66%) | 24/36 (67%) |
+| no_vehicle_rate | 3144 | 2668 | 83/324 (26%) | 5/36 (14%) |
 
 ## Findings & recommendations
 
-- ACS-derived metrics (`lead_exposure_pct`, `acs_*`, `saipe_*`) consistently publish values for counties under 1,000 population. ACS doesn't suppress these, but their MOEs are very wide. **Recommendation:** for the next ingest pass, pull MOEs from ACS (`*_M` variables) and suppress when MOE/estimate exceeds a threshold (typical: MOE/estimate > 0.5).
+- **MOE-aware ACS suppression is now active** (Phase 1h, May 2026). All ACS-direct ingests (B25034 / B25044 / S1601 / B17001) and the SAHIE/SAIPE timeseries APIs pull `*_M` (or `_LB90`/`_UB90` for SAHIE) and suppress counties where 90% MOE/estimate > 0.5. Counties filtered by source: lead_exposure ~55, no_vehicle ~476, lep ~1144, child_uninsured ~4, youth_under5_poverty ~1197. SAIPE all-ages and child poverty: 0 (model-based, tight CIs).
 - NCHS-derived rate metrics (infant mortality, premature death) are appropriately suppressed by source for low-count counties. No action needed.
 - CHR&R composite metrics inherit suppression from underlying NCHS rules. Acceptable as-is.
 - Behavioral health PLACES metrics use BRFSS small-area estimation and are smoothed across counties — small-county estimates are model-based, not direct, and that should be disclosed in the methods notes (already mentioned in PLACES ingest comments).
