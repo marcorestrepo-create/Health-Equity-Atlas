@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-05-07T19:36:33.329Z",
+  "methodology": {
+    "pivot_rationale": "CDC WONDER API blocks county-level grouping for vital statistics; >90% of US counties have suppressed maternal mortality at the county level. Pivoted to validating maternalAccess against perinatal outcomes (infant mortality, low birth weight) which have strong county coverage in CHR&R 2025.",
+    "composite_definition": "maternalAccessComposite = mean(maternityCareDesert/3, obProvidersDeficit, obUnitClosure, clamp(distance/30, 0, 1)). Range 0-1.",
+    "outcomes_independent": "Both outcomes (LBW, infant mortality) are NOT inputs to the maternalAccess composite. They ARE inputs to the separate `perinatal` HEG component but that component is computed independently from maternalAccess.",
+    "bootstrap": "1000 resamples, seed 42, percentile method 95% CI",
+    "source": "CHR&R 2025 (NCHS Detailed Mortality + Natality 2017-2023 underlying)"
+  },
+  "correlations": {
+    "low_birth_weight": {
+      "outcome": "Low Birth Weight (% of live births)",
+      "n": 3035,
+      "pearson_r": 0.08711713218980338,
+      "pearson_ci_lo": 0.04871362656869312,
+      "pearson_ci_hi": 0.12694148271075542,
+      "spearman_rho": 0.04835846317058187
+    },
+    "infant_mortality": {
+      "outcome": "Infant Mortality (per 1k live births)",
+      "n": 1172,
+      "pearson_r": 0.2802632232701919,
+      "pearson_ci_lo": 0.211756825221377,
+      "pearson_ci_hi": 0.348507085860199,
+      "spearman_rho": 0.237755450847813
+    }
+  },
+  "stratified_by_maternity_care_desert": {
+    "lbw": {
+      "desert_mean": 8.701924338006418,
+      "desert_n": 1249,
+      "non_desert_mean": 8.224732445951869,
+      "non_desert_n": 1786,
+      "delta_pp": 0.4771918920545488
+    },
+    "infMort": {
+      "desert_mean": 8.041397478584274,
+      "desert_n": 178,
+      "non_desert_mean": 6.304766653432597,
+      "non_desert_n": 994,
+      "delta_per_1k": 1.7366308251516775
+    }
+  }
+}

@@ -505,7 +505,7 @@ const GAP_SCORE_COMPONENTS = [
   { name: "Perinatal Outcomes Gap", weight: "10%", formula: "mean(infantMort/12, lbw/14, teenBirths/65) × 10", description: "NEW in v2. Average of three NCHS perinatal indicators (via CHR&R 2025, 2017–2023 pooled): infant mortality per 1k live births, low birth weight rate, and teen birth rate. Suppressed counties fall back to the national mean." },
   { name: "Child Poverty Gap", weight: "8%", formula: "mean(childPoverty/40, childUninsured/15) × 8", description: "NEW in v2. Average of Census SAIPE 2023 child poverty rate (under 18) and Census SAHIE 2023 child uninsured rate (under 19), each normalized against worst-case thresholds." },
   { name: "Social Gap", weight: "12%", formula: "sviOverall × 12", description: "CDC/ATSDR Social Vulnerability Index 2022 overall percentile (already 0–1 scaled) directly multiplied by weight." },
-  { name: "Environmental Gap", weight: "7%", formula: "mean(pm25/15, leadExposure/40, ejScreen/100) × 7", description: "Average of three environmental burdens: PM2.5 vs WHO interim Target 4 of 15 µg/m³ (CHR&R 2025), pre-1950 housing share as a lead exposure proxy (ACS B25034), and EPA EJScreen 2.3 composite percentile. Now broader than the v1 PM2.5-only definition." },
+  { name: "Environmental Gap", weight: "7%", formula: "mean(pm25/15, pre1950Housing/40, ejScreen/100) × 7", description: "Average of three environmental burdens: PM2.5 vs WHO interim Target 4 of 15 µg/m³ (CHR&R 2025), pre-1950 housing share (ACS B25034) as a structural proxy for lead-paint exposure risk, and EPA EJScreen 2.3 composite percentile. The pre-1950 housing share metric is the federal/HUD-standard ecological indicator for childhood lead-paint exposure (Sampson & Winter 2016, ATSDR ALERT) — it is not a direct measurement of personal exposure or lead-in-water risk." },
   { name: "Infrastructure Gap", weight: "6%", formula: "mean(noBroadband/55, noVehicle/30) × 6", description: "Average of normalized broadband-access deficit (CHR&R 2025) and no-vehicle rate (ACS 5-year 2023)." },
 ];
 
@@ -816,7 +816,15 @@ export default function Methods() {
                 Spearman ρ = 0.75, n = 3,080). Sensitivity to single-component
                 weight perturbations of ±20%: minimum top-decile Jaccard 0.89
                 across 20 perturbations — the top-10% county list is robust to
-                plausible analyst variation in weights.
+                plausible analyst variation in weights. Maternal Access composite
+                — the most load-bearing single component — was separately
+                validated against CHR&R 2025 perinatal outcomes: Pearson r = 0.28
+                vs Infant Mortality (n = 1,172) and a stratified +1.74 deaths per
+                1,000 in maternity care deserts vs non-deserts; Pearson r = 0.09
+                vs Low Birth Weight (n = 3,035) with a +0.48 percentage-point
+                delta deserts vs non-deserts. Moderate construct validity for
+                the composite, with the stratified comparison stronger than the
+                linear correlation.
               </p>
               <div
                 style={{

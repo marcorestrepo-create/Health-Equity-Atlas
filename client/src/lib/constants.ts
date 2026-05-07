@@ -59,7 +59,8 @@ export function formatMetricValue(value: number | null | undefined, key: string)
   if (key.includes("Rate") || key === "obesityRate" || key === "pm25") return value.toFixed(1) + "%";
   if (key.includes("Per100k") || key.includes("Per10k")) return value.toFixed(1);
   if (key === "distanceToHospital") return value.toFixed(1) + " mi";
-  if (key === "ejScreenIndex" || key === "leadExposureRisk") return value.toFixed(0);
+  if (key === "ejScreenIndex") return value.toFixed(0);
+  if (key === "leadExposureRisk") return value.toFixed(1) + "%";
   if (key === "hpsaScore") return value.toFixed(1);
   return value.toFixed(1);
 }

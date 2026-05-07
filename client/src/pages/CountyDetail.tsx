@@ -1435,7 +1435,7 @@ export default function CountyDetail() {
             <div className="space-y-2.5">
               <DataRow label="EJScreen index" value={county.ejScreenIndex != null ? `${county.ejScreenIndex.toFixed(1)} pctile` : "—"} />
               <DataRow label="PM2.5" value={county.pm25 != null ? `${county.pm25.toFixed(1)} µg/m³` : "—"} />
-              <DataRow label="Lead exposure risk" value={county.leadExposureRisk != null ? `${county.leadExposureRisk.toFixed(1)} pctile` : "—"} />
+              <DataRow label="Pre-1950 housing share" value={county.leadExposureRisk != null ? `${county.leadExposureRisk.toFixed(1)}%` : "—"} />
             </div>
           </div>
 
