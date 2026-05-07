@@ -76,6 +76,16 @@ export const counties = sqliteTable("counties", {
   childCareCostBurdenRate: real("child_care_cost_burden_rate"),
   readingScoresGradeLevel: real("reading_scores_grade_level"),
 
+  // Phase 1c: Mortality + child health (NCHS via CHR&R 2025, Census SAIPE / SAHIE)
+  drugOverdoseRate: real("drug_overdose_rate"),                  // per 100k
+  suicideRate: real("suicide_rate"),                              // per 100k, age-adjusted
+  fmdRate: real("fmd_rate"),                                      // frequent mental distress, % adults
+  childPovertyRate: real("child_poverty_rate"),                   // SAIPE under-18 %
+  childUninsuredRate: real("child_uninsured_rate"),               // SAHIE under-19 %
+  infantMortalityRate: real("infant_mortality_rate"),             // per 1k live births
+  lowBirthWeightRate: real("low_birth_weight_rate"),              // % live births
+  teenBirthsRate: real("teen_births_rate"),                       // per 1k females 15-19
+
   // Composite scores (0-100, higher = worse)
   healthEquityGapScore: real("health_equity_gap_score"),
   

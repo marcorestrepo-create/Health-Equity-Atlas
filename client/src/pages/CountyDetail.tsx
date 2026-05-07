@@ -699,26 +699,30 @@ export default function CountyDetail() {
     v == null ? "Not published" : `${v.toFixed(dp)}%`;
   const fmtNumOrDash = (v: number | null | undefined, dp = 2) =>
     v == null ? "Not published" : v.toFixed(dp);
+  const fmtPer100kOrDash = (v: number | null | undefined, dp = 1) =>
+    v == null ? "Not published" : `${v.toFixed(dp)}/100k`;
+  const fmtPer1kOrDash = (v: number | null | undefined, dp = 1) =>
+    v == null ? "Not published" : `${v.toFixed(dp)}/1k`;
 
   const bhIndicators = [
     { label: "Adult depression",        value: fmtPctOrDash(county.depressionRate),           natl: "20.7%" },
     { label: "Excessive drinking",      value: fmtPctOrDash(county.excessiveDrinkingRate),    natl: "16.6%" },
-    { label: "Frequent mental distress", value: fmtPctOrDash((county as any).fmdRate ?? null), natl: "—" },
+    { label: "Frequent mental distress", value: fmtPctOrDash(county.fmdRate),                  natl: "16.3%" },
     { label: "Lacks emotional support", value: fmtPctOrDash(county.lackEmotionalSupportRate), natl: "24.1%" },
     { label: "Loneliness",              value: fmtPctOrDash(county.lonelinessRate),           natl: "33.2%" },
-    { label: "Drug overdose deaths",    value: county.drugOverdoseRate != null ? `${county.drugOverdoseRate.toFixed(1)}/100k` : "—", natl: "32.6/100k" },
-    { label: "Suicide rate",            value: county.suicideRate != null ? `${county.suicideRate.toFixed(1)}/100k` : "—", natl: "14.1/100k" },
+    { label: "Drug overdose deaths",    value: fmtPer100kOrDash(county.drugOverdoseRate),     natl: "30.8/100k" },
+    { label: "Suicide rate",            value: fmtPer100kOrDash(county.suicideRate),          natl: "14.0/100k" },
     { label: "MH providers",            value: county.mentalHealthPer100k != null ? `${county.mentalHealthPer100k.toFixed(0)}/100k` : "—", natl: "294/100k" },
   ];
 
   // Phase 1b: Pediatric Care cells.
   const pcIndicators = [
-    { label: "Child poverty (<18)",        value: fmtPctOrDash((county as any).childPovertyRate ?? null), natl: "—" },
+    { label: "Child poverty (<18)",        value: fmtPctOrDash(county.childPovertyRate),                 natl: "15.5%" },
     { label: "Child poverty (<5)",         value: fmtPctOrDash(county.childUnder5PovertyRate),            natl: "17.6%" },
-    { label: "Child uninsured (<19)",      value: fmtPctOrDash((county as any).childUninsuredRate ?? null), natl: "—" },
-    { label: "Infant mortality",           value: (county as any).infantMortalityRate != null ? `${(county as any).infantMortalityRate.toFixed(1)}/1k` : "—", natl: "5.4/1k" },
-    { label: "Low birth weight",           value: (county as any).lowBirthWeightRate != null ? `${(county as any).lowBirthWeightRate.toFixed(1)}%` : "—", natl: "8.6%" },
-    { label: "Teen births",                value: (county as any).teenBirthsRate != null ? `${(county as any).teenBirthsRate.toFixed(1)}/1k` : "—", natl: "13.6/1k" },
+    { label: "Child uninsured (<19)",      value: fmtPctOrDash(county.childUninsuredRate),               natl: "5.3%" },
+    { label: "Infant mortality",           value: fmtPer1kOrDash(county.infantMortalityRate),            natl: "5.6/1k" },
+    { label: "Low birth weight",           value: fmtPctOrDash(county.lowBirthWeightRate),               natl: "8.4%" },
+    { label: "Teen births",                value: fmtPer1kOrDash(county.teenBirthsRate),                 natl: "15.5/1k" },
     { label: "Some college (25–44)",       value: fmtPctOrDash(county.someCollegeRate),                   natl: "67.8%" },
     { label: "HS graduation",              value: fmtPctOrDash(county.highSchoolGraduationRate),           natl: "87.0%" },
     { label: "Disconnected youth",         value: fmtPctOrDash(county.disconnectedYouthRate),              natl: "6.8%" },

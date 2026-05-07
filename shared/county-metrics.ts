@@ -97,6 +97,15 @@ export interface CountyMetrics {
   disconnectedYouthRate: number | null; // CHR&R 2025 (ACS)
   childCareCostBurdenRate: number | null; // CHR&R 2025 (Living Wage Institute)
   readingScoresGradeLevel: number | null; // CHR&R 2025 (Stanford SEDA)
+  // ---- Phase 1c: Mortality + child health (real federal data, suppression preserved as null) ----
+  drugOverdoseRate: number | null;       // NCHS via CHR&R 2025, per 100k
+  suicideRate: number | null;            // NCHS via CHR&R 2025, per 100k, age-adjusted
+  fmdRate: number | null;                // CDC PLACES 2024, % adults
+  childPovertyRate: number | null;       // Census SAIPE under-18, %
+  childUninsuredRate: number | null;     // Census SAHIE under-19, %
+  infantMortalityRate: number | null;    // NCHS via CHR&R 2025, per 1k live births
+  lowBirthWeightRate: number | null;     // NCHS via CHR&R 2025, % live births
+  teenBirthsRate: number | null;         // NCHS via CHR&R 2025, per 1k females 15-19
   healthEquityGapScore: number;
   topInterventions: string;
   interventionScores: InterventionScore[];
@@ -333,6 +342,16 @@ export function generateCounties(): CountyMetrics[] {
     const childCareCostRaw = getMetric(data.childCareCost, rc.fips);
     const readingScoresRaw = getMetric(data.reading, rc.fips);  // grade-level units, not %
 
+    // Phase 1c — mortality + child health, suppression-preserving.
+    const drugOverdoseRaw = getMetric(data.drugOverdose, rc.fips);
+    const suicideRaw = getMetric(data.suicide, rc.fips);
+    const fmdRaw = getMetric(data.fmd, rc.fips);
+    const childPovertyRaw = getMetric(data.childPoverty, rc.fips);
+    const childUninsuredRaw = getMetric(data.childUninsured, rc.fips);
+    const infantMortRaw = getMetric(data.infantMort, rc.fips);
+    const lbwRaw = getMetric(data.lbw, rc.fips);
+    const teenBirthsRaw = getMetric(data.teenBirths, rc.fips);
+
     // ------------------- DERIVED FROM REAL DATA -------------------
     // Maternal mortality: derive from MCD designation. National avg = 22.3 per 100k.
     // Deserts run higher, full-access counties lower. This is an interim approximation
@@ -479,6 +498,15 @@ export function generateCounties(): CountyMetrics[] {
       disconnectedYouthRate: disconnectedYouthRaw == null ? null : Math.round(disconnectedYouthRaw * 10) / 10,
       childCareCostBurdenRate: childCareCostRaw == null ? null : Math.round(childCareCostRaw * 10) / 10,
       readingScoresGradeLevel: readingScoresRaw == null ? null : Math.round(readingScoresRaw * 100) / 100,
+      // Phase 1c — null preserved when source suppresses.
+      drugOverdoseRate: drugOverdoseRaw == null ? null : Math.round(drugOverdoseRaw * 10) / 10,
+      suicideRate: suicideRaw == null ? null : Math.round(suicideRaw * 10) / 10,
+      fmdRate: fmdRaw == null ? null : Math.round(fmdRaw * 10) / 10,
+      childPovertyRate: childPovertyRaw == null ? null : Math.round(childPovertyRaw * 10) / 10,
+      childUninsuredRate: childUninsuredRaw == null ? null : Math.round(childUninsuredRaw * 10) / 10,
+      infantMortalityRate: infantMortRaw == null ? null : Math.round(infantMortRaw * 10) / 10,
+      lowBirthWeightRate: lbwRaw == null ? null : Math.round(lbwRaw * 10) / 10,
+      teenBirthsRate: teenBirthsRaw == null ? null : Math.round(teenBirthsRaw * 10) / 10,
       healthEquityGapScore: Math.round(healthEquityGapScore * 10) / 10,
       topInterventions: JSON.stringify(topInterventions),
       interventionScores: interventionScores.map((is, idx) => ({ ...is, rank: idx + 1 })),

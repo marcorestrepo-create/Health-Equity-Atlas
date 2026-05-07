@@ -94,6 +94,15 @@ const FIELD_TO_SLUG: Array<[string, string, number]> = [
   ["disconnectedYouthRate", "disconnected_youth_pct", 0.5],
   ["childCareCostBurdenRate", "child_care_cost_burden_pct", 0.5],
   ["readingScoresGradeLevel", "reading_scores_grade_level", 0.05],
+  // Phase 1c — mortality + child health (suppression-preserving)
+  ["drugOverdoseRate", "drug_overdose_deaths_per_100k", 1.0],
+  ["suicideRate", "suicide_rate_per_100k", 1.0],
+  ["fmdRate", "frequent_mental_distress", 0.5],
+  ["childPovertyRate", "child_poverty_rate_u18", 0.5],
+  ["childUninsuredRate", "child_uninsured_rate_under19", 0.5],
+  ["infantMortalityRate", "infant_mortality_per_1000", 1.0],
+  ["lowBirthWeightRate", "low_birth_weight_pct", 0.5],
+  ["teenBirthsRate", "teen_births_per_1000", 1.0],
 ];
 
 // Fields where the composer LEGITIMATELY returns null on suppression (no fallback).
@@ -101,6 +110,10 @@ const SUPPRESSION_PRESERVING_FIELDS = new Set([
   "depressionRate", "excessiveDrinkingRate", "lackEmotionalSupportRate", "lonelinessRate",
   "childUnder5PovertyRate", "someCollegeRate", "highSchoolGraduationRate",
   "disconnectedYouthRate", "childCareCostBurdenRate", "readingScoresGradeLevel",
+  // Phase 1c
+  "drugOverdoseRate", "suicideRate", "fmdRate",
+  "childPovertyRate", "childUninsuredRate", "infantMortalityRate",
+  "lowBirthWeightRate", "teenBirthsRate",
 ]);
 
 async function main() {

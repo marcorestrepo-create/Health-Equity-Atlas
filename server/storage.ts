@@ -56,6 +56,14 @@ sqlite.exec(`
     disconnected_youth_rate REAL,
     child_care_cost_burden_rate REAL,
     reading_scores_grade_level REAL,
+    drug_overdose_rate REAL,
+    suicide_rate REAL,
+    fmd_rate REAL,
+    child_poverty_rate REAL,
+    child_uninsured_rate REAL,
+    infant_mortality_rate REAL,
+    low_birth_weight_rate REAL,
+    teen_births_rate REAL,
     health_equity_gap_score REAL,
     top_interventions TEXT
   );
