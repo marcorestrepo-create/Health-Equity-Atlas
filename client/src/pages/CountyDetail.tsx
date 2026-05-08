@@ -8,6 +8,7 @@ import {
   Brain, ChevronRight, ChevronDown, Code2, Copy, Check, X
 } from "lucide-react";
 import { PulseDivider } from "@/components/PulseLayout";
+import { TrendKpis } from "@/components/TrendKpis";
 import { INTERVENTION_COLORS } from "@/lib/constants";
 import { useState, useEffect } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -1049,6 +1050,14 @@ export default function CountyDetail() {
             pm25: county.pm25,
           })}
         </p>
+      </section>
+
+      <PulseDivider />
+
+      {/* ── Longitudinal trends (Phase 2b: sparklines for the four history-backed metrics) ── */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        <div className="label-mono mb-4">Trends · 7–8 year window</div>
+        <TrendKpis fips={county.fips} />
       </section>
 
       <PulseDivider />

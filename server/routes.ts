@@ -4,10 +4,18 @@ import { storage } from "./storage";
 import { seedDatabase } from "./seed";
 import { STATES } from "../shared/state-meta";
 import { TOPICS } from "../shared/topic-meta";
+import { getMoversBlock, getCountyHistory, preloadLongitudinal } from "./longitudinal";
 
 export async function registerRoutes(server: Server, app: Express) {
   // Seed database on startup
   await seedDatabase();
+  // Warm longitudinal caches (Phase 2b: history-driven movers + sparklines)
+  try {
+    preloadLongitudinal();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("[longitudinal] preload failed:", e);
+  }
 
   // GET /robots.txt
   app.get("/robots.txt", (_req, res) => {
@@ -236,6 +244,32 @@ export async function registerRoutes(server: Server, app: Express) {
     });
     
     res.json({ county, interventions: rankedInterventions });
+  });
+
+  // GET /api/counties/:fips/history - longitudinal series (Phase 2b)
+  app.get("/api/counties/:fips/history", (req, res) => {
+    const fips = req.params.fips;
+    if (!/^\d{5}$/.test(fips)) {
+      return res.status(400).json({ error: "Invalid FIPS" });
+    }
+    try {
+      const payload = getCountyHistory(fips);
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      res.json(payload);
+    } catch (e) {
+      res.status(500).json({ error: "history unavailable" });
+    }
+  });
+
+  // GET /api/movers - precomputed biggest movers across the 4 longitudinal metrics (Phase 2b)
+  app.get("/api/movers", (_req, res) => {
+    try {
+      const payload = getMoversBlock();
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      res.json(payload);
+    } catch (e) {
+      res.status(500).json({ error: "movers unavailable" });
+    }
   });
 
   // GET /api/counties/search/:query

@@ -5,6 +5,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { Search, MapPin, ArrowRight, X } from "lucide-react";
 import { PulseDivider } from "@/components/PulseLayout";
 import { SearchOverlay, useSearchShortcut } from "@/components/SearchOverlay";
+import { MoversCard } from "@/components/MoversCard";
 import { STATE_ABBRS } from "@/lib/constants";
 import {
   GAP_RAMP,
@@ -458,6 +459,13 @@ export default function Dashboard() {
         >
           Higher scores indicate wider health-equity gaps. Click any county below to see profile and ranked interventions, or open the methods to see how scores are calculated.
         </p>
+      </section>
+
+      <PulseDivider />
+
+      {/* BIGGEST MOVERS (Phase 2b: rotates weekly across the four longitudinal metrics) */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        <MoversCard />
       </section>
 
       <PulseDivider />

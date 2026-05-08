@@ -17,6 +17,7 @@ import States from "@/pages/States";
 import StateDetail from "@/pages/StateDetail";
 import TopicDetail from "@/pages/TopicDetail";
 import Topics from "@/pages/Topics";
+import Movers from "@/pages/Movers";
 import NotFound from "@/pages/not-found";
 
 /**
@@ -31,6 +32,7 @@ function ChromeRoutes() {
       <main className="flex-1">
         <Switch>
           <Route path="/" component={Dashboard} />
+          <Route path="/m/:slug" component={Dashboard} />
           <Route path="/county/:fips" component={CountyDetail} />
           <Route path="/intervention/:slug" component={InterventionDetail} />
           <Route path="/map" component={MapView} />
@@ -43,6 +45,7 @@ function ChromeRoutes() {
           <Route path="/states/:slug" component={StateDetail} />
           <Route path="/topics" component={Topics} />
           <Route path="/topics/:slug" component={TopicDetail} />
+          <Route path="/movers" component={Movers} />
           <Route component={NotFound} />
         </Switch>
       </main>
