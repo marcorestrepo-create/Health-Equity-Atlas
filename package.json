@@ -18,7 +18,10 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "submit:indexnow": "tsx scripts/submit_indexnow.ts",
-    "ingest:sahie-history": "tsx scripts/ingest/sources/ingest_sahie_history.ts"
+    "ingest:sahie-history": "tsx scripts/ingest/sources/ingest_sahie_history.ts",
+    "ingest:saipe-history": "tsx scripts/ingest/sources/ingest_saipe_history.ts",
+    "ingest:acs-broadband-history": "tsx scripts/ingest/sources/ingest_acs_broadband_history.ts",
+    "ingest:infant-mortality-history": "tsx scripts/ingest/sources/ingest_infant_mortality_history.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
