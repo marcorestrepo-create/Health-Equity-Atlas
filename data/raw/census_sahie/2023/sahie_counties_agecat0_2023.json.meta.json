@@ -1,0 +1,8 @@
+{
+  "source": "census_sahie",
+  "vintage": "2023",
+  "filename": "sahie_counties_agecat0_2023.json",
+  "url": "https://api.census.gov/data/timeseries/healthins/sahie?get=NAME%2CPCTUI_PT%2CPCTUI_LB90%2CPCTUI_UB90&for=county%3A*&in=state%3A*&time=2023&AGECAT=0&RACECAT=0&SEXCAT=0&IPRCAT=0",
+  "fetched_at": "2026-05-08T16:30:04.209Z",
+  "bytes": 243509
+}
