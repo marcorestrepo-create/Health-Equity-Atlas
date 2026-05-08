@@ -5,7 +5,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { Search, MapPin, ArrowRight, X } from "lucide-react";
 import { PulseDivider } from "@/components/PulseLayout";
 import { SearchOverlay, useSearchShortcut } from "@/components/SearchOverlay";
-import { MoversCard } from "@/components/MoversCard";
+import { NotableTrends } from "@/components/NotableTrends";
 import { STATE_ABBRS } from "@/lib/constants";
 import {
   GAP_RAMP,
@@ -463,13 +463,6 @@ export default function Dashboard() {
 
       <PulseDivider />
 
-      {/* BIGGEST MOVERS (Phase 2b: rotates weekly across the four longitudinal metrics) */}
-      <section className="max-w-[1100px] mx-auto px-6">
-        <MoversCard />
-      </section>
-
-      <PulseDivider />
-
       {/* DATA EXPLORER */}
       <section className="max-w-[1100px] mx-auto px-6">
         {/* Sub-tabs — Map and States navigate; others stay in-place */}
@@ -598,6 +591,13 @@ export default function Dashboard() {
             Gap profile dots: Insurance · Maternal · Chronic disease · Access · Environment. Darker = wider gap.
           </p>
         </div>
+      </section>
+
+      <PulseDivider />
+
+      {/* NOTABLE TRENDS (Phase 2b-prime: static longitudinal summary, below the data explorer) */}
+      <section className="max-w-[1100px] mx-auto px-6">
+        <NotableTrends />
       </section>
 
       <PulseDivider className="!py-12" />

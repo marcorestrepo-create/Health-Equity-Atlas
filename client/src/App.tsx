@@ -32,7 +32,9 @@ function ChromeRoutes() {
       <main className="flex-1">
         <Switch>
           <Route path="/" component={Dashboard} />
-          <Route path="/m/:slug" component={Dashboard} />
+          {/* /m/:slug previously overrode the homepage rotation. Phase 2b-prime
+              removed homepage rotation, so this redirects to the full Movers page. */}
+          <Route path="/m/:slug" component={Movers} />
           <Route path="/county/:fips" component={CountyDetail} />
           <Route path="/intervention/:slug" component={InterventionDetail} />
           <Route path="/map" component={MapView} />
