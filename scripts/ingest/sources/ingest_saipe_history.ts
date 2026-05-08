@@ -33,6 +33,7 @@ const VINTAGES: Array<{ vintage: string; published: number }> = [
   { vintage: "2021", published: 12.8 },
   { vintage: "2022", published: 12.6 },
   { vintage: "2023", published: 12.5 },
+  { vintage: "2024", published: 12.1 },
 ];
 const TOLERANCE_PP = 0.5;
 

@@ -16,7 +16,7 @@
  *
  * Calibration targets (fetched live from ACS US row):
  *   2017: 78.1%  2018: 80.4%  2019: 82.7%
- *   2020: 85.2%  2021: 87.0%  2022: 88.3%  2023: 89.7%
+ *   2020: 85.2%  2021: 87.0%  2022: 88.3%  2023: 89.7%  2024: 91.0%
  * Tolerance: ±0.7pp per year (slightly wider than SAHIE/SAIPE because
  * county-pop-weighted reconstitution of an ACS table doesn't exactly match the
  * ACS national aggregate due to GQ/non-household population differences).
@@ -42,6 +42,7 @@ const VINTAGES: Array<{ vintage: string; published: number }> = [
   { vintage: "2021", published: 87.0 },
   { vintage: "2022", published: 88.3 },
   { vintage: "2023", published: 89.7 },
+  { vintage: "2024", published: 91.0 },
 ];
 const TOLERANCE_PP = 0.7;
 // Broadband is a high-share metric (~80-90%) so suppression only matters when

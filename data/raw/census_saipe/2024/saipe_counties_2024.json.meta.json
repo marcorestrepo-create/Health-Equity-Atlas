@@ -1,0 +1,8 @@
+{
+  "source": "census_saipe",
+  "vintage": "2024",
+  "filename": "saipe_counties_2024.json",
+  "url": "https://api.census.gov/data/timeseries/poverty/saipe?get=NAME%2CSAEPOVRTALL_PT%2CSAEPOVRTALL_MOE&for=county%3A*&in=state%3A*&YEAR=2024",
+  "fetched_at": "2026-05-08T17:24:03.988Z",
+  "bytes": 163090
+}
