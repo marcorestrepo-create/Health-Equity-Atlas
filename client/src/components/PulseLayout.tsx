@@ -289,6 +289,7 @@ export function PulseNav() {
   const navLinks = [
     { href: "/", label: "Dashboard" },
     { href: "/map", label: "Map" },
+    { href: "/research", label: "Research" },
     { href: "/methods", label: "Methods" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
@@ -470,6 +471,8 @@ export function PulseFooter() {
             primary data sources directly.
           </p>
           <p>
+            <Link href="/research" className="hover:opacity-70 transition-opacity">Research</Link>
+            {" · "}
             <Link href="/about" className="hover:opacity-70 transition-opacity">About</Link>
             {" · "}
             <Link href="/methods" className="hover:opacity-70 transition-opacity">Methods</Link>

@@ -193,6 +193,132 @@
 }
 
 /* ================================================================
+   Research article prose — long-form editorial reading
+   ================================================================ */
+.research-prose {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.72;
+  color: var(--pulse-text);
+}
+.research-prose > *:first-child {
+  margin-top: 0;
+}
+/* The markdown body often begins with its own H1 (duplicate of the page H1) —
+   hide the first H1 so we don't render the title twice. */
+.research-prose > h1:first-of-type {
+  display: none;
+}
+.research-prose h2 {
+  font-family: var(--font-serif);
+  font-size: 27px;
+  line-height: 1.2;
+  font-weight: 400;
+  color: var(--pulse-navy);
+  margin: 2.2em 0 0.6em;
+}
+.research-prose h3 {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  line-height: 1.25;
+  font-weight: 400;
+  color: var(--pulse-navy);
+  margin: 1.8em 0 0.5em;
+}
+.research-prose h4 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--pulse-text-muted);
+  margin: 1.6em 0 0.4em;
+}
+.research-prose p {
+  margin: 0 0 1.15em;
+}
+.research-prose a {
+  color: var(--pulse-ember);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(197, 82, 42, 0.35);
+  transition: border-color 0.15s ease;
+}
+.research-prose a:hover {
+  border-bottom-color: var(--pulse-ember);
+}
+.research-prose ul,
+.research-prose ol {
+  margin: 0 0 1.15em;
+  padding-left: 1.3em;
+}
+.research-prose li {
+  margin: 0 0 0.4em;
+}
+.research-prose strong {
+  font-weight: 600;
+  color: var(--pulse-navy);
+}
+.research-prose em {
+  font-style: italic;
+}
+.research-prose blockquote {
+  margin: 1.4em 0;
+  padding: 0.2em 0 0.2em 1.1em;
+  border-left: 3px solid var(--pulse-ember);
+  color: var(--pulse-text-muted);
+  font-style: italic;
+}
+.research-prose hr {
+  border: 0;
+  border-top: 1px solid var(--pulse-border);
+  margin: 2.4em 0;
+}
+.research-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--pulse-cream);
+  border: 1px solid var(--pulse-border-faint);
+  padding: 0.1em 0.35em;
+}
+.research-prose pre {
+  background: var(--pulse-cream);
+  border: 1px solid var(--pulse-border);
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  margin: 0 0 1.3em;
+}
+.research-prose pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.research-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.research-prose thead th {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--pulse-text-muted);
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--pulse-navy);
+  background: var(--pulse-cream);
+}
+.research-prose tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--pulse-border-faint);
+  vertical-align: top;
+}
+.research-prose tbody tr:hover td {
+  background: var(--pulse-cream);
+}
+
+/* ================================================================
    Equity gap color scale — 5 quintile classes
    ================================================================ */
 .gap-q1 { --gap-color: var(--pulse-good); }

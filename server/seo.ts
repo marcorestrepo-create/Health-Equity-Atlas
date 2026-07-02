@@ -23,6 +23,7 @@ import fs from "fs";
 import path from "path";
 import { storage } from "./storage";
 import { getStateBySlug } from "../shared/state-meta";
+import { getResearchBySlug } from "./research";
 
 const BASE_URL = "https://www.thepulseatlas.com";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
@@ -222,6 +223,70 @@ function countyMeta(fips: string): PageMeta | null {
   };
 }
 
+function researchIndexMeta(): PageMeta {
+  const title = "Research | Pulse Atlas";
+  const description =
+    "Original health equity research on maternity care deserts, county-level uninsured rates, chronic disease geography, and the composite gap score methodology.";
+  return {
+    title,
+    description,
+    ogTitle: title,
+    ogDescription: description,
+    canonical: `${BASE_URL}/research`,
+    ogImage: DEFAULT_OG_IMAGE,
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "Pulse Atlas Research",
+        description,
+        url: `${BASE_URL}/research`,
+        isPartOf: { "@type": "WebSite", name: "Pulse Atlas", url: BASE_URL },
+      },
+    ],
+  };
+}
+
+function researchArticleMeta(slug: string): PageMeta | null {
+  const a = getResearchBySlug(slug);
+  if (!a) return null;
+  const canonical = `${BASE_URL}/research/${a.slug}`;
+  const ogImage = a.ogImage.startsWith("http")
+    ? a.ogImage
+    : `${BASE_URL}${a.ogImage}`;
+  return {
+    title: a.title,
+    description: a.metaDescription,
+    ogTitle: a.title,
+    ogDescription: a.metaDescription,
+    canonical,
+    ogImage,
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: a.title,
+        description: a.metaDescription,
+        author: {
+          "@type": "Person",
+          name: "Marco Restrepo",
+          affiliation: "Chartis Group",
+        },
+        publisher: {
+          "@type": "Organization",
+          name: "Pulse Atlas",
+          logo: { "@type": "ImageObject", url: DEFAULT_OG_IMAGE },
+        },
+        datePublished: a.publishDate,
+        dateModified: a.publishDate,
+        image: ogImage,
+        mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
+        url: canonical,
+      },
+    ],
+  };
+}
+
 /**
  * Resolve a request path to a PageMeta, or null if the path is not one of the
  * SEO-managed route shapes (in which case the caller serves the shell as-is).
@@ -235,6 +300,10 @@ export function resolveMeta(reqPath: string): PageMeta | null {
   if (p === "/methods") return methodsMeta();
   if (p === "/about") return aboutMeta();
   if (p === "/contact") return contactMeta();
+
+  if (p === "/research") return researchIndexMeta();
+  const researchMatch = p.match(/^\/research\/([a-z0-9-]+)$/);
+  if (researchMatch) return researchArticleMeta(researchMatch[1]);
 
   const countyMatch = p.match(/^\/county\/([0-9A-Za-z]+)$/);
   if (countyMatch) return countyMeta(countyMatch[1]);

@@ -5,6 +5,7 @@ import { seedDatabase } from "./seed";
 import { STATES } from "../shared/state-meta";
 import { TOPICS } from "../shared/topic-meta";
 import { getMoversBlock, getCountyHistory, preloadLongitudinal } from "./longitudinal";
+import { getAllResearch, getResearchBySlug } from "./research";
 
 export async function registerRoutes(server: Server, app: Express) {
   // Seed database on startup
@@ -44,6 +45,16 @@ export async function registerRoutes(server: Server, app: Express) {
       `  <url>\n    <loc>${baseUrl}/topics</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`,
     ];
 
+    // Research: /research index + one URL per article.
+    const research = getAllResearch();
+    const researchUrls = [
+      `  <url>\n    <loc>${baseUrl}/research</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`,
+      ...research.map(
+        (a) =>
+          `  <url>\n    <loc>${baseUrl}/research/${a.slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`,
+      ),
+    ];
+
     const topicUrls = TOPICS.map(
       (t) =>
         `  <url>\n    <loc>${baseUrl}/topics/${t.slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`,
@@ -69,6 +80,7 @@ export async function registerRoutes(server: Server, app: Express) {
       `<?xml version="1.0" encoding="UTF-8"?>`,
       `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
       ...staticUrls,
+      ...researchUrls,
       ...topicUrls,
       ...stateUrls,
       ...interventionUrls,
@@ -78,6 +90,41 @@ export async function registerRoutes(server: Server, app: Express) {
 
     res.setHeader("Content-Type", "application/xml");
     res.send(xml);
+  });
+
+  // GET /api/research - list all research articles (index page payload)
+  app.get("/api/research", (_req, res) => {
+    const articles = getAllResearch().map((a) => ({
+      slug: a.slug,
+      title: a.title,
+      metaDescription: a.metaDescription,
+      targetQueries: a.targetQueries,
+      publishDate: a.publishDate,
+      author: a.author,
+    }));
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.json(articles);
+  });
+
+  // GET /api/research/:slug - full research article (body HTML + related counties)
+  app.get("/api/research/:slug", (req, res) => {
+    const article = getResearchBySlug(req.params.slug);
+    if (!article) {
+      return res.status(404).json({ error: "Article not found" });
+    }
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.json({
+      slug: article.slug,
+      title: article.title,
+      metaDescription: article.metaDescription,
+      targetQueries: article.targetQueries,
+      canonicalUrl: article.canonicalUrl,
+      ogImage: article.ogImage,
+      publishDate: article.publishDate,
+      author: article.author,
+      html: article.html,
+      relatedCounties: article.relatedCounties,
+    });
   });
 
   // GET /api/counties/:fips/related - sibling counties (same state) + nearest 5

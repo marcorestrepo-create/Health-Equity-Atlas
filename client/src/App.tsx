@@ -17,6 +17,8 @@ import StateDetail from "@/pages/StateDetail";
 import TopicDetail from "@/pages/TopicDetail";
 import Topics from "@/pages/Topics";
 import Movers from "@/pages/Movers";
+import Research from "@/pages/Research";
+import ResearchArticle from "@/pages/ResearchArticle";
 import NotFound from "@/pages/not-found";
 
 /**
@@ -46,6 +48,8 @@ function ChromeRoutes() {
           <Route path="/states/:slug" component={StateDetail} />
           <Route path="/topics" component={Topics} />
           <Route path="/topics/:slug" component={TopicDetail} />
+          <Route path="/research" component={Research} />
+          <Route path="/research/:slug" component={ResearchArticle} />
           <Route path="/movers" component={Movers} />
           <Route component={NotFound} />
         </Switch>
