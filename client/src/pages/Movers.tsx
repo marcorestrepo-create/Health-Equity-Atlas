@@ -6,7 +6,7 @@
  * are filtered to only TRUE bad-direction moves — if only N counties moved
  * the wrong way, only N rows show, with an explanatory note.
  */
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -148,11 +148,12 @@ function MoversTable({ rows, block }: { rows: MoverRow[]; block: MetricMoversBlo
 function MoverTableRow({ row, block }: { row: MoverRow; block: MetricMoversBlock }) {
   const good = deltaIsGood(row.delta, block.good);
   const color = good ? "var(--pulse-good)" : "var(--pulse-alarm)";
+  const [, navigate] = useLocation();
   return (
     <tr
       style={{ borderBottom: "1px solid var(--pulse-border-faint)", cursor: "pointer" }}
       onClick={() => {
-        window.location.hash = `#/county/${row.fips}`;
+        navigate(`/county/${row.fips}`);
       }}
       data-testid={`row-mover-${row.fips}`}
     >

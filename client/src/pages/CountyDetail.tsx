@@ -1497,7 +1497,7 @@ export default function CountyDetail() {
                 letterSpacing: "0.01em",
               }}
             >
-              Pulse Atlas. ({new Date().getFullYear()}). {county.name}, {county.state} — Health Equity Gap profile (FIPS {county.fips}). Retrieved {todayIso} from https://thepulseatlas.com/#/county/{county.fips}. Licensed under CC BY 4.0.
+              Pulse Atlas. ({new Date().getFullYear()}). {county.name}, {county.state} — Health Equity Gap profile (FIPS {county.fips}). Retrieved {todayIso} from https://thepulseatlas.com/county/{county.fips}. Licensed under CC BY 4.0.
             </p>
           </div>
 
@@ -1817,12 +1817,12 @@ function EmbedModal({ fips, countyName, stateAbbr, onClose, copied, setCopied }:
   // The brief specifies https://www.thepulseatlas.com/#/embed/<fips>. We use
   // the production hostname here regardless of where the page is currently
   // hosted, since the snippet is for use on third-party sites.
-  const snippet = `<iframe src="https://www.thepulseatlas.com/#/embed/${fips}" width="400" height="320" frameborder="0" style="border:1px solid #e5e7eb; border-radius:8px;" title="Pulse Atlas — ${countyName}, ${stateAbbr}"></iframe>`;
+  const snippet = `<iframe src="https://www.thepulseatlas.com/embed/${fips}" width="400" height="320" frameborder="0" style="border:1px solid #e5e7eb; border-radius:8px;" title="Pulse Atlas — ${countyName}, ${stateAbbr}"></iframe>`;
 
   // For the in-modal preview, point the iframe at the *current* origin so
   // dev / preview deploys show their own data instead of trying to fetch
   // production thepulseatlas.com (which would 404 in dev).
-  const previewSrc = `${window.location.origin}/#/embed/${fips}`;
+  const previewSrc = `${window.location.origin}/embed/${fips}`;
 
   async function handleCopy() {
     try {

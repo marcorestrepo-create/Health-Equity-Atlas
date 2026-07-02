@@ -3,6 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+
+    <!--
+      Legacy hash-URL redirect. The atlas migrated from hash routing
+      (/#/county/40031) to clean browser URLs (/county/40031). Google indexed
+      the old fragment variants, so before React mounts we rewrite any legacy
+      "#/" URL to its clean-path equivalent with history.replaceState (no full
+      reload, no flash). Runs first so the SPA boots on the correct path.
+    -->
+    <script>
+      (function () {
+        if (location.hash && location.hash.indexOf("#/") === 0) {
+          var path = location.hash.slice(1); // "#/county/40031" -> "/county/40031"
+          history.replaceState(null, "", path + location.search);
+        }
+      })();
+    </script>
+
     <title>Pulse — U.S. Health Equity Atlas</title>
     <meta name="description" content="Interactive county-by-county atlas mapping health equity gaps across 3,144 U.S. counties. Insurance, maternal mortality, chronic disease, provider shortages, and more." />
     <meta name="author" content="Pulse: U.S. Health Equity Atlas" />
@@ -35,8 +52,9 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      // Initial page_view fires automatically on load; subsequent hash-route
-      // navigation page_views are dispatched manually from main.tsx.
+      // Initial page_view fires automatically on load; subsequent SPA
+      // navigation page_views are dispatched manually from main.tsx
+      // (history pushState/replaceState/popstate).
       gtag('config', 'G-ZZ2S3Y0954', { anonymize_ip: true });
     </script>
 

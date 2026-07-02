@@ -94,12 +94,13 @@ const esc = (s: string) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
-function buildRedirectScript(hashTarget: string): string {
-  // Runs before React mounts. If we landed on a path URL with NO hash, set
-  // the hash so the SPA can route to the matching page. If the user (or an
-  // iframe consumer) supplied their own hash, respect it — don't clobber
-  // hash routes like #/embed/<fips> that the host might be deep-linking to.
-  return `<script>(function(){var h=${JSON.stringify(hashTarget)};if(!location.hash||location.hash==="#"){history.replaceState(null,"","/#"+h);}})();</script>`;
+function buildRedirectScript(_hashTarget: string): string {
+  // The atlas migrated from hash routing to clean browser-location routing
+  // (Tier 3 SEO). Path URLs like /county/48113 now boot the SPA directly, so
+  // there is no longer any path→hash rewrite to perform. We keep only a
+  // legacy-hash guard: if an old #/… URL is hit, rewrite it to the clean path
+  // before React mounts (mirrors the guard in client/index.html).
+  return `<script>(function(){if(location.hash&&location.hash.indexOf("#/")===0){history.replaceState(null,"",location.hash.slice(1)+location.search);}})();</script>`;
 }
 
 /**

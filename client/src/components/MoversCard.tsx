@@ -78,7 +78,7 @@ export function MoversCard() {
           </h2>
         </div>
         <a
-          href="#/movers"
+          href="/movers"
           className="font-data text-[12px] underline shrink-0"
           style={{ color: "var(--pulse-navy)", letterSpacing: "0.04em" }}
           data-testid="link-movers-page"
@@ -136,7 +136,7 @@ export function MoversCard() {
         style={{ borderTop: "1px solid var(--pulse-border-faint)" }}
       >
         <a
-          href={`#/m/${prevSlug}`}
+          href={`/m/${prevSlug}`}
           className="font-data text-[11px] uppercase tracking-[0.08em]"
           style={{ color: "var(--pulse-text-muted)" }}
           data-testid="link-rotation-prev"
@@ -147,7 +147,7 @@ export function MoversCard() {
           {ROTATION.map((s) => (
             <a
               key={s}
-              href={`#/m/${s}`}
+              href={`/m/${s}`}
               title={data[s].label}
               data-testid={`dot-rotation-${s}`}
               style={{
@@ -161,7 +161,7 @@ export function MoversCard() {
           ))}
         </span>
         <a
-          href={`#/m/${nextSlug}`}
+          href={`/m/${nextSlug}`}
           className="font-data text-[11px] uppercase tracking-[0.08em]"
           style={{ color: "var(--pulse-text-muted)" }}
           data-testid="link-rotation-next"
@@ -178,7 +178,7 @@ function MoverRowLink({ row, block }: { row: MoverRow; block: MetricMoversBlock 
   const color = good ? "var(--pulse-good)" : "var(--pulse-alarm)";
   return (
     <a
-      href={`#/county/${row.fips}`}
+      href={`/county/${row.fips}`}
       data-testid={`row-mover-${row.fips}`}
       className="flex items-center justify-between py-2 hover:bg-[rgba(0,0,0,0.02)] transition-colors"
       style={{ borderBottom: "1px solid var(--pulse-border-faint)", textDecoration: "none" }}

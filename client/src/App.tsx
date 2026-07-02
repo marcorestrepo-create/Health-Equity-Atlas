@@ -1,5 +1,4 @@
 import { Switch, Route, Router } from "wouter";
-import { useHashLocation } from "wouter/use-hash-location";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
@@ -60,8 +59,12 @@ function AppContent() {
   // Top-level Switch picks the embed route FIRST so it short-circuits the
   // chrome wrapper. Anything else falls through to ChromeRoutes, which
   // re-runs its own Switch over the normal app pages.
+  // Migrated from hash routing (useHashLocation) to the default browser
+  // location so every page has a real, crawlable, clean URL (/county/40031)
+  // instead of a fragment (/#/county/40031). Server-side meta injection
+  // (server/seo.ts) depends on the path being visible to Express.
   return (
-    <Router hook={useHashLocation}>
+    <Router>
       <Switch>
         <Route path="/embed/:fips" component={CountyEmbed} />
         <Route>

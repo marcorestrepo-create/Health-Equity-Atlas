@@ -405,7 +405,7 @@ function Legend({ spec }: { spec: DimSpec }) {
             )}
           </ul>
           <div style={{ marginTop: 10, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.10em", textTransform: "uppercase" }}>
-            <a href="#/methods" style={{ color: "#FFD89B", textDecoration: "underline" }}>Read the full methods →</a>
+            <a href="/methods" style={{ color: "#FFD89B", textDecoration: "underline" }}>Read the full methods →</a>
           </div>
         </div>
       )}
